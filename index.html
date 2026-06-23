@@ -294,6 +294,7 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
               <div class="result-block" id="nextStepBox" style="display:none;"><div class="result-block-title mid">Próximo passo</div><div class="result-block-text" id="nextStepText"></div></div>
             </div>
             <button class="ghost-btn" id="retryBtn" onclick="resetForRetry()" style="display:none;">Fazer nova tentativa</button>
+            <button class="ghost-btn" id="backBtn" onclick="voltarAoPainel()" style="display:none;margin-top:8px;border-color:rgba(89,225,255,0.15);color:var(--cyan);">← Voltar ao painel</button>
           </div>
         </div>
       </section>
@@ -506,6 +507,7 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
         ? 'Você atingiu a nota mínima. Seu resultado foi registrado. Siga para a próxima etapa.'
         : 'Você ainda não atingiu a nota mínima. Revise os pontos de atenção e tente novamente.';
       document.getElementById('retryBtn').style.display = approved ? 'none' : 'block';
+      document.getElementById('backBtn').style.display = 'block';
       setTimeout(() => document.getElementById('resultModule').scrollIntoView({behavior:'smooth',block:'start'}), 100);
     }
 
@@ -555,6 +557,21 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
         btn.disabled = false; btn.textContent = 'Perguntar ao tutor';
         document.getElementById('tutorLoading').style.display = 'none';
         showAlert((err && err.message) || 'Falha de conexão com o tutor.');
+      }
+    }
+
+    function voltarAoPainel() {
+      // Tenta fechar a aba (se foi aberta pelo dashboard)
+      // Se não conseguir, redireciona para o dashboard
+      try {
+        window.close();
+        // Se window.close() não funcionar (aba não foi aberta por script),
+        // aguarda 300ms e redireciona
+        setTimeout(function() {
+          window.location.href = '/dashboard.html';
+        }, 300);
+      } catch(e) {
+        window.location.href = '/dashboard.html';
       }
     }
 
