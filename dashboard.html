@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SENA | Painel de Progresso</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #06080c;
+      --panel: rgba(16,21,29,0.95);
+      --border: rgba(112,141,173,0.15);
+      --text: #edf3f8;
+      --text-soft: #9aa7b5;
+      --text-faint: #5a6470;
+      --cyan: #59e1ff;
+      --cyan-dim: rgba(89,225,255,0.12);
+      --gold: #d6b36a;
+      --gold-dim: rgba(214,179,106,0.12);
+      --success: #7ef0c2;
+      --success-dim: rgba(126,240,194,0.1);
+      --danger: #ff6b88;
+      --danger-dim: rgba(255,107,136,0.1);
+      --shadow: 0 20px 48px rgba(0,0,0,0.38);
+      --r-xl: 22px; --r-lg: 16px; --r-md: 12px;
+    }
+    html, body { min-height: 100%; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background:
+        radial-gradient(ellipse at top left, rgba(89,225,255,0.07), transparent 30%),
+        radial-gradient(ellipse at bottom right, rgba(214,179,106,0.05), transparent 28%),
+        linear-gradient(180deg, #06080c 0%, #090c11 100%);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* MODAL */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); z-index:9999; place-items:center; padding:24px; }
+    .modal-overlay.visible { display:grid; }
+    .modal-card { width:100%; max-width:440px; background:linear-gradient(180deg,rgba(16,21,29,0.99) 0%,rgba(10,14,20,1) 100%); border:1px solid var(--border); border-radius:var(--r-xl); box-shadow:var(--shadow); padding:36px 30px 30px; text-align:center; animation:popIn .2s ease; }
+    @keyframes popIn { from{opacity:0;transform:scale(.96) translateY(12px)} to{opacity:1;transform:scale(1) translateY(0)} }
+    .modal-icon { width:52px;height:52px;margin:0 auto 18px;border-radius:16px;display:grid;place-items:center;background:var(--cyan-dim);border:1px solid rgba(89,225,255,0.2);font-size:20px;font-weight:800;color:var(--cyan); }
+    .modal-card h2 { font-size:20px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px; }
+    .modal-card p  { color:var(--text-soft);font-size:14px;line-height:1.7;margin-bottom:22px; }
+    .modal-input { width:100%;padding:13px 16px;border-radius:var(--r-md);border:1px solid rgba(255,255,255,0.09);background:rgba(5,9,13,0.6);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;outline:none;text-align:center;transition:border-color .18s,box-shadow .18s;margin-bottom:10px; }
+    .modal-input:focus { border-color:rgba(89,225,255,0.32);box-shadow:0 0 0 3px rgba(89,225,255,0.07); }
+    .modal-input::placeholder { color:#3d4a56; }
+    .modal-error { color:var(--danger);font-size:13px;min-height:18px;margin-bottom:10px; }
+    .btn-primary { width:100%;padding:14px 20px;border:none;border-radius:var(--r-md);background:linear-gradient(135deg,var(--cyan),#9be9ff);color:#061018;font-family:'Inter',sans-serif;font-size:13px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;transition:transform .18s,box-shadow .18s; }
+    .btn-primary:hover { transform:translateY(-1px);box-shadow:0 12px 24px rgba(89,225,255,0.2); }
+    .modal-note { margin-top:14px;color:var(--text-faint);font-size:11px; }
+
+    /* SHELL */
+    .shell { display:none;max-width:1020px;margin:0 auto;padding:28px 18px 48px; }
+    .shell.visible { display:block; }
+
+    /* HERO */
+    .hero { background:linear-gradient(180deg,rgba(16,21,29,0.92) 0%,rgba(10,14,20,0.98) 100%);border:1px solid var(--border);border-radius:26px;box-shadow:var(--shadow);padding:28px;margin-bottom:22px;position:relative;overflow:hidden; }
+    .hero::before { content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(89,225,255,0.06),transparent 40%),linear-gradient(225deg,rgba(214,179,106,0.04),transparent 35%);pointer-events:none; }
+    .hero-top { display:flex;align-items:center;gap:18px;flex-wrap:wrap;position:relative;z-index:1; }
+    .seal { width:64px;height:64px;flex-shrink:0;border-radius:20px;display:grid;place-items:center;background:radial-gradient(circle at 30% 30%,rgba(89,225,255,0.22),transparent 50%),linear-gradient(180deg,rgba(20,28,38,0.96),rgba(10,14,20,1));border:1px solid rgba(89,225,255,0.2);font-size:26px;font-weight:800;color:var(--text); }
+    .hero-copy { flex:1;min-width:200px; }
+    .eyebrow { display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);color:var(--gold);font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:10px; }
+    .eyebrow::before { content:'';width:6px;height:6px;border-radius:999px;background:var(--gold);box-shadow:0 0 8px rgba(214,179,106,0.55); }
+    .hero h1 { font-size:clamp(28px,5vw,40px);font-weight:800;letter-spacing:-.03em;line-height:1;margin-bottom:6px; }
+    .hero-sub { color:var(--text-soft);font-size:14px; }
+    .hero-user { text-align:right;flex-shrink:0; }
+    .hero-email { font-size:13px;color:var(--cyan);font-weight:600;margin-bottom:2px; }
+    .hero-sair { font-size:11px;color:var(--text-faint);text-decoration:none;cursor:pointer;background:none;border:none;font-family:inherit;padding:0; }
+    .hero-sair:hover { color:var(--text-soft); }
+
+    /* PROGRESS */
+    .overall-progress { margin-top:22px;position:relative;z-index:1; }
+    .progress-header { display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px; }
+    .progress-label { font-size:12px;font-weight:700;color:var(--text-soft);letter-spacing:.08em;text-transform:uppercase; }
+    .progress-count { font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--cyan); }
+    .progress-track { height:6px;border-radius:999px;background:rgba(255,255,255,0.06);overflow:hidden; }
+    .progress-fill { height:100%;border-radius:999px;background:linear-gradient(90deg,var(--cyan),#9be9ff);transition:width .8s cubic-bezier(.4,0,.2,1);box-shadow:0 0 12px rgba(89,225,255,0.35); }
+
+    /* INFO CARDS */
+    .info-row { display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px; }
+    .info-card { background:var(--panel);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px; }
+    .info-card-label { font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint);margin-bottom:6px; }
+    .info-card-value { font-size:15px;font-weight:700;color:var(--text); }
+    .info-card-value.cyan { color:var(--cyan); }
+    .info-card-value.success { color:var(--success); }
+    .info-card-value.gold { color:var(--gold); }
+
+    /* MÓDULOS */
+    .modules { display:grid;gap:14px; }
+    .module-card { background:var(--panel);border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;transition:border-color .2s; }
+    .module-card.locked { opacity:.5; }
+    .module-card.complete { border-color:rgba(126,240,194,0.2); }
+    .module-header { display:flex;align-items:center;gap:14px;padding:18px 20px;cursor:pointer;user-select:none;border-bottom:1px solid transparent;transition:border-color .2s; }
+    .module-card.open .module-header { border-bottom-color:rgba(255,255,255,0.06); }
+    .module-num { width:36px;height:36px;flex-shrink:0;border-radius:11px;display:grid;place-items:center;font-size:13px;font-weight:800;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:var(--text-soft); }
+    .module-card.complete .module-num { background:var(--success-dim);border-color:rgba(126,240,194,0.2);color:var(--success); }
+    .module-card.locked .module-num { background:rgba(255,255,255,0.03);color:var(--text-faint); }
+    .module-info { flex:1;min-width:0; }
+    .module-title { font-size:14px;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .module-meta { font-size:12px;color:var(--text-faint); }
+    .module-badge { flex-shrink:0;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.06em; }
+    .module-badge.done    { background:var(--success-dim);color:var(--success); }
+    .module-badge.partial { background:var(--cyan-dim);color:var(--cyan); }
+    .module-badge.locked  { background:rgba(255,255,255,0.04);color:var(--text-faint); }
+    .module-badge.pending { background:var(--gold-dim);color:var(--gold); }
+    .module-chevron { flex-shrink:0;color:var(--text-faint);font-size:12px;transition:transform .2s; }
+    .module-card.open .module-chevron { transform:rotate(180deg); }
+    .module-progress { padding:0 20px 14px;display:none; }
+    .module-card.open .module-progress { display:block; }
+    .mod-track { height:3px;border-radius:999px;background:rgba(255,255,255,0.05);overflow:hidden;margin-top:2px; }
+    .mod-fill { height:100%;border-radius:999px;background:var(--cyan);transition:width .6s ease; }
+    .aulas-list { display:none;padding:0 12px 14px;gap:8px; }
+    .module-card.open .aulas-list { display:grid; }
+
+    /* AULAS */
+    .aula-row { display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:var(--r-md);border:1px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.02);transition:border-color .18s,background .18s; }
+    .aula-row:not(.locked):hover { border-color:rgba(89,225,255,0.15);background:rgba(89,225,255,0.04); }
+    .aula-row.locked { opacity:.4;cursor:not-allowed; }
+    .aula-status { width:28px;height:28px;flex-shrink:0;border-radius:8px;display:grid;place-items:center;font-size:13px; }
+    .aula-status.pending  { background:rgba(255,255,255,0.05);color:var(--text-faint); }
+    .aula-status.approved { background:var(--success-dim);color:var(--success); }
+    .aula-status.rejected { background:var(--danger-dim);color:var(--danger); }
+    .aula-info { flex:1;min-width:0; }
+    .aula-num { font-size:10px;font-weight:700;color:var(--text-faint);letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px; }
+    .aula-title { font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .aula-nota { font-family:'JetBrains Mono',monospace;font-size:12px;flex-shrink:0;padding:3px 8px;border-radius:6px; }
+    .aula-nota.approved { background:var(--success-dim);color:var(--success); }
+    .aula-nota.rejected { background:var(--danger-dim);color:var(--danger); }
+    .aula-nota.pending  { color:var(--text-faint); }
+    .btn-praticar { flex-shrink:0;padding:7px 14px;border:none;border-radius:8px;background:linear-gradient(135deg,var(--cyan),#9be9ff);color:#061018;font-family:'Inter',sans-serif;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;transition:transform .15s,box-shadow .15s;white-space:nowrap; }
+    .btn-praticar:hover { transform:translateY(-1px);box-shadow:0 6px 14px rgba(89,225,255,0.22); }
+    .btn-praticar.retry { background:rgba(255,107,136,0.12);color:var(--danger);border:1px solid rgba(255,107,136,0.2);box-shadow:none; }
+    .btn-praticar.retry:hover { background:rgba(255,107,136,0.18);box-shadow:none;transform:translateY(-1px); }
+    .btn-praticar.rever { background:rgba(255,255,255,0.06);color:var(--text-soft);border:1px solid rgba(255,255,255,0.08);box-shadow:none; }
+    .btn-praticar.rever:hover { background:rgba(255,255,255,0.1);box-shadow:none; }
+
+    /* CERT BANNER */
+    .cert-banner { display:none;margin-bottom:22px;padding:24px 28px;border-radius:var(--r-xl);border:1px solid rgba(214,179,106,0.25);background:linear-gradient(135deg,rgba(214,179,106,0.08),rgba(126,240,194,0.05));text-align:center; }
+    .cert-banner.visible { display:block; }
+    .cert-banner h2 { font-size:20px;font-weight:800;color:var(--gold);margin-bottom:6px; }
+    .cert-banner p  { color:var(--text-soft);font-size:14px;margin-bottom:18px; }
+    .btn-cert { display:inline-block;padding:13px 28px;border-radius:var(--r-md);background:linear-gradient(135deg,var(--gold),#f0d090);color:#1a1000;font-weight:800;font-size:13px;letter-spacing:.07em;text-transform:uppercase;text-decoration:none;cursor:pointer;border:none;font-family:'Inter',sans-serif; }
+
+    /* LOADING / FOOTER */
+    .loading { min-height:60vh;display:grid;place-items:center;color:var(--text-soft);font-size:14px; }
+    .footer { text-align:center;padding:24px 0 0;color:var(--text-faint);font-size:12px; }
+    .footer a { color:var(--text-faint);text-decoration:none; }
+    .footer a:hover { color:var(--text-soft); }
+
+    @media (max-width:640px) {
+      .info-row { grid-template-columns:1fr 1fr; }
+      .hero-user { display:none; }
+      .aula-title { max-width:130px; }
+      .module-title { font-size:13px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-card">
+      <div class="modal-icon">S</div>
+      <h2>Identificação do Aluno</h2>
+      <p>Informe o e-mail da sua matrícula para acessar seu painel de progresso no SENA.</p>
+      <input class="modal-input" type="email" id="emailInput" placeholder="seu@email.com" autocomplete="email" />
+      <div class="modal-error" id="emailError"></div>
+      <button class="btn-primary" onclick="confirmarEmail()">Acessar meu painel</button>
+      <div class="modal-note">IBSDH — Instituto Bruno Sena de Desenvolvimento Humano</div>
+    </div>
+  </div>
+
+  <div class="loading" id="loadingEl">Carregando seu progresso...</div>
+
+  <div class="shell" id="appShell">
+
+    <div class="cert-banner" id="certBanner">
+      <h2>🏆 Você está elegível para a certificação!</h2>
+      <p>Concluiu todas as 42 aulas do Practitioner em PNL. Emita agora seu certificado oficial do IBSDH.</p>
+      <button class="btn-cert" onclick="irParaCertificado()">Emitir meu certificado</button>
+    </div>
+
+    <div class="hero">
+      <div class="hero-top">
+        <div class="seal">S</div>
+        <div class="hero-copy">
+          <div class="eyebrow">Painel de progresso</div>
+          <h1>SENA</h1>
+          <div class="hero-sub">Practitioner em PNL — IBSDH</div>
+        </div>
+        <div class="hero-user">
+          <div class="hero-email" id="emailDisplay"></div>
+          <button class="hero-sair" onclick="sair()">Trocar e-mail</button>
+        </div>
+      </div>
+      <div class="overall-progress">
+        <div class="progress-header">
+          <span class="progress-label">Progresso geral</span>
+          <span class="progress-count" id="progressCount">0 / 42 aulas</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-row">
+      <div class="info-card">
+        <div class="info-card-label">Aprovadas</div>
+        <div class="info-card-value success" id="countAprov">—</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-label">Pendentes</div>
+        <div class="info-card-value gold" id="countPend">—</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-label">Média geral</div>
+        <div class="info-card-value cyan" id="mediaGeral">—</div>
+      </div>
+    </div>
+
+    <div class="modules" id="modulesContainer"></div>
+
+    <div class="footer">
+      IBSDH &mdash; <a href="?certificado" target="_blank">Emitir certificado</a>
+    </div>
+  </div>
+
+  <script>
+    const CURSO = 'Practitioner';
+    const APPS_SCRIPT_URL = '/api';
+
+    const MODULOS = [
+      { nome: 'Módulo 1 — Origens e Fundamentos',                    aulas: [1,2,3,4,5,6,7] },
+      { nome: 'Módulo 2 — Sistemas Representacionais e Acuidade',    aulas: [8,9,10,11,12] },
+      { nome: 'Módulo 3 — A Estrutura da Linguagem',                 aulas: [13,14,15,16,17] },
+      { nome: 'Módulo 4 — Objetivos, Estado e Âncoras',             aulas: [18,19,20,21,22,23] },
+      { nome: 'Módulo 5 — Submodalidades e Padrões',                 aulas: [24,25,26,27,28,29,30,31] },
+      { nome: 'Módulo 6 — Técnicas Avançadas e Prática Clínica',    aulas: [32,33,34,35,36,37,38,39,40,41,42] }
+    ];
+
+    // Títulos das 42 aulas (buscados do Apps Script na inicialização)
+    let TITULOS = {};
+
+    let email = '';
+    let progresso = {};
+
+    (function init() {
+      const salvo = localStorage.getItem('sena_email');
+      if (salvo && !/\{\{/.test(salvo) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(salvo)) {
+        email = salvo;
+        carregarProgresso();
+      } else {
+        document.getElementById('loadingEl').style.display = 'none';
+        mostrarModal();
+      }
+    })();
+
+    document.getElementById('emailInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') confirmarEmail();
+    });
+
+    function mostrarModal() {
+      document.getElementById('modalOverlay').classList.add('visible');
+      setTimeout(() => document.getElementById('emailInput').focus(), 100);
+    }
+
+    function confirmarEmail() {
+      const val = (document.getElementById('emailInput').value || '').trim().toLowerCase();
+      const err = document.getElementById('emailError');
+      if (!val) { err.textContent = 'Informe seu e-mail.'; return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { err.textContent = 'E-mail inválido.'; return; }
+      err.textContent = '';
+      email = val;
+      localStorage.setItem('sena_email', email);
+      document.getElementById('modalOverlay').classList.remove('visible');
+      document.getElementById('loadingEl').style.display = 'grid';
+      carregarProgresso();
+    }
+
+    function sair() {
+      localStorage.removeItem('sena_email');
+      location.reload();
+    }
+
+    async function carregarProgresso() {
+      try {
+        // Busca progresso e títulos em paralelo
+        const [resProg, resTit] = await Promise.all([
+          fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'progresso', email: email, curso: CURSO })
+          }),
+          fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'titulos', curso: CURSO })
+          })
+        ]);
+
+        progresso = await resProg.json() || {};
+
+        const titData = await resTit.json();
+        if (titData && !titData.erro) TITULOS = titData;
+
+        document.getElementById('loadingEl').style.display = 'none';
+        renderDashboard();
+      } catch(err) {
+        document.getElementById('loadingEl').textContent =
+          'Erro ao carregar progresso. Recarregue a página.';
+      }
+    }
+
+    function renderDashboard() {
+      document.getElementById('appShell').classList.add('visible');
+
+      const parts = email.split('@');
+      document.getElementById('emailDisplay').textContent =
+        parts[0].slice(0,2) + '***@' + parts[1];
+
+      const TOTAL = 42;
+      let aprovadas = 0, somaNotas = 0, comNota = 0;
+
+      for (let i = 1; i <= TOTAL; i++) {
+        const p = progresso['Aula_' + i];
+        if (p && p.aprovado === 'SIM') aprovadas++;
+        if (p && p.melhor_nota) { somaNotas += Number(p.melhor_nota); comNota++; }
+      }
+
+      const media = comNota > 0 ? (somaNotas / comNota).toFixed(1) : null;
+      const pct   = Math.round((aprovadas / TOTAL) * 100);
+
+      document.getElementById('progressCount').textContent = aprovadas + ' / ' + TOTAL + ' aulas';
+      document.getElementById('progressFill').style.width  = pct + '%';
+      document.getElementById('countAprov').textContent    = aprovadas;
+      document.getElementById('countPend').textContent     = (TOTAL - aprovadas);
+      document.getElementById('mediaGeral').textContent    = media ? media + '/10' : '—';
+
+      if (aprovadas >= TOTAL) document.getElementById('certBanner').classList.add('visible');
+
+      const bloqueados = calcularBloqueados();
+      const container  = document.getElementById('modulesContainer');
+      container.innerHTML = '';
+
+      MODULOS.forEach(function(mod, idx) {
+        const bloqueado = bloqueados[idx];
+        const aprovMod  = mod.aulas.filter(n => { const p = progresso['Aula_'+n]; return p && p.aprovado === 'SIM'; }).length;
+        const totalMod  = mod.aulas.length;
+        const completo  = aprovMod === totalMod;
+        const pctMod    = Math.round((aprovMod / totalMod) * 100);
+
+        let badgeClass, badgeText;
+        if (bloqueado)       { badgeClass = 'locked';  badgeText = '🔒 Bloqueado'; }
+        else if (completo)   { badgeClass = 'done';    badgeText = 'Completo ✓'; }
+        else if (aprovMod>0) { badgeClass = 'partial'; badgeText = aprovMod + '/' + totalMod + ' aprovadas'; }
+        else                 { badgeClass = 'pending'; badgeText = 'Não iniciado'; }
+
+        // Abre automaticamente o primeiro módulo não completo
+        const aberto = !bloqueado && !completo;
+
+        const card = document.createElement('div');
+        card.className = 'module-card' +
+          (bloqueado ? ' locked' : '') +
+          (completo  ? ' complete' : '') +
+          (aberto    ? ' open' : '');
+
+        card.innerHTML =
+          '<div class="module-header" onclick="toggleModulo(this)">' +
+            '<div class="module-num">' + (idx + 1) + '</div>' +
+            '<div class="module-info">' +
+              '<div class="module-title">' + mod.nome + '</div>' +
+              '<div class="module-meta">' + totalMod + ' aulas · ' + aprovMod + ' aprovadas</div>' +
+            '</div>' +
+            '<span class="module-badge ' + badgeClass + '">' + badgeText + '</span>' +
+            '<span class="module-chevron">▼</span>' +
+          '</div>' +
+          '<div class="module-progress">' +
+            '<div class="mod-track"><div class="mod-fill" style="width:' + pctMod + '%"></div></div>' +
+          '</div>' +
+          '<div class="aulas-list">' + renderAulas(mod.aulas, bloqueado) + '</div>';
+
+        container.appendChild(card);
+      });
+    }
+
+    function calcularBloqueados() {
+      const b = [false];
+      for (let i = 1; i < MODULOS.length; i++) {
+        const anteriorOk = MODULOS[i-1].aulas.every(function(n) {
+          const p = progresso['Aula_' + n];
+          return p && p.aprovado === 'SIM';
+        });
+        b.push(b[i-1] ? true : !anteriorOk);
+      }
+      return b;
+    }
+
+    function renderAulas(nums, bloqueado) {
+      return nums.map(function(n) {
+        const p        = progresso['Aula_' + n];
+        const aprovado = p && p.aprovado === 'SIM';
+        const reprovado= p && p.melhor_nota && p.aprovado !== 'SIM';
+        const nota     = p && p.melhor_nota ? Number(p.melhor_nota).toFixed(1) : null;
+        const status   = aprovado ? 'approved' : reprovado ? 'rejected' : 'pending';
+        const icon     = aprovado ? '✓' : reprovado ? '✗' : '·';
+        const titulo   = TITULOS['Aula_' + n] || ('Aula ' + n);
+
+        let btnHtml = '';
+        if (!bloqueado) {
+          if (aprovado) {
+            btnHtml = '<button class="btn-praticar rever" onclick="abrirSimulador('+n+')">Rever</button>';
+          } else if (reprovado) {
+            btnHtml = '<button class="btn-praticar retry" onclick="abrirSimulador('+n+')">Tentar novamente</button>';
+          } else {
+            btnHtml = '<button class="btn-praticar" onclick="abrirSimulador('+n+')">Praticar →</button>';
+          }
+        }
+
+        const notaHtml = nota
+          ? '<span class="aula-nota ' + status + '">' + nota + '</span>'
+          : '<span class="aula-nota pending">—</span>';
+
+        return '<div class="aula-row' + (bloqueado ? ' locked' : '') + '">' +
+          '<div class="aula-status ' + status + '">' + icon + '</div>' +
+          '<div class="aula-info">' +
+            '<div class="aula-num">Aula ' + n + '</div>' +
+            '<div class="aula-title">' + titulo + '</div>' +
+          '</div>' +
+          notaHtml +
+          btnHtml +
+        '</div>';
+      }).join('');
+    }
+
+    function toggleModulo(header) {
+      const card = header.parentElement;
+      if (card.classList.contains('locked')) return;
+      card.classList.toggle('open');
+    }
+
+    function abrirSimulador(numAula) {
+      // Abre o simulador na mesma origem (Netlify)
+      const url = '/index.html?email=' + encodeURIComponent(email) +
+        '&curso=' + encodeURIComponent(CURSO) +
+        '&aula=Aula_' + numAula;
+      window.open(url, '_blank');
+    }
+
+    function irParaCertificado() {
+      // Link pro certificado via Apps Script
+      window.open(APPS_SCRIPT_URL + '?certificado&email=' + encodeURIComponent(email), '_blank');
+    }
+  </script>
+</body>
+</html>

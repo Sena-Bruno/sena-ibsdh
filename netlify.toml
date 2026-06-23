@@ -1,0 +1,28 @@
+# Headers de segurança para todas as páginas
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "microphone=(*)"
+
+# Proxy: /api/* → Apps Script (resolve o CORS)
+# O Netlify faz a chamada server-side, sem restrição de CORS
+[[redirects]]
+  from = "/api/*"
+  to = "https://script.google.com/macros/s/AKfycbyFELrRRh3l_NnPr3Yk8jCJ3A11Cs27pxP7HWneh5EgPamilMf4eRQ8e7tCiaYWzzIq/exec"
+  status = 200
+  force = true
+  [redirects.headers]
+    X-Forwarded-For = ""
+
+# SPA fallback
+[[redirects]]
+  from = "/dashboard"
+  to = "/dashboard.html"
+  status = 200
+
+[[redirects]]
+  from = "/simulador"
+  to = "/index.html"
+  status = 200
