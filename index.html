@@ -1424,6 +1424,45 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
             <button class="ghost-btn" id="retryBtn" onclick="resetForRetry()" style="display:none;">Fazer nova tentativa</button>
             <button class="ghost-btn" id="backBtn" onclick="voltarAoPainel()" style="display:none;margin-top:8px;border-color:rgba(89,225,255,0.15);color:var(--cyan);">← Voltar ao painel</button>
 
+            <!-- Replay com marcações -->
+            <div class="replay-section" id="replaySection">
+              <div class="replay-header" onclick="toggleReplay()">
+                <span class="replay-title">🎯 Replay — veja sua resposta marcada pela IA</span>
+                <span class="replay-chevron">▼</span>
+              </div>
+              <div class="replay-body" id="replayBody"></div>
+            </div>
+
+            <!-- Comparação anônima -->
+            <div class="comparacao-section" id="comparacaoSection">
+              <div class="comparacao-header" onclick="toggleComparacao()">
+                <span class="comparacao-title">👥 Ver como outros alunos responderam</span>
+                <span class="comparacao-chevron">▼</span>
+              </div>
+              <div class="comparacao-body" id="comparacaoBody"></div>
+            </div>
+
+            <!-- Diário Clínico -->
+            <div class="diario-section" id="diarioSection">
+              <div class="diario-header" onclick="toggleDiario()">
+                <span class="diario-title">📓 Diário clínico — registre sua reflexão</span>
+                <span class="diario-chevron">▼</span>
+              </div>
+              <div class="diario-body">
+                <textarea class="diario-textarea" id="diarioInput" placeholder="O que você percebeu sobre sua própria condução? Que padrão notou? O que faria diferente?"></textarea>
+                <div class="diario-actions">
+                  <button class="diario-btn-salvar" onclick="salvarDiario()" id="diarioBtnSalvar">Salvar reflexão</button>
+                  <button class="diario-btn-analise" onclick="analisarDiario()" id="diarioBtnAnalise">✨ Ver análise semanal da IA</button>
+                </div>
+                <div class="diario-status" id="diarioStatus"></div>
+                <div class="diario-analise-box" id="diarioAnaliseBox">
+                  <div class="diario-analise-title">Análise de padrões — Supervisor IA</div>
+                  <div class="diario-analise-text" id="diarioAnaliseText"></div>
+                </div>
+                <div class="diario-entradas" id="diarioEntradas"></div>
+              </div>
+            </div>
+
             <!-- Histórico de tentativas -->
             <div class="historico-section" id="historicoSection">
               <div class="historico-toggle" id="historicoToggle" onclick="toggleHistorico()">
@@ -1944,6 +1983,442 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
         statusEl.className = 'audio-status';
       }
     }
+
+    // ── MODO SUPERVISOR ────────────────────────────────────────────────
+    const SUPERVISOR_ITENS = [
+      { id: 'rapport',     label: 'Estabeleci rapport e conexão com o perfil do paciente' },
+      { id: 'perfil',      label: 'Identifiquei e adaptei minha condução ao perfil clínico sorteado' },
+      { id: 'tecnica',     label: 'Apliquei uma técnica ou estratégia compatível com esta aula' },
+      { id: 'resistencia', label: 'Manejei as resistências específicas do paciente adequadamente' },
+      { id: 'validacao',   label: 'Validei se houve avanço ou mudança antes de encerrar' },
+      { id: 'etica',       label: 'Mantive postura ética e respeitei os limites do papel profissional' }
+    ];
+
+    let supervisorRespostas = {};
+    let pendingPayload = null;
+
+    function abrirSupervisor(payload) {
+      pendingPayload = payload;
+      supervisorRespostas = {};
+      const container = document.getElementById('supervisorItems');
+      container.innerHTML = '';
+      SUPERVISOR_ITENS.forEach(function(item) {
+        supervisorRespostas[item.id] = null;
+        const div = document.createElement('div');
+        div.className = 'supervisor-item';
+        div.id = 'sup_' + item.id;
+        div.innerHTML = '<div class="supervisor-toggle"><div class="supervisor-knob"></div></div><div class="supervisor-label">' + item.label + '</div>';
+        div.addEventListener('click', function() {
+          const atual = supervisorRespostas[item.id];
+          supervisorRespostas[item.id] = (atual !== true);
+          div.classList.toggle('sim', supervisorRespostas[item.id]);
+          div.classList.toggle('nao', !supervisorRespostas[item.id]);
+        });
+        container.appendChild(div);
+      });
+      document.getElementById('supervisorOverlay').classList.add('visible');
+    }
+
+    function cancelarSupervisor() {
+      document.getElementById('supervisorOverlay').classList.remove('visible');
+      pendingPayload = null;
+      processing = false;
+      document.getElementById('submitBtn').disabled = false;
+      document.getElementById('submitBtn').textContent = 'Enviar resposta';
+      document.getElementById('clinicalInput').disabled = false;
+      document.getElementById('processingModule').classList.remove('visible');
+    }
+
+    async function confirmarSupervisor() {
+      if (!pendingPayload) return;
+      SUPERVISOR_ITENS.forEach(function(item) {
+        if (supervisorRespostas[item.id] === null) supervisorRespostas[item.id] = false;
+      });
+      document.getElementById('supervisorOverlay').classList.remove('visible');
+      document.getElementById('processingModule').classList.add('visible');
+      document.getElementById('resultModule').classList.remove('visible');
+      const payload = Object.assign({}, pendingPayload, { autoavaliacao: supervisorRespostas });
+      const autoav = supervisorRespostas;
+      pendingPayload = null;
+      try {
+        const res = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'avaliar', dados: payload })
+        });
+        const data = await res.json();
+        handleResult(data, autoav);
+      } catch(err) {
+        handleError(err);
+      }
+    }
+
+    function inferirCriteriosIA(data) {
+      const texto = ((data.fortes || '') + ' ' + (data.atencao || '') + ' ' + (data.justificativa || '')).toLowerCase();
+      return {
+        rapport:     /rapport|v[íi]nculo|conex[aã]o|confian/.test(texto) && !/sem rapport|falta.*rapport/.test(texto),
+        perfil:      /perfil|adapt|paciente/.test(texto) && !/ignorou.*perfil|n[aã]o.*adapt/.test(texto),
+        tecnica:     /t[eé]cnica|estrat[eé]gia|interven/.test(texto) && !/sem t[eé]cnica/.test(texto),
+        resistencia: /resist[eê]n|manejo|contornou/.test(texto) && !/n[aã]o.*resistên/.test(texto),
+        validacao:   /valid|verific|confirm|fechamento/.test(texto) && !/sem valid/.test(texto),
+        etica:       !/[eé]tico|limite|escopo|fora do papel/.test(data.atencao || '')
+      };
+    }
+
+    function renderComparacao(autoavaliacao, iaAnalise) {
+      if (!autoavaliacao || !iaAnalise) return;
+      const grid = document.getElementById('compareGrid');
+      grid.innerHTML = '';
+      SUPERVISOR_ITENS.forEach(function(item) {
+        const aluno = autoavaliacao[item.id];
+        const ia    = iaAnalise[item.id];
+        if (aluno === undefined || ia === undefined) return;
+        const row = document.createElement('div');
+        row.className = 'compare-row';
+        row.innerHTML = '<span class="compare-row-label">' + item.label + '</span>' +
+          '<span class="compare-pill ' + (aluno ? 'sim-aluno' : 'nao-aluno') + '">' + (aluno ? 'Você: ✓' : 'Você: ✗') + '</span>' +
+          '<span class="compare-pill ' + (ia ? 'sim-ia' : 'nao-ia') + '">' + (ia ? 'IA: ✓' : 'IA: ✗') + '</span>';
+        grid.appendChild(row);
+      });
+      document.getElementById('supervisorCompare').style.display = 'block';
+    }
+
+    // ── MODO CONVERSA ──────────────────────────────────────────────────
+    let modoAtual = 'texto';
+    let chatHistorico = [];
+    let chatAtivo = false;
+
+    function setMode(modo) {
+      if (modoAtual === modo) return;
+      modoAtual = modo;
+      const txtBtn  = document.getElementById('modeTxtBtn');
+      const convBtn = document.getElementById('modeConvBtn');
+      const inputPanel = document.getElementById('inputModule');
+      const chatPanel  = document.getElementById('chatPanel');
+      if (modo === 'texto') {
+        txtBtn.classList.add('active'); convBtn.classList.remove('active');
+        inputPanel.style.display = 'grid'; chatPanel.classList.remove('visible');
+      } else {
+        convBtn.classList.add('active'); txtBtn.classList.remove('active');
+        inputPanel.style.display = 'none'; chatPanel.classList.add('visible');
+        if (!chatAtivo) {
+          chatAtivo = true; chatHistorico = [];
+          document.getElementById('chatMessages').innerHTML = '<div class="chat-empty">O paciente está aguardando.<br>Inicie a sessão com sua primeira fala.</div>';
+          document.getElementById('chatTurns').textContent = '0 trocas';
+          document.getElementById('chatEncerrarBtn').disabled = true;
+        }
+        setTimeout(() => document.getElementById('chatInput').focus(), 100);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const chatInput = document.getElementById('chatInput');
+      if (chatInput) {
+        chatInput.addEventListener('input', function() {
+          this.style.height = 'auto';
+          this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+        chatInput.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarMensagemChat(); }
+        });
+      }
+    });
+
+    function adicionarMensagemChat(role, texto) {
+      const messages = document.getElementById('chatMessages');
+      const empty = messages.querySelector('.chat-empty');
+      if (empty) empty.remove();
+      const div = document.createElement('div');
+      div.className = 'chat-msg ' + role;
+      const textoEsc = texto.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>');
+      div.innerHTML = '<div class="chat-avatar">' + (role === 'terapeuta' ? 'T' : 'P') + '</div>' +
+        '<div class="chat-bubble">' + textoEsc + '</div>';
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    async function enviarMensagemChat() {
+      const input = document.getElementById('chatInput');
+      const sendBtn = document.getElementById('chatSendBtn');
+      const mensagem = (input.value || '').trim();
+      if (!mensagem || !activeProfile || sendBtn.disabled) return;
+      adicionarMensagemChat('terapeuta', mensagem);
+      chatHistorico.push({ role: 'terapeuta', texto: mensagem });
+      input.value = ''; input.style.height = 'auto';
+      sendBtn.disabled = true;
+      const typing = document.getElementById('chatTyping');
+      typing.classList.add('visible');
+      document.getElementById('chatMessages').scrollTop = 99999;
+      try {
+        const res = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'conversar',
+            perfil: activeProfile.name,
+            historico: chatHistorico.slice(-10),
+            curso: SYSTEM.protocol,
+            aula: SYSTEM.module,
+            mensagem: mensagem
+          })
+        });
+        const data = await res.json();
+        typing.classList.remove('visible');
+        if (data.erro) { showAlert('Erro: ' + data.mensagem); sendBtn.disabled = false; return; }
+        const resposta = data.resposta || '...';
+        adicionarMensagemChat('paciente', resposta);
+        chatHistorico.push({ role: 'paciente', texto: resposta });
+        const trocas = Math.floor(chatHistorico.length / 2);
+        document.getElementById('chatTurns').textContent = trocas + ' troca' + (trocas !== 1 ? 's' : '');
+        if (trocas >= 3) document.getElementById('chatEncerrarBtn').disabled = false;
+      } catch(err) {
+        typing.classList.remove('visible');
+        showAlert('Falha de conexão.');
+      } finally { sendBtn.disabled = false; input.focus(); }
+    }
+
+    async function encerrarSessaoChat() {
+      const trocas = Math.floor(chatHistorico.length / 2);
+      if (trocas < 3) { showAlert('Realize pelo menos 3 trocas antes de encerrar.'); return; }
+      const transcricao = chatHistorico.map(function(m) {
+        return (m.role === 'terapeuta' ? '[TERAPEUTA]' : '[PACIENTE]') + ' ' + m.texto;
+      }).join('\n\n');
+      if (transcricao.length < MIN_CHARS) { showAlert('Sessão muito curta.'); return; }
+      hideAlert();
+      processing = true;
+      document.getElementById('chatEncerrarBtn').disabled = true;
+      document.getElementById('chatSendBtn').disabled = true;
+      const payload = {
+        email: SYSTEM.operator, curso: SYSTEM.protocol, aula: SYSTEM.module,
+        resposta: transcricao, perfil: activeProfile.name, modo: 'conversa'
+      };
+      abrirSupervisor(payload);
+    }
+
+    // ── REPLAY COM MARCAÇÕES ───────────────────────────────────────────
+    let replayGerado = false;
+
+    function toggleReplay() {
+      const sec = document.getElementById('replaySection');
+      sec.classList.toggle('open');
+      if (sec.classList.contains('open') && !replayGerado) carregarReplay();
+    }
+
+    async function carregarReplay() {
+      replayGerado = true;
+      const body = document.getElementById('replayBody');
+      const resposta = document.getElementById('clinicalInput').value.trim() ||
+        chatHistorico.filter(function(m){return m.role==='terapeuta';}).map(function(m){return m.texto;}).join(' ');
+      if (!resposta) { body.innerHTML = '<div class="replay-loading">Resposta não disponível.</div>'; return; }
+      body.innerHTML = '<div class="replay-loading">Gerando análise...</div>';
+      try {
+        const res = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'replay', resposta: resposta,
+            fortes: document.getElementById('positiveAnalysis').textContent,
+            atencao: document.getElementById('negativeAnalysis').textContent,
+            prescricao: document.getElementById('prescriptionAnalysis').textContent,
+            perfil: activeProfile ? activeProfile.name : '',
+            curso: SYSTEM.protocol, aula: SYSTEM.module
+          })
+        });
+        const data = await res.json();
+        if (data.erro) { body.innerHTML = '<div class="replay-loading">Não foi possível gerar o replay.</div>'; return; }
+        renderReplay(data, body);
+      } catch(err) { body.innerHTML = '<div class="replay-loading">Erro ao gerar replay.</div>'; }
+    }
+
+    function renderReplay(data, container) {
+      let html = '<div class="replay-legend">' +
+        '<span class="replay-legend-item"><span class="replay-dot" style="background:rgba(126,240,194,0.5)"></span>Forte</span>' +
+        '<span class="replay-legend-item"><span class="replay-dot" style="background:rgba(245,193,99,0.5)"></span>Atenção</span>' +
+        '<span class="replay-legend-item"><span class="replay-dot" style="background:rgba(255,107,136,0.4)"></span>Inconsistente</span>' +
+        '</div><div class="replay-text">';
+      if (Array.isArray(data.segmentos)) {
+        data.segmentos.forEach(function(seg) {
+          if (!seg.texto) return;
+          const esc = seg.texto.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+          if (!seg.tipo || seg.tipo === 'neutro') { html += esc; }
+          else {
+            const title = seg.nota ? ' title="' + seg.nota.replace(/"/g,'&quot;') + '"' : '';
+            html += '<span class="replay-mark ' + seg.tipo + '"' + title + '>' + esc + '</span>';
+          }
+        });
+      }
+      html += '</div>';
+      if (Array.isArray(data.ausencias) && data.ausencias.length > 0) {
+        html += '<div class="replay-ausencias"><div class="replay-ausencias-title">Elementos ausentes</div><ul>';
+        data.ausencias.forEach(function(a) { html += '<li>' + a.replace(/</g,'&lt;') + '</li>'; });
+        html += '</ul></div>';
+      }
+      container.innerHTML = html;
+    }
+
+    // ── COMPARAÇÃO ANÔNIMA ─────────────────────────────────────────────
+    let comparacaoGerada = false;
+
+    function toggleComparacao() {
+      const sec = document.getElementById('comparacaoSection');
+      sec.classList.toggle('open');
+      if (sec.classList.contains('open') && !comparacaoGerada) carregarComparacao();
+    }
+
+    async function carregarComparacao() {
+      comparacaoGerada = true;
+      const body = document.getElementById('comparacaoBody');
+      body.innerHTML = '<div class="comp-aviso">Buscando exemplos...</div>';
+      try {
+        const res = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'comparacao_anonima',
+            curso: SYSTEM.protocol, aula: SYSTEM.module,
+            perfil: activeProfile ? activeProfile.name : '', email: SYSTEM.operator
+          })
+        });
+        const data = await res.json();
+        if (!data.exemplos || data.exemplos.length === 0) {
+          body.innerHTML = '<div class="comp-aviso">Ainda não há outros alunos aprovados nesta aula. Volte depois!</div>';
+          return;
+        }
+        let html = '';
+        data.exemplos.forEach(function(ex) {
+          html += '<div class="comp-card"><div class="comp-card-header">' +
+            '<div class="comp-card-id">🎭 ' + ex.id + ' · Perfil: ' + (ex.perfil||'—') + '</div>' +
+            '<span class="comp-card-nota">' + Number(ex.nota).toFixed(1) + '/10</span></div>' +
+            '<div class="comp-card-body">' +
+            '<div class="comp-label">Trecho da resposta</div>' +
+            '<div class="comp-text">"' + (ex.trecho||'').replace(/</g,'&lt;').substring(0,600) + (ex.trecho&&ex.trecho.length>=600?'...':'"') + '</div>' +
+            (ex.fortes ? '<div class="comp-label">Pontos fortes identificados</div><div class="comp-text">' + ex.fortes.replace(/</g,'&lt;') + '</div>' : '') +
+            '</div></div>';
+        });
+        body.innerHTML = html;
+      } catch(err) { body.innerHTML = '<div class="comp-aviso">Erro ao carregar.</div>'; }
+    }
+
+    // ── DIÁRIO CLÍNICO ─────────────────────────────────────────────────
+    function toggleDiario() {
+      const sec = document.getElementById('diarioSection');
+      sec.classList.toggle('open');
+      if (sec.classList.contains('open')) carregarEntradasDiario();
+    }
+
+    async function salvarDiario() {
+      const texto = (document.getElementById('diarioInput').value || '').trim();
+      const status = document.getElementById('diarioStatus');
+      const btn = document.getElementById('diarioBtnSalvar');
+      if (!texto) { status.textContent = 'Escreva algo antes de salvar.'; status.className = 'diario-status erro'; return; }
+      btn.disabled = true; status.textContent = 'Salvando...'; status.className = 'diario-status';
+      try {
+        const res = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'salvar_diario', email: SYSTEM.operator, curso: SYSTEM.protocol, aula: SYSTEM.module, reflexao: texto })
+        });
+        const data = await res.json();
+        if (data.sucesso) {
+          status.textContent = '✓ Reflexão salva.'; status.className = 'diario-status ok';
+          document.getElementById('diarioInput').value = '';
+          carregarEntradasDiario();
+        } else { throw new Error('erro'); }
+      } catch(err) { status.textContent = 'Erro ao salvar.'; status.className = 'diario-status erro'; }
+      finally { btn.disabled = false; }
+    }
+
+    async function analisarDiario() {
+      const btn = document.getElementById('diarioBtnAnalise');
+      const box = document.getElementById('diarioAnaliseBox');
+      const txt = document.getElementById('diarioAnaliseText');
+      btn.disabled = true; btn.textContent = 'Analisando...';
+      box.classList.remove('visible');
+      try {
+        const res = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'analise_diario', email: SYSTEM.operator, curso: SYSTEM.protocol })
+        });
+        const data = await res.json();
+        txt.textContent = data.analise || 'Sem análise disponível.';
+        box.classList.add('visible');
+      } catch(err) { txt.textContent = 'Erro ao gerar análise.'; box.classList.add('visible'); }
+      finally { btn.disabled = false; btn.textContent = '✨ Ver análise semanal da IA'; }
+    }
+
+    async function carregarEntradasDiario() {
+      const container = document.getElementById('diarioEntradas');
+      try {
+        const res = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'buscar_diario', email: SYSTEM.operator, curso: SYSTEM.protocol, aula: SYSTEM.module })
+        });
+        const data = await res.json();
+        if (!data.entradas || data.entradas.length === 0) { container.classList.remove('visible'); return; }
+        container.innerHTML = '<div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--text-faint);margin-bottom:4px;">Entradas anteriores</div>';
+        data.entradas.forEach(function(e) {
+          const dt = e.timestamp ? new Date(e.timestamp).toLocaleDateString('pt-BR') : '';
+          const div = document.createElement('div');
+          div.className = 'diario-entrada';
+          div.innerHTML = '<div class="diario-entrada-meta">' + e.aula + ' · ' + dt + '</div>' +
+            '<div class="diario-entrada-text">' + e.reflexao.substring(0,200).replace(/</g,'&lt;') + (e.reflexao.length>200?'...':'') + '</div>';
+          container.appendChild(div);
+        });
+        container.classList.add('visible');
+      } catch(err) { container.classList.remove('visible'); }
+    }
+
+    // ── MODO DESAFIO ───────────────────────────────────────────────────
+    let modoDesafio = false;
+    let perfilDesafio = null;
+    let notaMinimaDesafio = 7;
+
+    function mostrarSeletorNivel() {
+      document.getElementById('desafioNivelSelector').classList.toggle('visible');
+    }
+
+    async function gerarDesafio(nivel) {
+      document.getElementById('desafioNivelSelector').classList.remove('visible');
+      document.getElementById('desafioBtn').disabled = true;
+      document.getElementById('desafioBtn').textContent = '⚡ Gerando...';
+      try {
+        const res = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'gerar_desafio', curso: SYSTEM.protocol, aula: SYSTEM.module, nivel: nivel })
+        });
+        const data = await res.json();
+        if (data.erro) { showAlert('Erro ao gerar desafio.'); return; }
+        modoDesafio = true; notaMinimaDesafio = data.nota_minima_desafio || 8; perfilDesafio = data;
+        activeProfile = {
+          name: data.perfis_base ? data.perfis_base[0] : 'Ansioso',
+          desc: data.descricao, resistances: data.resistencias || [],
+          approach: data.abordagem_ideal, type: 'DESAFIO'
+        };
+        document.getElementById('statusDot').classList.add('active');
+        document.getElementById('patientId').textContent = '⚡ ' + data.nivel;
+        document.getElementById('patientType').textContent = data.nome.toUpperCase();
+        document.getElementById('patientDesc').textContent = data.descricao;
+        document.getElementById('patientStats').style.display = 'grid';
+        const list = document.getElementById('resistanceList');
+        list.innerHTML = '';
+        (data.resistencias||[]).forEach(function(r){const li=document.createElement('li');li.textContent=r;list.appendChild(li);});
+        document.getElementById('approachText').textContent = data.abordagem_ideal;
+        document.getElementById('desafioCard').style.display = 'block';
+        document.getElementById('desafioCard').innerHTML = '<div class="desafio-card"><div class="desafio-card-badge">⚡ ' + data.nivel + '</div><div class="desafio-card-nome">' + data.nome + '</div><div class="desafio-nota-min">Nota mínima para o selo: ' + notaMinimaDesafio + '/10</div></div>';
+        document.getElementById('thresholdValue').textContent = notaMinimaDesafio + '/10';
+        document.getElementById('thresholdDisplay').textContent = notaMinimaDesafio;
+        document.getElementById('initBtn').style.display = 'none';
+        document.getElementById('desafioBtn').style.display = 'none';
+        document.getElementById('inputModule').classList.add('visible');
+        document.getElementById('modeSelector').classList.add('visible');
+        setTimeout(()=>document.getElementById('inputModule').scrollIntoView({behavior:'smooth',block:'start'}),100);
+      } catch(err) { showAlert('Erro ao gerar desafio.'); }
+      finally { document.getElementById('desafioBtn').disabled=false; document.getElementById('desafioBtn').textContent='⚡ Modo Desafio — paciente composto'; }
+    }
+
+    function verificarSeloDesafio(nota, aprovado) {
+      if (!modoDesafio || !perfilDesafio) return;
+      if (aprovado && nota >= notaMinimaDesafio) {
+        document.getElementById('seloNome').textContent = perfilDesafio.selo || 'Desafio Clínico';
+        document.getElementById('seloDesafio').classList.add('visible');
+      }
+    }
+
   </script>
 </body>
 </html>
