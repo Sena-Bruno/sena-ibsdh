@@ -2128,8 +2128,16 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
       const empty = messages.querySelector('.chat-empty');
       if (empty) empty.remove();
       const div = document.createElement('div');
+      // Mensagem de sistema (erro/aviso) — exibe centralizado
+      if (role === 'sistema') {
+        div.style.cssText = 'text-align:center;font-size:12px;color:var(--danger);padding:8px;opacity:.8;';
+        div.textContent = texto;
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+        return;
+      }
       div.className = 'chat-msg ' + role;
-      const textoEsc = texto.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>');
+      const textoEsc = String(texto).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/[\r\n]+/g,'<br>');
       div.innerHTML = '<div class="chat-avatar">' + (role === 'terapeuta' ? 'T' : 'P') + '</div>' +
         '<div class="chat-bubble">' + textoEsc + '</div>';
       messages.appendChild(div);
@@ -2160,19 +2168,36 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
             mensagem: mensagem
           })
         });
+
+        // Verificar se a resposta HTTP foi ok
+        if (!res.ok) {
+          throw new Error('Servidor retornou ' + res.status);
+        }
+
         const data = await res.json();
         typing.classList.remove('visible');
-        if (data.erro) { showAlert('Erro: ' + data.mensagem); sendBtn.disabled = false; return; }
+
+        if (data.erro) {
+          // Mostrar erro como mensagem do sistema no chat
+          adicionarMensagemChat('sistema', '⚠️ ' + (data.mensagem || 'Erro ao processar.'));
+          return;
+        }
+
         const resposta = data.resposta || '...';
         adicionarMensagemChat('paciente', resposta);
         chatHistorico.push({ role: 'paciente', texto: resposta });
         const trocas = Math.floor(chatHistorico.length / 2);
         document.getElementById('chatTurns').textContent = trocas + ' troca' + (trocas !== 1 ? 's' : '');
         if (trocas >= 3) document.getElementById('chatEncerrarBtn').disabled = false;
+
       } catch(err) {
         typing.classList.remove('visible');
-        showAlert('Falha de conexão.');
-      } finally { sendBtn.disabled = false; input.focus(); }
+        // Mostrar erro diretamente no chat para o aluno ver
+        adicionarMensagemChat('sistema', '⚠️ Falha de conexão: ' + (err.message || 'tente novamente.'));
+      } finally {
+        sendBtn.disabled = false;
+        input.focus();
+      }
     }
 
     async function encerrarSessaoChat() {
