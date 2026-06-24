@@ -321,12 +321,54 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
     };
 
     const PERFIS_CLINICOS = {
-      'Ansioso':      { nome:'Ansioso',      descricao:'Paciente com alta ansiedade antecipatória, tende a catastrofizar e busca garantias constantes.',        resistencias:['Catastrofização','Necessidade de controle','Evitação de sensações corporais'],    abordagem_ideal:'Calibrar respiração, rapport kinestésico, ancoragem de calma antes de qualquer intervenção.' },
-      'Cético':       { nome:'Cético',        descricao:'Paciente racional, desconfiante de abordagens intuitivas, exige lógica e evidências em cada passo.',      resistencias:['Questionamento constante','Desvalorização do processo','Racionalização excessiva'], abordagem_ideal:'Linguagem técnica e objetiva, rapport visual, explicar o racional de cada técnica antes de aplicar.' },
-      'Resistente':   { nome:'Resistente',    descricao:'Paciente que verbalmente concorda mas inconscientemente bloqueia qualquer mudança, padrão forte de sabotagem.', resistencias:['Concordância superficial','Sabotagem inconsciente','Mudança de assunto'],         abordagem_ideal:'Identificar intenção positiva do bloqueio, trabalhar com partes, recontextualizar a mudança como segura.' },
-      'Emocionalmente lábil': { nome:'Emocionalmente lábil', descricao:'Paciente que oscila rapidamente entre estados emocionais, dificultando a manutenção do foco terapêutico.', resistencias:['Oscilação de humor','Dificuldade de foco','Reatividade emocional alta'], abordagem_ideal:'Ancoragem de estado estável antes de iniciar, ritmo lento, uso de metáforas dissociativas.' },
-      'Fechado':      { nome:'Fechado',       descricao:'Paciente com baixa expressão verbal, monossilábico, dificulta o rapport e a coleta de informações.',       resistencias:['Monossilabismo','Desconfiança inicial','Resistência ao contato visual'],          abordagem_ideal:'Construir rapport gradual, perguntas abertas simples, espelhar linguagem corporal, tolerar silêncios.' },
-      'Dependente':   { nome:'Dependente',    descricao:'Paciente que transfere responsabilidade ao terapeuta, busca validação constante e teme tomar decisões.',    resistencias:['Transferência de responsabilidade','Medo de errar','Necessidade de aprovação'],  abordagem_ideal:'Devolver perguntas como perguntas, fortalecer lócus interno, celebrar pequenas decisões autônomas.' }
+      'Ansioso': {
+        nome: 'Ansioso',
+        descricao: 'Paciente agitado, fala acelerada, respiração superficial, catastrofização frequente, necessidade de controle excessivo, dificuldade de tolerância à incerteza',
+        resistencias: ['Interrompe com "e se"', 'Antecipa problemas', 'Não tolera silêncio terapêutico'],
+        abordagem_ideal: 'Rapport respiratório primeiro, validação antes de intervenção, ritmo mais lento'
+      },
+      'Cético': {
+        nome: 'Cético',
+        descricao: 'Paciente desconfiado, questiona metodologia, testa credibilidade do terapeuta, linguagem racional excessiva, dificuldade de vulnerabilidade',
+        resistencias: ['"Isso realmente funciona?"', 'Pede evidências', 'Testa autoridade'],
+        abordagem_ideal: 'Credibilização rápida, referenciação, convite à experiência direta, menos promessas'
+      },
+      'Evitativo': {
+        nome: 'Evitativo',
+        descricao: 'Paciente com respostas vagas, muda de assunto quando aprofundado, dificuldade de acesso emocional, intelectualização defensiva, evita contato visual',
+        resistencias: ['Respostas de uma palavra', 'Muda de assunto', '"Não sei"/"Talvez"'],
+        abordagem_ideal: 'Perguntas mais específicas, confronto gentil, foco no corporal, paciência'
+      },
+      'Intelectualizador': {
+        nome: 'Intelectualizador',
+        descricao: 'Paciente que raciocina demais, distanciamento somático, analisa próprio processo, dificuldade de experiência direta, teorização excessiva',
+        resistencias: ['Explicações longas', 'Analisa a técnica em vez de fazê-la', 'Distância emocional'],
+        abordagem_ideal: 'Convite à experiência direta, interromper raciocínio, foco em sensações corporais'
+      },
+      'Dissociado': {
+        nome: 'Dissociado',
+        descricao: 'Paciente desconectado do presente, narrativa fragmentada, pouca presença corporal, olhar perdido, dificuldade de foco sustentado',
+        resistencias: ['Falta de continuidade na fala', 'Não responde diretamente', 'Ausência de contato'],
+        abordagem_ideal: 'Ancoragem no presente, orientação espacial, ativação corporal, fragmentação da sessão'
+      },
+      'Depressivo': {
+        nome: 'Depressivo',
+        descricao: 'Paciente com energia baixa, fala lenta, pessimismo, retraimento, dificuldade de engajamento, possível ideação suicida (avaliação de risco)',
+        resistencias: ['"Não adianta nada"', 'Falta de motivação', 'Desistência rápida'],
+        abordagem_ideal: 'Ativação gradual, pequenos passos, validação do sofrimento, estruturação, avaliação de segurança'
+      },
+      'Histriônico': {
+        nome: 'Histriônico',
+        descricao: 'Paciente dramático, emoções intensas e rápidas, busca atenção, linguagem colorida, sedução, dificuldade de foco',
+        resistencias: ['Dramatização', 'Fuga em emoções', 'Não completa tarefas'],
+        abordagem_ideal: 'Contenção, estrutura firme, direcionamento, foco em resultados concretos'
+      },
+      'Obsessivo': {
+        nome: 'Obsessivo',
+        descricao: 'Paciente rígido, detalhista, perfeccionista, dificuldade de delegar, controle excessivo, ansiedade com imperfeição',
+        resistencias: ['Detalhes excessivos', 'Não aceita "bom o suficiente"', 'Procrastinação por perfeição'],
+        abordagem_ideal: 'Estrutura clara, flexibilidade modelada, foco no processo não no resultado'
+      }
     };
 
     let activeProfile = null;
