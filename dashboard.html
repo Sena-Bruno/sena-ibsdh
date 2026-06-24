@@ -194,7 +194,7 @@
         <div class="hero-copy">
           <div class="eyebrow">Painel de progresso</div>
           <h1>SENA</h1>
-          <div class="hero-sub">Practitioner em PNL — IBSDH</div>
+          <div class="hero-sub" id="heroSub">Carregando...</div>
         </div>
         <div class="hero-user">
           <div class="hero-email" id="emailDisplay"></div>
@@ -235,20 +235,15 @@
   </div>
 
   <script>
-    const CURSO = 'Practitioner';
+    // Curso vem da URL: dashboard.html?curso=Practitioner
+    const urlParams = new URLSearchParams(window.location.search);
+    const CURSO = urlParams.get('curso') || 'Practitioner';
     const APPS_SCRIPT_URL = '/api';
 
-    const MODULOS = [
-      { nome: 'Módulo 1 — Origens e Fundamentos',                    aulas: [1,2,3,4,5,6,7] },
-      { nome: 'Módulo 2 — Sistemas Representacionais e Acuidade',    aulas: [8,9,10,11,12] },
-      { nome: 'Módulo 3 — A Estrutura da Linguagem',                 aulas: [13,14,15,16,17] },
-      { nome: 'Módulo 4 — Objetivos, Estado e Âncoras',             aulas: [18,19,20,21,22,23] },
-      { nome: 'Módulo 5 — Submodalidades e Padrões',                 aulas: [24,25,26,27,28,29,30,31] },
-      { nome: 'Módulo 6 — Técnicas Avançadas e Prática Clínica',    aulas: [32,33,34,35,36,37,38,39,40,41,42] }
-    ];
-
-    // Títulos das 42 aulas (buscados do Apps Script na inicialização)
+    // Estrutura do curso (módulos + aulas) carregada dinamicamente da Base_Aulas
+    let MODULOS = [];
     let TITULOS = {};
+    let TOTAL_AULAS = 0;
 
     let email = '';
     let progresso = {};
@@ -293,24 +288,40 @@
 
     async function carregarProgresso() {
       try {
-        // Busca progresso e títulos em paralelo
-        const [resProg, resTit] = await Promise.all([
+        // Busca estrutura do curso e progresso do aluno em paralelo
+        const [resEst, resProg] = await Promise.all([
           fetch(APPS_SCRIPT_URL, {
             method: 'POST',
-            body: JSON.stringify({ action: 'progresso', email: email, curso: CURSO })
+            body: JSON.stringify({ action: 'estrutura_curso', curso: CURSO })
           }),
           fetch(APPS_SCRIPT_URL, {
             method: 'POST',
-            body: JSON.stringify({ action: 'titulos', curso: CURSO })
+            body: JSON.stringify({ action: 'progresso', email: email, curso: CURSO })
           })
         ]);
 
+        const estrutura = await resEst.json();
+        if (estrutura && !estrutura.erro && estrutura.modulos) {
+          MODULOS = estrutura.modulos;
+          TOTAL_AULAS = estrutura.totalAulas;
+          // Monta TITULOS a partir da estrutura
+          TITULOS = {};
+          MODULOS.forEach(function(mod) {
+            mod.aulas.forEach(function(a) { TITULOS[a.aula] = a.titulo; });
+          });
+        }
+
         progresso = await resProg.json() || {};
 
-        const titData = await resTit.json();
-        if (titData && !titData.erro) TITULOS = titData;
-
         document.getElementById('loadingEl').style.display = 'none';
+
+        if (!MODULOS.length) {
+          document.getElementById('loadingEl').style.display = 'grid';
+          document.getElementById('loadingEl').textContent =
+            'Nenhuma aula encontrada para o curso "' + CURSO + '". Verifique a Base_Aulas.';
+          return;
+        }
+
         renderDashboard();
       } catch(err) {
         document.getElementById('loadingEl').textContent =
@@ -320,19 +331,23 @@
 
     function renderDashboard() {
       document.getElementById('appShell').classList.add('visible');
+      document.getElementById('heroSub').textContent = CURSO.replace(/_/g, ' ') + ' — IBSDH';
 
       const parts = email.split('@');
       document.getElementById('emailDisplay').textContent =
         parts[0].slice(0,2) + '***@' + parts[1];
 
-      const TOTAL = 42;
+      const TOTAL = TOTAL_AULAS;
       let aprovadas = 0, somaNotas = 0, comNota = 0;
 
-      for (let i = 1; i <= TOTAL; i++) {
-        const p = progresso['Aula_' + i];
-        if (p && p.aprovado === 'SIM') aprovadas++;
-        if (p && p.melhor_nota) { somaNotas += Number(p.melhor_nota); comNota++; }
-      }
+      // Itera sobre todas as aulas de todos os módulos
+      MODULOS.forEach(function(mod) {
+        mod.aulas.forEach(function(a) {
+          const p = progresso[a.aula];
+          if (p && p.aprovado === 'SIM') aprovadas++;
+          if (p && p.melhor_nota) { somaNotas += Number(p.melhor_nota); comNota++; }
+        });
+      });
 
       const media = comNota > 0 ? (somaNotas / comNota).toFixed(1) : null;
       const pct   = Math.round((aprovadas / TOTAL) * 100);
@@ -351,7 +366,7 @@
 
       MODULOS.forEach(function(mod, idx) {
         const bloqueado = bloqueados[idx];
-        const aprovMod  = mod.aulas.filter(n => { const p = progresso['Aula_'+n]; return p && p.aprovado === 'SIM'; }).length;
+        const aprovMod  = mod.aulas.filter(a => { const p = progresso[a.aula]; return p && p.aprovado === 'SIM'; }).length;
         const totalMod  = mod.aulas.length;
         const completo  = aprovMod === totalMod;
         const pctMod    = Math.round((aprovMod / totalMod) * 100);
@@ -376,7 +391,7 @@
             '<div class="module-num">' + (idx + 1) + '</div>' +
             '<div class="module-info">' +
               '<div class="module-title">' + mod.nome + '</div>' +
-              '<div class="module-meta">' + totalMod + ' aulas · ' + aprovMod + ' aprovadas</div>' +
+              '<div class="module-meta">' + totalMod + ' aula' + (totalMod !== 1 ? 's' : '') + ' · ' + aprovMod + ' aprovada' + (aprovMod !== 1 ? 's' : '') + '</div>' +
             '</div>' +
             '<span class="module-badge ' + badgeClass + '">' + badgeText + '</span>' +
             '<span class="module-chevron">▼</span>' +
@@ -393,8 +408,8 @@
     function calcularBloqueados() {
       const b = [false];
       for (let i = 1; i < MODULOS.length; i++) {
-        const anteriorOk = MODULOS[i-1].aulas.every(function(n) {
-          const p = progresso['Aula_' + n];
+        const anteriorOk = MODULOS[i-1].aulas.every(function(a) {
+          const p = progresso[a.aula];
           return p && p.aprovado === 'SIM';
         });
         b.push(b[i-1] ? true : !anteriorOk);
@@ -402,24 +417,26 @@
       return b;
     }
 
-    function renderAulas(nums, bloqueado) {
-      return nums.map(function(n) {
-        const p        = progresso['Aula_' + n];
+    function renderAulas(aulasList, bloqueado) {
+      return aulasList.map(function(a) {
+        const p        = progresso[a.aula];
         const aprovado = p && p.aprovado === 'SIM';
         const reprovado= p && p.melhor_nota && p.aprovado !== 'SIM';
         const nota     = p && p.melhor_nota ? Number(p.melhor_nota).toFixed(1) : null;
         const status   = aprovado ? 'approved' : reprovado ? 'rejected' : 'pending';
         const icon     = aprovado ? '✓' : reprovado ? '✗' : '·';
-        const titulo   = TITULOS['Aula_' + n] || ('Aula ' + n);
+        const titulo   = a.titulo || a.aula;
+        const numDisplay = a.aula.replace('Aula_', '');
 
         let btnHtml = '';
         if (!bloqueado) {
+          const aulaId = a.aula;
           if (aprovado) {
-            btnHtml = '<button class="btn-praticar rever" onclick="abrirSimulador('+n+')">Rever</button>';
+            btnHtml = '<button class="btn-praticar rever" data-aula="' + aulaId + '" onclick="abrirSimulador(this.dataset.aula)">Rever</button>';
           } else if (reprovado) {
-            btnHtml = '<button class="btn-praticar retry" onclick="abrirSimulador('+n+')">Tentar novamente</button>';
+            btnHtml = '<button class="btn-praticar retry" data-aula="' + aulaId + '" onclick="abrirSimulador(this.dataset.aula)">Tentar novamente</button>';
           } else {
-            btnHtml = '<button class="btn-praticar" onclick="abrirSimulador('+n+')">Praticar →</button>';
+            btnHtml = '<button class="btn-praticar" data-aula="' + aulaId + '" onclick="abrirSimulador(this.dataset.aula)">Praticar →</button>';
           }
         }
 
@@ -430,7 +447,7 @@
         return '<div class="aula-row' + (bloqueado ? ' locked' : '') + '">' +
           '<div class="aula-status ' + status + '">' + icon + '</div>' +
           '<div class="aula-info">' +
-            '<div class="aula-num">Aula ' + n + '</div>' +
+            '<div class="aula-num">Aula ' + numDisplay + '</div>' +
             '<div class="aula-title">' + titulo + '</div>' +
           '</div>' +
           notaHtml +
@@ -445,11 +462,11 @@
       card.classList.toggle('open');
     }
 
-    function abrirSimulador(numAula) {
+    function abrirSimulador(codigoAula) {
       // Abre o simulador na mesma origem (Netlify)
       const url = '/index.html?email=' + encodeURIComponent(email) +
         '&curso=' + encodeURIComponent(CURSO) +
-        '&aula=Aula_' + numAula;
+        '&aula=' + encodeURIComponent(codigoAula);
       window.open(url, '_blank');
     }
 
@@ -539,7 +556,7 @@
         const novoProg = await res.json();
         if (novoProg && !novoProg.erro) {
           progresso = novoProg;
-          renderDashboard();
+          if (MODULOS.length) renderDashboard();
         }
       } catch(err) {
         // silencioso
