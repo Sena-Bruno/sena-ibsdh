@@ -624,6 +624,15 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
       document.getElementById('retryBtn').style.display = approved ? 'none' : 'block';
       document.getElementById('backBtn').style.display = 'block';
       carregarHistorico();
+
+      // Sinaliza para o dashboard que o progresso mudou
+      localStorage.setItem('sena_progresso_atualizado', JSON.stringify({
+        curso: SYSTEM.protocol,
+        aula:  SYSTEM.module,
+        nota:  data.nota,
+        aprovado: !!data.aprovado,
+        ts: Date.now()
+      }));
       setTimeout(() => document.getElementById('resultModule').scrollIntoView({behavior:'smooth',block:'start'}), 100);
     }
 
