@@ -157,6 +157,11 @@
       .aula-title { max-width:130px; }
       .module-title { font-size:13px; }
     }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
   </style>
 </head>
 <body>
@@ -452,6 +457,92 @@
       // Link pro certificado via Apps Script
       window.open(APPS_SCRIPT_URL + '?certificado&email=' + encodeURIComponent(email), '_blank');
     }
+
+    // ── ATUALIZAÇÃO AUTOMÁTICA DE PROGRESSO ──────────────────────────
+    // Escuta sinais do simulador (outra aba) via localStorage
+    window.addEventListener('storage', function(e) {
+      if (e.key !== 'sena_progresso_atualizado') return;
+      if (!e.newValue) return;
+
+      try {
+        const sinal = JSON.parse(e.newValue);
+
+        // Só atualiza se for do mesmo curso e se o sinal for recente (< 30s)
+        if (sinal.curso !== CURSO) return;
+        if (Date.now() - sinal.ts > 30000) return;
+
+        // Mostra toast de notificação
+        mostrarToastAtualizacao(sinal.aula, sinal.nota, sinal.aprovado);
+
+        // Recarrega o progresso silenciosamente
+        setTimeout(function() {
+          recarregarProgressoSilencioso();
+        }, 800);
+      } catch(err) {
+        // silencioso
+      }
+    });
+
+    function mostrarToastAtualizacao(aula, nota, aprovado) {
+      const existing = document.getElementById('toastAtualiz');
+      if (existing) existing.remove();
+
+      const numAula = String(aula).replace('Aula_', '');
+      const cor = aprovado ? 'rgba(126,240,194,0.12)' : 'rgba(255,107,136,0.12)';
+      const borda = aprovado ? 'rgba(126,240,194,0.25)' : 'rgba(255,107,136,0.2)';
+      const txtCor = aprovado ? '#7ef0c2' : '#ff6b88';
+      const icone = aprovado ? '✓' : '✗';
+      const msg = aprovado
+        ? 'Aula ' + numAula + ' aprovada com ' + Number(nota).toFixed(1) + '/10'
+        : 'Aula ' + numAula + ' — ' + Number(nota).toFixed(1) + '/10 (não aprovada)';
+
+      const toast = document.createElement('div');
+      toast.id = 'toastAtualiz';
+      toast.style.cssText = [
+        'position:fixed', 'bottom:24px', 'right:24px', 'z-index:9999',
+        'background:' + cor,
+        'border:1px solid ' + borda,
+        'border-radius:14px',
+        'padding:14px 18px',
+        'font-family:Inter,sans-serif',
+        'font-size:14px',
+        'font-weight:600',
+        'color:' + txtCor,
+        'box-shadow:0 16px 32px rgba(0,0,0,0.35)',
+        'display:flex',
+        'align-items:center',
+        'gap:10px',
+        'animation:toastIn .25s ease',
+        'max-width:320px'
+      ].join(';');
+
+      toast.innerHTML =
+        '<span style="font-size:16px">' + icone + '</span>' +
+        '<span>' + msg + ' &mdash; Atualizando painel...</span>';
+
+      document.body.appendChild(toast);
+
+      // Remove após 4 segundos
+      setTimeout(function() {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity .3s';
+        setTimeout(function() { toast.remove(); }, 300);
+      }, 4000);
+    }
+
+    async function recarregarProgressoSilencioso() {
+      try {
+        const res = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'progresso', email: email, curso: CURSO })
+        });
+        const novoProg = await res.json();
+        if (novoProg && !novoProg.erro) {
+          progresso = novoProg;
+          renderDashboard();
+        }
+      } catch(err) {
+        // silencioso
+      }
+    }
   </script>
-</body>
-</html>
