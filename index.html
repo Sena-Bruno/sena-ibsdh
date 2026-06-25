@@ -1198,6 +1198,327 @@
     .selo-info {}
     .selo-label { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #f5c163; }
     .selo-nome { font-size: 15px; font-weight: 800; color: var(--text); margin-top: 2px; }
+
+    /* ── VOZ DO PACIENTE ─────────────────────────────── */
+    .voz-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.07);
+      background: rgba(255,255,255,0.03);
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--text-faint);
+      transition: all .18s;
+      user-select: none;
+    }
+    .voz-toggle:hover { background: rgba(255,255,255,0.06); }
+    .voz-toggle.ativo {
+      border-color: rgba(255,107,136,0.3);
+      background: rgba(255,107,136,0.08);
+      color: var(--danger);
+    }
+    .voz-toggle-dot {
+      width: 7px; height: 7px;
+      border-radius: 999px;
+      background: var(--text-faint);
+      transition: background .18s;
+    }
+    .voz-toggle.ativo .voz-toggle-dot {
+      background: var(--danger);
+      box-shadow: 0 0 8px rgba(255,107,136,0.6);
+      animation: vozPulse 1.5s ease-in-out infinite;
+    }
+    @keyframes vozPulse {
+      0%,100% { transform: scale(1); }
+      50% { transform: scale(1.4); }
+    }
+    .chat-speaking .chat-bubble {
+      border-color: rgba(255,107,136,0.35) !important;
+      animation: speakingGlow 0.8s ease-in-out infinite alternate;
+    }
+    @keyframes speakingGlow {
+      from { box-shadow: none; }
+      to   { box-shadow: 0 0 12px rgba(255,107,136,0.2); }
+    }
+
+    /* ── ESTADO EMOCIONAL DO PACIENTE ───────────────── */
+    .estado-paciente {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.02);
+      margin-bottom: 10px;
+      transition: all .4s ease;
+    }
+    .estado-paciente.visible { display: flex; }
+
+    .estado-icon { font-size: 18px; transition: all .4s; }
+
+    .estado-info { flex: 1; }
+    .estado-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: 2px;
+    }
+    .estado-valor {
+      font-size: 13px;
+      font-weight: 700;
+      transition: color .4s;
+    }
+    .estado-barra-wrap {
+      width: 80px;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      overflow: hidden;
+    }
+    .estado-barra {
+      height: 100%;
+      border-radius: 999px;
+      transition: width .6s ease, background .4s;
+    }
+
+    /* ── BOAS-VINDAS ─────────────────────────────────── */
+    .boas-vindas-bar {
+      display: none;
+      padding: 14px 18px;
+      border-radius: 14px;
+      border: 1px solid rgba(89,225,255,0.15);
+      background: rgba(89,225,255,0.05);
+      margin-bottom: 16px;
+      animation: fadeSlideIn .4s ease;
+    }
+    .boas-vindas-bar.visible { display: block; }
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .boas-vindas-eyebrow {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 6px;
+    }
+    .boas-vindas-texto {
+      font-size: 14px;
+      color: var(--text-soft);
+      line-height: 1.65;
+      font-style: italic;
+    }
+
+    /* ── PRONTUÁRIO ──────────────────────────────────── */
+    .prontuario-btn {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(214,179,106,0.2);
+      background: rgba(214,179,106,0.06);
+      color: var(--gold);
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background .18s;
+      display: none;
+    }
+    .prontuario-btn.visible { display: block; }
+    .prontuario-btn:hover { background: rgba(214,179,106,0.12); }
+
+    /* Modal prontuário */
+    .prontuario-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.82);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      place-items: center;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .prontuario-overlay.visible { display: grid; }
+
+    .prontuario-modal {
+      width: 100%;
+      max-width: 680px;
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 32px 64px rgba(0,0,0,0.4);
+      animation: popIn .2s ease;
+      color: #1a1a2e;
+    }
+
+    .prontuario-header {
+      background: linear-gradient(135deg, #0f1923, #0a0d12);
+      padding: 24px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .prontuario-logo {
+      font-size: 13px;
+      font-weight: 800;
+      color: #edf3f8;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .prontuario-logo small {
+      display: block;
+      font-size: 10px;
+      color: #9aa7b5;
+      font-weight: 400;
+      letter-spacing: .05em;
+      margin-top: 2px;
+    }
+
+    .prontuario-tipo {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: #d6b36a;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(214,179,106,0.3);
+    }
+
+    .prontuario-body {
+      padding: 28px;
+    }
+
+    .prontuario-titulo {
+      font-size: 22px;
+      font-weight: 800;
+      color: #1a1a2e;
+      margin-bottom: 4px;
+    }
+
+    .prontuario-subtitulo {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 24px;
+    }
+
+    .prontuario-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .prontuario-campo {
+      border-left: 3px solid #0f766e;
+      padding-left: 12px;
+    }
+
+    .prontuario-campo-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #999;
+      margin-bottom: 3px;
+    }
+
+    .prontuario-campo-valor {
+      font-size: 13px;
+      color: #1a1a2e;
+      font-weight: 600;
+    }
+
+    .prontuario-secao {
+      margin-bottom: 18px;
+    }
+
+    .prontuario-secao-titulo {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #0f766e;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .prontuario-secao-texto {
+      font-size: 13px;
+      color: #374151;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      font-family: Georgia, serif;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .prontuario-resultado {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .prontuario-resultado.aprovado { background: #dcfce7; color: #166534; }
+    .prontuario-resultado.reprovado { background: #fee2e2; color: #991b1b; }
+
+    .prontuario-footer {
+      padding: 16px 28px;
+      background: #f9fafb;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .prontuario-nota-num {
+      font-size: 28px;
+      font-weight: 800;
+      color: #0f766e;
+    }
+
+    .prontuario-action-btns { display: flex; gap: 8px; }
+
+    .pron-btn-fechar {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      background: #fff;
+      color: #374151;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .pron-btn-imprimir {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: none;
+      background: #0f766e;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -1217,6 +1538,13 @@
 
   
   <!-- Modal Modo Supervisor -->
+  <!-- Prontuário Modal -->
+  <div class="prontuario-overlay" id="prontuarioOverlay">
+    <div class="prontuario-modal" id="prontuarioConteudo">
+      <!-- Gerado dinamicamente -->
+    </div>
+  </div>
+
   <div class="supervisor-overlay" id="supervisorOverlay">
     <div class="supervisor-card">
       <div class="supervisor-header">
@@ -1302,6 +1630,10 @@
           <div class="card-title">Resposta clínica e avaliação</div>
         </div>
         <div class="card-body">
+          <div class="boas-vindas-bar" id="boasVindasBar">
+            <div class="boas-vindas-eyebrow">SENA — Simulador Clínico</div>
+            <div class="boas-vindas-texto" id="boasVindasTexto"></div>
+          </div>
           <div class="input-panel" id="inputModule">
             <div class="section-block">
               <div class="section-title">Critério base da aula</div>
@@ -1374,6 +1706,16 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
 
           <!-- Chat de simulação bidirecional -->
           <div class="chat-panel" id="chatPanel">
+            <div class="estado-paciente" id="estadoPaciente">
+              <div class="estado-icon" id="estadoIcon">😐</div>
+              <div class="estado-info">
+                <div class="estado-label">Estado do paciente</div>
+                <div class="estado-valor" id="estadoValor">Neutro</div>
+              </div>
+              <div class="estado-barra-wrap">
+                <div class="estado-barra" id="estadoBarra" style="width:50%;background:var(--text-faint);"></div>
+              </div>
+            </div>
             <div class="chat-messages" id="chatMessages">
               <div class="chat-empty" id="chatEmpty">O paciente está aguardando você iniciar a sessão.<br>Digite sua primeira fala como terapeuta.</div>
             </div>
@@ -1391,6 +1733,10 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
             </div>
             <div class="chat-footer">
               <span class="chat-turns" id="chatTurns">0 trocas</span>
+              <div class="voz-toggle" id="vozToggle" onclick="toggleVozPaciente()" title="Ativar voz do paciente (Chrome)">
+                <span class="voz-toggle-dot"></span>
+                <span id="vozLabel">Voz do paciente</span>
+              </div>
               <button class="chat-encerrar" id="chatEncerrarBtn" onclick="encerrarSessaoChat()" disabled>Encerrar sessão e avaliar</button>
             </div>
           </div>
@@ -1422,6 +1768,7 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
               </div>
             </div>
             <button class="ghost-btn" id="retryBtn" onclick="resetForRetry()" style="display:none;">Fazer nova tentativa</button>
+            <button class="prontuario-btn" id="prontuarioBtn" onclick="abrirProntuario()">📋 Ver prontuário desta sessão</button>
             <button class="ghost-btn" id="backBtn" onclick="voltarAoPainel()" style="display:none;margin-top:8px;border-color:rgba(89,225,255,0.15);color:var(--cyan);">← Voltar ao painel</button>
 
             <!-- Replay com marcações -->
@@ -1620,6 +1967,8 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
       document.getElementById('thresholdValue').textContent  = SYSTEM.threshold + '/10';
       document.getElementById('thresholdDisplay').textContent = SYSTEM.threshold;
       document.getElementById('criteriaBox').textContent     = SYSTEM.criteria;
+      // Carregar boas-vindas de forma assíncrona
+      carregarBoasVindas();
       // Botão de desafio visível no estado inicial como alternativa
 
       document.getElementById('clinicalInput').addEventListener('input', function() {
@@ -1714,6 +2063,7 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
       document.getElementById('prescriptionAnalysis').textContent = data.prescricao || 'Revise a aula e tente novamente.';
       document.getElementById('nextStepBox').style.display = 'block';
       verificarSeloDesafio(Number(data.nota || 0), approved);
+      gerarProntuarioAposSessao(data);
       document.getElementById('nextStepText').textContent = approved
         ? 'Você atingiu a nota mínima. Seu resultado foi registrado. Siga para a próxima etapa.'
         : 'Você ainda não atingiu a nota mínima. Revise os pontos de atenção e tente novamente.';
@@ -1787,6 +2137,8 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
       perfilDesafio = null;
       notaMinimaDesafio = 7;
       document.getElementById('seloDesafio').classList.remove('visible');
+      document.getElementById('prontuarioBtn').classList.remove('visible');
+      prontuarioDados = null;
       document.getElementById('desafioCard').style.display = 'none';
       document.getElementById('clinicalInput').focus();
       document.getElementById('clinicalInput').scrollIntoView({behavior:'smooth',block:'center'});
@@ -2186,6 +2538,8 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
         const resposta = data.resposta || '...';
         adicionarMensagemChat('paciente', resposta);
         chatHistorico.push({ role: 'paciente', texto: resposta });
+        falarTexto(resposta);
+        atualizarEstadoPaciente(resposta);
         const trocas = Math.floor(chatHistorico.length / 2);
         document.getElementById('chatTurns').textContent = trocas + ' troca' + (trocas !== 1 ? 's' : '');
         if (trocas >= 3) document.getElementById('chatEncerrarBtn').disabled = false;
@@ -2444,6 +2798,194 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
       }
     }
 
+
+    // ── #2: VOZ DO PACIENTE ────────────────────────────────────────────
+    let vozAtiva = false;
+    let synth = window.speechSynthesis;
+    let vozAtual = null;
+
+    function toggleVozPaciente() {
+      const suportado = 'speechSynthesis' in window;
+      if (!suportado) {
+        document.getElementById('vozLabel').textContent = 'Sem suporte (use Chrome)';
+        return;
+      }
+      vozAtiva = !vozAtiva;
+      const toggle = document.getElementById('vozToggle');
+      const label = document.getElementById('vozLabel');
+      if (vozAtiva) {
+        toggle.classList.add('ativo');
+        label.textContent = 'Voz ativa';
+        // Testar com uma fala curta
+        falarTexto('Voz do paciente ativada.');
+      } else {
+        toggle.classList.remove('ativo');
+        label.textContent = 'Voz do paciente';
+        if (synth) synth.cancel();
+      }
+    }
+
+    function falarTexto(texto) {
+      if (!vozAtiva || !synth) return;
+      synth.cancel();
+      const utter = new SpeechSynthesisUtterance(texto);
+      utter.lang = 'pt-BR';
+      utter.rate = 0.92;
+      utter.pitch = 0.88; // ligeiramente mais grave — tom sério/neutro
+      // Buscar voz em português se disponível
+      const vozes = synth.getVoices();
+      const vozPT = vozes.find(v => v.lang.startsWith('pt')) || vozes[0];
+      if (vozPT) utter.voice = vozPT;
+      vozAtual = utter;
+      // Animar bolha enquanto fala
+      utter.onstart = function() {
+        const msgs = document.getElementById('chatMessages');
+        const bubbles = msgs.querySelectorAll('.chat-msg.paciente');
+        const ultima = bubbles[bubbles.length - 1];
+        if (ultima) ultima.classList.add('chat-speaking');
+      };
+      utter.onend = function() {
+        const msgs = document.getElementById('chatMessages');
+        msgs.querySelectorAll('.chat-speaking').forEach(function(el) {
+          el.classList.remove('chat-speaking');
+        });
+      };
+      synth.speak(utter);
+    }
+
+    // ── #6: ESTADO EMOCIONAL DO PACIENTE ──────────────────────────────
+    const ESTADOS_EMOCIONAIS = {
+      aberto:     { icon: '🟢', label: 'Aberto',      cor: 'var(--success)', pct: 85 },
+      engajado:   { icon: '🔵', label: 'Engajado',    cor: 'var(--cyan)',    pct: 70 },
+      neutro:     { icon: '⚪', label: 'Neutro',      cor: 'var(--text-faint)', pct: 50 },
+      resistente: { icon: '🟡', label: 'Resistente',  cor: '#f5c163',       pct: 35 },
+      fechado:    { icon: '🔴', label: 'Fechado',     cor: 'var(--danger)', pct: 15 }
+    };
+
+    function inferirEstadoPaciente(texto) {
+      const t = texto.toLowerCase();
+      // Sinais de abertura
+      if (/entendo|faz sentido|nunca pensei|interessante|me ajuda|tô pronto|consegui/.test(t))
+        return 'aberto';
+      if (/talvez|pode ser|vou tentar|ok|certo|sim/.test(t))
+        return 'engajado';
+      // Sinais de resistência
+      if (/não sei|mas|porém|difícil|complicado|duvido|não funciona/.test(t))
+        return 'resistente';
+      if (/não|nunca|impossível|não quero|para de|deixa pra lá/.test(t))
+        return 'fechado';
+      return 'neutro';
+    }
+
+    function atualizarEstadoPaciente(texto) {
+      const estado = inferirEstadoPaciente(texto);
+      const def = ESTADOS_EMOCIONAIS[estado];
+      const wrap = document.getElementById('estadoPaciente');
+      wrap.classList.add('visible');
+      document.getElementById('estadoIcon').textContent = def.icon;
+      document.getElementById('estadoValor').textContent = def.label;
+      document.getElementById('estadoValor').style.color = def.cor;
+      document.getElementById('estadoBarra').style.width = def.pct + '%';
+      document.getElementById('estadoBarra').style.background = def.cor;
+    }
+
+    // ── #4: BOAS-VINDAS PERSONALIZADAS ────────────────────────────────
+    async function carregarBoasVindas() {
+      try {
+        const res = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'boas_vindas',
+            email: SYSTEM.operator,
+            curso: SYSTEM.protocol,
+            aula: SYSTEM.module,
+            nome: SYSTEM.operator.split('@')[0]
+          })
+        });
+        const data = await res.json();
+        if (data.mensagem) {
+          document.getElementById('boasVindasTexto').textContent = data.mensagem;
+          document.getElementById('boasVindasBar').classList.add('visible');
+          // Sumir após 12 segundos
+          setTimeout(function() {
+            document.getElementById('boasVindasBar').style.opacity = '0';
+            document.getElementById('boasVindasBar').style.transition = 'opacity 1s';
+            setTimeout(function() {
+              document.getElementById('boasVindasBar').classList.remove('visible');
+              document.getElementById('boasVindasBar').style.opacity = '';
+              document.getElementById('boasVindasBar').style.transition = '';
+            }, 1000);
+          }, 12000);
+        }
+      } catch(e) { /* silencioso */ }
+    }
+
+    // ── #3: PRONTUÁRIO CLÍNICO ────────────────────────────────────────
+    let prontuarioDados = null;
+
+    function abrirProntuario() {
+      if (!prontuarioDados) return;
+      const modal = document.getElementById('prontuarioConteudo');
+      const d = prontuarioDados;
+      const aprovClass = d.aprovado === 'Aprovado' ? 'aprovado' : 'reprovado';
+
+      modal.innerHTML =
+        '<div class="prontuario-header">' +
+          '<div class="prontuario-logo">IBSDH<small>Instituto Bruno Sena de Desenvolvimento Humano</small></div>' +
+          '<span class="prontuario-tipo">Prontuário de Sessão</span>' +
+        '</div>' +
+        '<div class="prontuario-body">' +
+          '<div class="prontuario-titulo">Registro de Sessão Clínica</div>' +
+          '<div class="prontuario-subtitulo">' + d.data + ' às ' + d.hora + '</div>' +
+          '<div class="prontuario-grid">' +
+            '<div class="prontuario-campo"><div class="prontuario-campo-label">Terapeuta</div><div class="prontuario-campo-valor">' + d.terapeuta + '</div></div>' +
+            '<div class="prontuario-campo"><div class="prontuario-campo-label">Paciente</div><div class="prontuario-campo-valor">' + d.paciente + '</div></div>' +
+            '<div class="prontuario-campo"><div class="prontuario-campo-label">Modalidade</div><div class="prontuario-campo-valor">' + d.modalidade + '</div></div>' +
+            '<div class="prontuario-campo"><div class="prontuario-campo-label">Tema da sessão</div><div class="prontuario-campo-valor">' + d.tema + '</div></div>' +
+          '</div>' +
+          (d.transcricao ? '<div class="prontuario-secao"><div class="prontuario-secao-titulo">Transcrição da sessão</div><div class="prontuario-secao-texto">' + d.transcricao.replace(/</g,'&lt;') + '</div></div>' : '') +
+          (d.fortes ? '<div class="prontuario-secao"><div class="prontuario-secao-titulo">Pontos de competência identificados</div><div class="prontuario-secao-texto">' + d.fortes.replace(/</g,'&lt;') + '</div></div>' : '') +
+          (d.atencao ? '<div class="prontuario-secao"><div class="prontuario-secao-titulo">Pontos de atenção</div><div class="prontuario-secao-texto">' + d.atencao.replace(/</g,'&lt;') + '</div></div>' : '') +
+          (d.prescricao ? '<div class="prontuario-secao"><div class="prontuario-secao-titulo">Prescrição de desenvolvimento</div><div class="prontuario-secao-texto">' + d.prescricao.replace(/</g,'&lt;') + '</div></div>' : '') +
+        '</div>' +
+        '<div class="prontuario-footer">' +
+          '<div><div style="font-size:11px;color:#999;margin-bottom:2px;">Nota final</div><div class="prontuario-nota-num">' + d.nota + '/10</div><span class="prontuario-resultado ' + aprovClass + '">' + d.aprovado + '</span></div>' +
+          '<div class="prontuario-action-btns">' +
+            '<button class="pron-btn-fechar" onclick="fecharProntuario()">Fechar</button>' +
+            '<button class="pron-btn-imprimir" onclick="imprimirProntuario()">🖨️ Imprimir / Salvar PDF</button>' +
+          '</div>' +
+        '</div>';
+
+      document.getElementById('prontuarioOverlay').classList.add('visible');
+    }
+
+    function fecharProntuario() {
+      document.getElementById('prontuarioOverlay').classList.remove('visible');
+    }
+
+    function imprimirProntuario() {
+      window.print();
+    }
+
+    async function gerarProntuarioAposSessao(resultado) {
+      try {
+        const historico = chatHistorico.length > 0 ? chatHistorico : [];
+        const res = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'prontuario',
+            email: SYSTEM.operator,
+            curso: SYSTEM.protocol,
+            aula: SYSTEM.module,
+            historico: historico,
+            perfil: activeProfile ? activeProfile.name : '',
+            resultado: resultado
+          })
+        });
+        prontuarioDados = await res.json();
+        document.getElementById('prontuarioBtn').classList.add('visible');
+      } catch(e) { /* silencioso */ }
+    }
   </script>
 </body>
 </html>
