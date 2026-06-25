@@ -33,6 +33,19 @@
     .btn-aceitar:hover { transform:translateY(-1px);box-shadow:0 12px 24px rgba(245,193,99,0.25); }
     .loading { text-align:center;padding:48px;color:var(--text-faint);font-size:14px; }
     .footer { text-align:center;padding:20px 0;color:var(--text-faint);font-size:12px; }
+
+    @media (max-width: 768px) {
+      .shell { padding: 16px 14px 32px; }
+      .hero { padding: 20px 18px; border-radius: 20px; }
+      .hero h1 { font-size: 28px; }
+      .card { padding: 16px; }
+      .nivel-btns { flex-direction: column; }
+    }
+    @media (max-width: 480px) {
+      .curso-selector { gap: 6px; }
+      .curso-btn { font-size: 11px; padding: 7px 12px; }
+      .btn-aceitar { padding: 14px; font-size: 12px; }
+    }
   </style>
 </head>
 <body>
