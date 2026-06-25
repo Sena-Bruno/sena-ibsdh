@@ -42,6 +42,21 @@
     .footer { text-align:center;padding:20px 0;color:var(--text-faint);font-size:12px; }
     .btn-voltar { display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:var(--text-soft);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;margin-bottom:16px;transition:background .18s; }
     .btn-voltar:hover { background:rgba(255,255,255,0.06); }
+
+    @media (max-width: 768px) {
+      .shell { padding: 16px 14px 32px; }
+      .hero { padding: 20px 18px; border-radius: 20px; }
+      .hero h1 { font-size: 28px; }
+      .ranking-item { padding: 14px 16px; gap: 12px; }
+      .rank-taxa { font-size: 15px; }
+    }
+    @media (max-width: 480px) {
+      .curso-selector { gap: 6px; }
+      .curso-btn { font-size: 11px; padding: 7px 12px; }
+      .rank-pos { width: 30px; height: 30px; font-size: 12px; }
+      .rank-perfil { font-size: 14px; }
+      .rank-meta { font-size: 11px; }
+    }
   </style>
 </head>
 <body>
