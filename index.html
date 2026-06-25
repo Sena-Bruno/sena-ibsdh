@@ -1600,6 +1600,16 @@
               <div class="mini-panel"><div class="mini-title">Resistências do paciente</div><ul class="mini-list" id="resistanceList"></ul></div>
               <div class="mini-panel"><div class="mini-title">Abordagem recomendada</div><div class="mini-text" id="approachText"></div></div>
             </div>
+            <div class="estado-paciente" id="estadoPaciente">
+              <div class="estado-icon" id="estadoIcon">😐</div>
+              <div class="estado-info">
+                <div class="estado-label">Estado do paciente</div>
+                <div class="estado-valor" id="estadoValor">Neutro</div>
+              </div>
+              <div class="estado-barra-wrap">
+                <div class="estado-barra" id="estadoBarra" style="width:50%;background:var(--text-faint);"></div>
+              </div>
+            </div>
             <button class="primary-btn" onclick="initializeSimulation()" id="initBtn">Gerar paciente virtual</button>
             <button class="desafio-btn" onclick="mostrarSeletorNivel()" id="desafioBtn">⚡ Modo Desafio — paciente composto</button>
 
@@ -1701,21 +1711,11 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
           <!-- Seletor de modo -->
           <div class="mode-selector" id="modeSelector">
             <button class="mode-btn active" id="modeTxtBtn" onclick="setMode('texto')">✍️ Modo Texto</button>
-            <button class="mode-btn" id="modeConvBtn" onclick="setMode('conversa')">💬 Modo Conversa</button>
+            <button class="mode-btn" id="modeConvBtn" onclick="setMode('conversa')">💬 Modo Conversa <span style="font-size:10px;opacity:.7;">· 🎙️ voz</span></button>
           </div>
 
           <!-- Chat de simulação bidirecional -->
           <div class="chat-panel" id="chatPanel">
-            <div class="estado-paciente" id="estadoPaciente">
-              <div class="estado-icon" id="estadoIcon">😐</div>
-              <div class="estado-info">
-                <div class="estado-label">Estado do paciente</div>
-                <div class="estado-valor" id="estadoValor">Neutro</div>
-              </div>
-              <div class="estado-barra-wrap">
-                <div class="estado-barra" id="estadoBarra" style="width:50%;background:var(--text-faint);"></div>
-              </div>
-            </div>
             <div class="chat-messages" id="chatMessages">
               <div class="chat-empty" id="chatEmpty">O paciente está aguardando você iniciar a sessão.<br>Digite sua primeira fala como terapeuta.</div>
             </div>
@@ -1997,6 +1997,8 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
         document.getElementById('patientDesc').textContent = activeProfile.desc;
 
         document.getElementById('patientStats').style.display = 'grid';
+        // Mostrar estado emocional inicial
+        atualizarEstadoPaciente('aguardando início');
         const list = document.getElementById('resistanceList');
         list.innerHTML = '';
         activeProfile.resistances.forEach(function(r) {
@@ -2063,6 +2065,12 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
       document.getElementById('prescriptionAnalysis').textContent = data.prescricao || 'Revise a aula e tente novamente.';
       document.getElementById('nextStepBox').style.display = 'block';
       verificarSeloDesafio(Number(data.nota || 0), approved);
+      // Atualizar estado emocional baseado no resultado
+      if (approved) {
+        atualizarEstadoPaciente('entendo faz sentido me ajuda consegui');
+      } else {
+        atualizarEstadoPaciente('não sei mas difícil');
+      }
       gerarProntuarioAposSessao(data);
       document.getElementById('nextStepText').textContent = approved
         ? 'Você atingiu a nota mínima. Seu resultado foi registrado. Siga para a próxima etapa.'
@@ -2864,6 +2872,7 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
 
     function inferirEstadoPaciente(texto) {
       const t = texto.toLowerCase();
+      if (/aguardando/.test(t)) return 'neutro';
       // Sinais de abertura
       if (/entendo|faz sentido|nunca pensei|interessante|me ajuda|tô pronto|consegui/.test(t))
         return 'aberto';
@@ -2891,6 +2900,26 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
 
     // ── #4: BOAS-VINDAS PERSONALIZADAS ────────────────────────────────
     async function carregarBoasVindas() {
+      // Mostrar mensagem padrão imediatamente enquanto carrega
+      const nomeExibir = SYSTEM.operator.split('@')[0];
+      const aulaNum = SYSTEM.module.replace('Aula_', '');
+      const msgPadrao = nomeExibir + ', você está na Aula ' + aulaNum + ' de ' + SYSTEM.protocol + '. Gere um paciente virtual para iniciar a simulação clínica.';
+      document.getElementById('boasVindasTexto').textContent = msgPadrao;
+      document.getElementById('boasVindasBar').classList.add('visible');
+
+      function sumir() {
+        setTimeout(function() {
+          document.getElementById('boasVindasBar').style.opacity = '0';
+          document.getElementById('boasVindasBar').style.transition = 'opacity 1s';
+          setTimeout(function() {
+            document.getElementById('boasVindasBar').classList.remove('visible');
+            document.getElementById('boasVindasBar').style.opacity = '';
+            document.getElementById('boasVindasBar').style.transition = '';
+          }, 1000);
+        }, 10000);
+      }
+
+      // Tentar carregar mensagem personalizada da IA
       try {
         const res = await fetch(APPS_SCRIPT_URL, {
           method: 'POST',
@@ -2899,25 +2928,18 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
             email: SYSTEM.operator,
             curso: SYSTEM.protocol,
             aula: SYSTEM.module,
-            nome: SYSTEM.operator.split('@')[0]
+            nome: nomeExibir
           })
         });
         const data = await res.json();
-        if (data.mensagem) {
+        if (data && data.mensagem && data.mensagem.length > 10) {
           document.getElementById('boasVindasTexto').textContent = data.mensagem;
-          document.getElementById('boasVindasBar').classList.add('visible');
-          // Sumir após 12 segundos
-          setTimeout(function() {
-            document.getElementById('boasVindasBar').style.opacity = '0';
-            document.getElementById('boasVindasBar').style.transition = 'opacity 1s';
-            setTimeout(function() {
-              document.getElementById('boasVindasBar').classList.remove('visible');
-              document.getElementById('boasVindasBar').style.opacity = '';
-              document.getElementById('boasVindasBar').style.transition = '';
-            }, 1000);
-          }, 12000);
         }
-      } catch(e) { /* silencioso */ }
+      } catch(e) {
+        // Mantém a mensagem padrão — silencioso
+      } finally {
+        sumir();
+      }
     }
 
     // ── #3: PRONTUÁRIO CLÍNICO ────────────────────────────────────────
