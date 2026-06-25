@@ -141,8 +141,147 @@
     .audio-status.done { color:var(--success); }
     .audio-lang select { background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:var(--text-soft);font-family:'Inter',sans-serif;font-size:12px;padding:5px 8px;outline:none;cursor:pointer; }
 
-    @media (max-width:940px) { .layout{grid-template-columns:1fr} .status-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
-    @media (max-width:640px) { .shell{padding:16px 12px 26px} .hero,.card-body{padding-left:16px;padding-right:16px} .status-grid{grid-template-columns:1fr} .patient-grid{grid-template-columns:1fr} .hero h1{font-size:32px} .score-number{font-size:58px} }
+
+    /* ── RESPONSIVIDADE ─────────────────────────────── */
+
+    /* Tablet largo (940px) */
+    @media (max-width: 940px) {
+      .layout { grid-template-columns: 1fr; }
+      .status-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .supervisor-card { max-width: 100%; }
+      .prontuario-modal { max-width: 100%; }
+    }
+
+    /* Tablet / mobile grande (768px) */
+    @media (max-width: 768px) {
+      .shell { padding: 16px 14px 32px; }
+      .hero { padding: 20px 18px; border-radius: 20px; }
+      .hero h1 { font-size: 34px; }
+      .card-body { padding: 16px; }
+      .card-header { padding: 14px 16px; }
+
+      /* Layout do resultado */
+      .score-number { font-size: 60px; }
+      .compare-row { grid-template-columns: 1fr; gap: 6px; }
+      .compare-row-label { font-size: 12px; }
+
+      /* Chat */
+      .chat-messages { min-height: 260px; max-height: 340px; }
+      .chat-bubble { max-width: 88%; font-size: 13px; }
+      .chat-footer { gap: 8px; }
+      .voz-toggle { display: none; } /* esconde voz em mobile — não suportado bem */
+
+      /* Modo supervisor */
+      .supervisor-card { margin: 0 8px; border-radius: 20px; }
+      .supervisor-header { padding: 18px 18px 14px; }
+      .supervisor-body { padding: 14px 18px; }
+      .supervisor-footer { padding: 12px 18px 18px; flex-direction: column; }
+      .supervisor-btn-cancel,
+      .supervisor-btn-submit { width: 100%; padding: 13px; }
+
+      /* Prontuário */
+      .prontuario-modal { margin: 8px; border-radius: 14px; }
+      .prontuario-grid { grid-template-columns: 1fr; gap: 10px; }
+      .prontuario-body { padding: 18px; }
+      .prontuario-footer { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .prontuario-action-btns { width: 100%; }
+      .pron-btn-fechar, .pron-btn-imprimir { flex: 1; text-align: center; }
+
+      /* Replay legend */
+      .replay-legend { gap: 8px; }
+
+      /* Estado emocional */
+      .estado-paciente { padding: 10px 12px; }
+      .estado-barra-wrap { width: 60px; }
+
+      /* Boas-vindas */
+      .boas-vindas-bar { padding: 12px 14px; }
+
+      /* Desafio */
+      .desafio-nivel-selector { padding: 12px; }
+      .nivel-btns { flex-direction: column; gap: 6px; }
+      .nivel-btn { padding: 10px; text-align: left; }
+
+      /* Diário */
+      .diario-body { padding: 14px; }
+      .diario-actions { flex-direction: column; }
+      .diario-btn-salvar, .diario-btn-analise { width: 100%; padding: 12px; text-align: center; }
+
+      /* Input footer */
+      .input-footer { flex-direction: column; align-items: stretch; }
+      .input-footer .count { order: 2; text-align: center; }
+      #submitBtn { width: 100% !important; min-width: unset !important; }
+      #tutorBtn  { width: 100% !important; min-width: unset !important; margin-top: 0 !important; }
+
+      /* Mode selector */
+      .mode-selector { gap: 6px; }
+      .mode-btn { font-size: 11px; padding: 9px 10px; }
+
+      /* Audio bar */
+      .audio-bar { flex-wrap: wrap; gap: 8px; }
+      .audio-lang { width: 100%; }
+      .audio-lang select { width: 100%; }
+    }
+
+    /* Mobile médio (480px) */
+    @media (max-width: 480px) {
+      .hero { padding: 16px; border-radius: 16px; }
+      .hero h1 { font-size: 28px; }
+      .status-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .status-card { padding: 12px; }
+      .status-label { font-size: 10px; }
+      .status-value { font-size: 13px; }
+
+      .seal { width: 54px; height: 54px; }
+      .seal::before { font-size: 22px; }
+
+      .patient-name { font-size: 22px; }
+      .patient-grid { grid-template-columns: 1fr; }
+
+      .score-number { font-size: 52px; }
+      .result-tag { font-size: 10px; }
+
+      .chat-messages { min-height: 220px; max-height: 280px; }
+      .chat-avatar { width: 26px; height: 26px; font-size: 11px; border-radius: 8px; }
+      .chat-bubble { font-size: 12px; padding: 9px 11px; max-width: 92%; }
+      .chat-input { font-size: 13px; padding: 9px 12px; }
+      .chat-send-btn { width: 38px; height: 38px; font-size: 14px; }
+      .chat-encerrar { font-size: 10px; padding: 8px 12px; }
+      .chat-turns { font-size: 11px; }
+
+      .supervisor-item { padding: 11px 12px; gap: 10px; }
+      .supervisor-label { font-size: 12px; }
+      .supervisor-toggle { width: 38px; height: 20px; }
+      .supervisor-knob { width: 14px; height: 14px; }
+      .supervisor-item.sim .supervisor-knob { left: 20px; }
+
+      .result-block { padding: 12px; }
+      .result-block-text { font-size: 13px; }
+
+      .replay-body { padding: 12px; }
+      .replay-text { font-size: 13px; }
+
+      .historico-toggle { padding: 11px 12px; font-size: 12px; }
+
+      .diario-textarea { min-height: 80px; }
+
+      .boas-vindas-texto { font-size: 13px; }
+
+      .prontuario-titulo { font-size: 18px; }
+      .prontuario-nota-num { font-size: 22px; }
+    }
+
+    /* Mobile pequeno (360px) */
+    @media (max-width: 360px) {
+      .shell { padding: 12px 10px 24px; }
+      .hero h1 { font-size: 24px; }
+      .status-grid { grid-template-columns: 1fr; gap: 6px; }
+      .seal { display: none; } /* esconde o logo em telas muito pequenas */
+      .hero-copy { min-width: unset; }
+      .score-number { font-size: 44px; }
+      .chat-messages { min-height: 180px; max-height: 240px; }
+      .primary-btn, .ghost-btn { padding: 13px 14px; font-size: 12px; }
+    }
 
     /* ── HISTÓRICO DE TENTATIVAS ─────────────────── */
     .historico-section {
