@@ -151,11 +151,27 @@
     .footer a { color:var(--text-faint);text-decoration:none; }
     .footer a:hover { color:var(--text-soft); }
 
-    @media (max-width:640px) {
-      .info-row { grid-template-columns:1fr 1fr; }
-      .hero-user { display:none; }
-      .aula-title { max-width:130px; }
-      .module-title { font-size:13px; }
+    @media (max-width: 768px) {
+      .hero { padding: 20px 18px; border-radius: 20px; }
+      .hero h1 { font-size: 28px; }
+      .hero-user { display: none; }
+      .info-row { grid-template-columns: 1fr 1fr; }
+      .module-header { padding: 14px 16px; gap: 10px; }
+      .module-title { font-size: 13px; }
+      .aula-row { gap: 8px; padding: 10px 12px; }
+      .aula-title { font-size: 12px; max-width: 120px; }
+      .aula-num { font-size: 9px; }
+      .btn-praticar { font-size: 10px; padding: 6px 10px; }
+      .aula-nota { font-size: 11px; padding: 2px 6px; }
+    }
+
+    @media (max-width: 480px) {
+      .info-row { grid-template-columns: 1fr; }
+      .module-num { width: 30px; height: 30px; font-size: 12px; border-radius: 9px; }
+      .module-badge { font-size: 10px; padding: 3px 7px; }
+      .aula-title { max-width: 110px; }
+      .cert-banner h2 { font-size: 16px; }
+      .cert-banner p { font-size: 13px; }
     }
 
     @keyframes toastIn {
