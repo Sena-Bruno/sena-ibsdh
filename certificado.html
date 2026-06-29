@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Certificação SENA | IBSDH</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #07090d;
+      --panel: rgba(16, 21, 29, 0.96);
+      --panel-soft: rgba(255,255,255,0.03);
+      --border: rgba(112,141,173,0.18);
+      --text: #edf3f8;
+      --text-soft: #9aa7b5;
+      --gold: #d6b36a;
+      --cyan: #59e1ff;
+      --success: #7ef0c2;
+      --danger: #ff6b88;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(89,225,255,0.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(214,179,106,0.06), transparent 22%),
+        linear-gradient(180deg, #06080c 0%, #0a0d12 100%);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .wrap { width: 100%; max-width: 820px; }
+    .card {
+      background: linear-gradient(180deg, rgba(16,21,29,0.96) 0%, rgba(11,16,22,0.98) 100%);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: 0 22px 48px rgba(0,0,0,0.35);
+      overflow: hidden;
+    }
+
+    .header {
+      padding: 28px 28px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      color: var(--gold);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .eyebrow::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--gold);
+    }
+
+    h1 {
+      font-size: 34px;
+      line-height: 1.05;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 10px;
+    }
+
+    .sub {
+      color: var(--text-soft);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .body {
+      padding: 24px 28px 28px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .field { display: grid; gap: 8px; }
+
+    label {
+      color: var(--text-soft);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+    }
+
+    input {
+      width: 100%;
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      font-size: 15px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: rgba(89,225,255,0.35);
+      box-shadow: 0 0 0 4px rgba(89,225,255,0.08);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn, .btn-secondary, .btn-success {
+      border: none;
+      border-radius: 14px;
+      padding: 16px 18px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn {
+      color: #061018;
+      background: linear-gradient(135deg, var(--cyan) 0%, #9be9ff 100%);
+    }
+
+    .btn-success {
+      color: #061018;
+      background: linear-gradient(135deg, var(--success) 0%, #b8ffe3 100%);
+    }
+
+    .btn-secondary {
+      color: var(--text);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .btn:disabled, .btn-secondary:disabled, .btn-success:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .alert {
+      display: none;
+      padding: 14px 16px;
+      border-radius: 14px;
+      font-size: 14px;
+    }
+
+    .alert.visible { display: block; }
+
+    .alert.error {
+      border: 1px solid rgba(255,107,136,0.18);
+      background: rgba(255,107,136,0.08);
+      color: #ffb4c2;
+    }
+
+    .alert.success {
+      border: 1px solid rgba(126,240,194,0.18);
+      background: rgba(126,240,194,0.08);
+      color: #baffdf;
+    }
+
+    .status-box {
+      display: none;
+      gap: 12px;
+    }
+
+    .status-box.visible {
+      display: grid;
+    }
+
+    .item {
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .label2 {
+      color: var(--text-soft);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .value {
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.7;
+      word-break: break-word;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="header">
+        <div class="eyebrow">Certificação SENA</div>
+        <h1>Certificado de Proficiência Clínica</h1>
+        <div class="sub">
+          Consulte seu status de certificação complementar do IBSDH. Se você já for elegível, poderá emitir seu certificado nesta página.
+        </div>
+      </div>
+
+      <div class="body">
+        <div class="alert error" id="alertError"></div>
+        <div class="alert success" id="alertSuccess"></div>
+
+        <div class="field">
+          <label for="emailInput">E-mail</label>
+          <input id="emailInput" type="email" placeholder="seuemail@exemplo.com">
+        </div>
+
+        <div class="field">
+          <label for="cursoInput">Curso</label>
+          <input id="cursoInput" type="text" placeholder="Practitioner">
+        </div>
+
+        <div class="field">
+          <label for="nomeInput">Nome completo</label>
+          <input id="nomeInput" type="text" placeholder="Seu nome completo">
+        </div>
+
+        <div class="btn-row">
+          <button class="btn" id="consultarBtn" onclick="consultarStatus()">Consultar status</button>
+          <button class="btn-success" id="emitirBtn" onclick="emitirCertificado()" style="display:none;">Emitir certificado</button>
+          <button class="btn-secondary" id="reenviarBtn" onclick="reenviarCertificado()" style="display:none;">Reenviar por e-mail</button>
+          <a href="#" target="_blank" class="btn-success" id="abrirPdfBtn" style="display:none;">Abrir PDF</a>
+        </div>
+
+        <div class="status-box" id="statusBox">
+          <div class="item">
+            <div class="label2">Status</div>
+            <div class="value" id="sStatus"></div>
+          </div>
+
+          <div class="item">
+            <div class="label2">Aluno</div>
+            <div class="value" id="sNome"></div>
+          </div>
+
+          <div class="item">
+            <div class="label2">Curso</div>
+            <div class="value" id="sCurso"></div>
+          </div>
+
+          <div class="item">
+            <div class="label2">Média no SENA</div>
+            <div class="value" id="sMedia"></div>
+          </div>
+
+          <div class="item">
+            <div class="label2">Aulas aprovadas</div>
+            <div class="value" id="sAulas"></div>
+          </div>
+
+          <div class="item">
+            <div class="label2">Certificação</div>
+            <div class="value" id="sCertificado"></div>
+          </div>
+
+          <div class="item">
+            <div class="label2">Código</div>
+            <div class="value" id="sCodigo"></div>
+          </div>
+
+          <div class="item">
+            <div class="label2">Data de emissão</div>
+            <div class="value" id="sData"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showError(msg) {
+      hideSuccess();
+      const el = document.getElementById('alertError');
+      el.textContent = msg;
+      el.classList.add('visible');
+    }
+
+    function hideError() {
+      document.getElementById('alertError').classList.remove('visible');
+    }
+
+    function showSuccess(msg) {
+      hideError();
+      const el = document.getElementById('alertSuccess');
+      el.textContent = msg;
+      el.classList.add('visible');
+    }
+
+    function hideSuccess() {
+      document.getElementById('alertSuccess').classList.remove('visible');
+    }
+
+    function hideStatus() {
+      document.getElementById('statusBox').classList.remove('visible');
+    }
+
+    function getFormData() {
+      return {
+        email: String(document.getElementById('emailInput').value || '').trim(),
+        curso: String(document.getElementById('cursoInput').value || '').trim(),
+        nome: String(document.getElementById('nomeInput').value || '').trim()
+      };
+    }
+
+    function resetButtons() {
+      document.getElementById('emitirBtn').style.display = 'none';
+      document.getElementById('reenviarBtn').style.display = 'none';
+      document.getElementById('abrirPdfBtn').style.display = 'none';
+    }
+
+    function renderStatus(data) {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.classList.add('visible');
+
+      document.getElementById('sNome').textContent = data.nome_aluno || getFormData().nome || '-';
+      document.getElementById('sCurso').textContent = data.curso || getFormData().curso || '-';
+      document.getElementById('sMedia').textContent = (data.media ?? '-') === '' ? '-' : String(data.media ?? '-');
+      document.getElementById('sAulas').textContent = (data.aulasAprovadas ?? 0) + '/' + (data.totalAulas ?? 0);
+      document.getElementById('sCertificado').textContent = data.nome_certificado || 'Certificado de Proficiência Clínica — IBSDH';
+      document.getElementById('sCodigo').textContent = data.codigo_certificado || '-';
+      document.getElementById('sData').textContent = data.data_emissao || '-';
+
+      resetButtons();
+
+      if (data.status === 'emitido') {
+        document.getElementById('sStatus').textContent = 'Certificado já emitido';
+        const abrir = document.getElementById('abrirPdfBtn');
+        abrir.href = data.link_pdf || '#';
+        abrir.style.display = 'inline-block';
+        document.getElementById('reenviarBtn').style.display = 'inline-block';
+      } else if (data.status === 'elegivel') {
+        document.getElementById('sStatus').textContent = 'Elegível para emissão';
+        document.getElementById('emitirBtn').style.display = 'inline-block';
+      } else {
+        document.getElementById('sStatus').textContent = 'Ainda não elegível';
+      }
+    }
+
+    function consultarStatus() {
+      const { email, curso } = getFormData();
+      const btn = document.getElementById('consultarBtn');
+
+      if (!email || !curso) {
+        showError('Informe o e-mail e o curso.');
+        return;
+      }
+
+      hideError();
+      hideSuccess();
+      hideStatus();
+      resetButtons();
+
+      btn.disabled = true;
+      btn.textContent = 'Consultando...';
+
+      google.script.run
+        .withSuccessHandler(function(data) {
+          btn.disabled = false;
+          btn.textContent = 'Consultar status';
+
+          if (!data) {
+            showError('Resposta vazia do servidor.');
+            return;
+          }
+
+          if (data.erro) {
+            showError(data.mensagem || 'Erro ao consultar status.');
+            return;
+          }
+
+          renderStatus(data);
+
+          if (data.mensagem) {
+            if (data.status === 'emitido' || data.status === 'elegivel') {
+              showSuccess(data.mensagem);
+            } else {
+              showError(data.mensagem);
+            }
+          }
+        })
+        .withFailureHandler(function(err) {
+          btn.disabled = false;
+          btn.textContent = 'Consultar status';
+          showError((err && err.message) || 'Falha de conexão.');
+        })
+        .consultarStatusCertificacao(email, curso);
+    }
+
+    function emitirCertificado() {
+      const { email, curso, nome } = getFormData();
+      const btn = document.getElementById('emitirBtn');
+
+      if (!email || !curso || !nome) {
+        showError('Informe e-mail, curso e nome completo para emitir.');
+        return;
+      }
+
+      hideError();
+      hideSuccess();
+      btn.disabled = true;
+      btn.textContent = 'Emitindo...';
+
+      google.script.run
+        .withSuccessHandler(function(data) {
+          btn.disabled = false;
+          btn.textContent = 'Emitir certificado';
+
+          if (!data) {
+            showError('Resposta vazia do servidor.');
+            return;
+          }
+
+          if (data.erro) {
+            showError(data.mensagem || 'Erro ao emitir certificado.');
+            return;
+          }
+
+          renderStatus(data);
+          showSuccess(data.mensagem || 'Certificado emitido com sucesso.');
+        })
+        .withFailureHandler(function(err) {
+          btn.disabled = false;
+          btn.textContent = 'Emitir certificado';
+          showError((err && err.message) || 'Falha de conexão.');
+        })
+        .emitirCertificadoPagina(email, curso, nome);
+    }
+
+    function reenviarCertificado() {
+      const { email, curso } = getFormData();
+      const btn = document.getElementById('reenviarBtn');
+
+      if (!email || !curso) {
+        showError('Informe e-mail e curso.');
+        return;
+      }
+
+      hideError();
+      hideSuccess();
+      btn.disabled = true;
+      btn.textContent = 'Reenviando...';
+
+      google.script.run
+        .withSuccessHandler(function(data) {
+          btn.disabled = false;
+          btn.textContent = 'Reenviar por e-mail';
+
+          if (!data) {
+            showError('Resposta vazia do servidor.');
+            return;
+          }
+
+          if (data.erro) {
+            showError(data.mensagem || 'Erro ao reenviar certificado.');
+            return;
+          }
+
+          showSuccess(data.mensagem || 'Certificado reenviado com sucesso.');
+        })
+        .withFailureHandler(function(err) {
+          btn.disabled = false;
+          btn.textContent = 'Reenviar por e-mail';
+          showError((err && err.message) || 'Falha de conexão.');
+        })
+        .reenviarCertificadoExistente(email, curso);
+    }
+  </script>
+</body>
+</html>
