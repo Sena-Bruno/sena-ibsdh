@@ -293,12 +293,10 @@
   </div>
 
   <script>
-    // Curso vem da URL: dashboard.html?curso=Practitioner
     const urlParams = new URLSearchParams(window.location.search);
     const CURSO = urlParams.get('curso') || 'Practitioner';
     const APPS_SCRIPT_URL = '/api';
 
-    // Estrutura do curso (módulos + aulas) carregada dinamicamente da Base_Aulas
     let MODULOS = [];
     let TITULOS = {};
     let TOTAL_AULAS = 0;
@@ -346,7 +344,6 @@
 
     async function carregarProgresso() {
       try {
-        // Busca estrutura do curso e progresso do aluno em paralelo
         const [resEst, resProg] = await Promise.all([
           fetch(APPS_SCRIPT_URL, {
             method: 'POST',
@@ -362,7 +359,6 @@
         if (estrutura && !estrutura.erro && estrutura.modulos) {
           MODULOS = estrutura.modulos;
           TOTAL_AULAS = estrutura.totalAulas;
-          // Monta TITULOS a partir da estrutura
           TITULOS = {};
           MODULOS.forEach(function(mod) {
             mod.aulas.forEach(function(a) { TITULOS[a.aula] = a.titulo; });
@@ -398,7 +394,6 @@
       const TOTAL = TOTAL_AULAS;
       let aprovadas = 0, somaNotas = 0, comNota = 0;
 
-      // Itera sobre todas as aulas de todos os módulos
       MODULOS.forEach(function(mod) {
         mod.aulas.forEach(function(a) {
           const p = progresso[a.aula];
@@ -435,14 +430,11 @@
         else if (aprovMod>0) { badgeClass = 'partial'; badgeText = aprovMod + '/' + totalMod + ' aprovadas'; }
         else                 { badgeClass = 'pending'; badgeText = 'Não iniciado'; }
 
-        // Abre automaticamente o primeiro módulo não completo
-        const aberto = !bloqueado && !completo;
-
+        // Todos os módulos começam fechados
         const card = document.createElement('div');
         card.className = 'module-card' +
           (bloqueado ? ' locked' : '') +
-          (completo  ? ' complete' : '') +
-          (aberto    ? ' open' : '');
+          (completo  ? ' complete' : '');
 
         card.innerHTML =
           '<div class="module-header" onclick="toggleModulo(this)">' +
@@ -517,11 +509,21 @@
     function toggleModulo(header) {
       const card = header.parentElement;
       if (card.classList.contains('locked')) return;
-      card.classList.toggle('open');
+
+      const jaAberto = card.classList.contains('open');
+
+      // Fecha todos os módulos abertos
+      document.querySelectorAll('.module-card.open').forEach(function(c) {
+        c.classList.remove('open');
+      });
+
+      // Se não estava aberto, abre ele; se já estava, ficou fechado (toggle)
+      if (!jaAberto) {
+        card.classList.add('open');
+      }
     }
 
     function abrirSimulador(codigoAula) {
-      // Abre o simulador na mesma origem (Netlify)
       const url = '/index.html?email=' + encodeURIComponent(email) +
         '&curso=' + encodeURIComponent(CURSO) +
         '&aula=' + encodeURIComponent(codigoAula);
@@ -529,32 +531,25 @@
     }
 
     function irParaCertificado() {
-    window.open('/certificado.html', '_blank');
-}
+      window.open('/certificado.html', '_blank');
+    }
 
     // ── ATUALIZAÇÃO AUTOMÁTICA DE PROGRESSO ──────────────────────────
-    // Escuta sinais do simulador (outra aba) via localStorage
     window.addEventListener('storage', function(e) {
       if (e.key !== 'sena_progresso_atualizado') return;
       if (!e.newValue) return;
 
       try {
         const sinal = JSON.parse(e.newValue);
-
-        // Só atualiza se for do mesmo curso e se o sinal for recente (< 30s)
         if (sinal.curso !== CURSO) return;
         if (Date.now() - sinal.ts > 30000) return;
 
-        // Mostra toast de notificação
         mostrarToastAtualizacao(sinal.aula, sinal.nota, sinal.aprovado);
 
-        // Recarrega o progresso silenciosamente
         setTimeout(function() {
           recarregarProgressoSilencioso();
         }, 800);
-      } catch(err) {
-        // silencioso
-      }
+      } catch(err) {}
     });
 
     function mostrarToastAtualizacao(aula, nota, aprovado) {
@@ -596,7 +591,6 @@
 
       document.body.appendChild(toast);
 
-      // Remove após 4 segundos
       setTimeout(function() {
         toast.style.opacity = '0';
         toast.style.transition = 'opacity .3s';
@@ -615,8 +609,8 @@
           progresso = novoProg;
           if (MODULOS.length) renderDashboard();
         }
-      } catch(err) {
-        // silencioso
-      }
+      } catch(err) {}
     }
   </script>
+</body>
+</html>
