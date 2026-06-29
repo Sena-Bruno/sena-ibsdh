@@ -37,7 +37,7 @@
       line-height: 1.6;
     }
 
-    /* MODAL */
+    /* MODAL EMAIL */
     .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); z-index:9999; place-items:center; padding:24px; }
     .modal-overlay.visible { display:grid; }
     .modal-card { width:100%; max-width:440px; background:linear-gradient(180deg,rgba(16,21,29,0.99) 0%,rgba(10,14,20,1) 100%); border:1px solid var(--border); border-radius:var(--r-xl); box-shadow:var(--shadow); padding:36px 30px 30px; text-align:center; animation:popIn .2s ease; }
@@ -53,6 +53,14 @@
     .btn-primary:hover { transform:translateY(-1px);box-shadow:0 12px 24px rgba(89,225,255,0.2); }
     .modal-note { margin-top:14px;color:var(--text-faint);font-size:11px; }
 
+    /* MODAL WHATSAPP */
+    .wpp-step { display:none; }
+    .wpp-step.active { display:block; }
+    .wpp-code { font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--cyan);background:rgba(89,225,255,0.08);border:1px solid rgba(89,225,255,0.2);border-radius:10px;padding:12px 20px;margin:14px 0;letter-spacing:.1em; }
+    .wpp-link { display:inline-flex;align-items:center;gap:8px;padding:13px 22px;border-radius:var(--r-md);background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;font-weight:800;font-size:13px;letter-spacing:.06em;text-decoration:none;margin-bottom:14px; }
+    .btn-secondary { width:100%;padding:12px 20px;border:1px solid rgba(255,255,255,0.1);border-radius:var(--r-md);background:rgba(255,255,255,0.04);color:var(--text-soft);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px; }
+    .btn-secondary:hover { background:rgba(255,255,255,0.08); }
+
     /* SHELL */
     .shell { display:none;max-width:1020px;margin:0 auto;padding:28px 18px 48px; }
     .shell.visible { display:block; }
@@ -67,10 +75,23 @@
     .eyebrow::before { content:'';width:6px;height:6px;border-radius:999px;background:var(--gold);box-shadow:0 0 8px rgba(214,179,106,0.55); }
     .hero h1 { font-size:clamp(28px,5vw,40px);font-weight:800;letter-spacing:-.03em;line-height:1;margin-bottom:6px; }
     .hero-sub { color:var(--text-soft);font-size:14px; }
-    .hero-user { text-align:right;flex-shrink:0; }
-    .hero-email { font-size:13px;color:var(--cyan);font-weight:600;margin-bottom:2px; }
+    .hero-right { text-align:right;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px; }
+    .hero-email { font-size:13px;color:var(--cyan);font-weight:600; }
     .hero-sair { font-size:11px;color:var(--text-faint);text-decoration:none;cursor:pointer;background:none;border:none;font-family:inherit;padding:0; }
     .hero-sair:hover { color:var(--text-soft); }
+
+    /* RANKING BADGE no hero */
+    .rank-badge { display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:rgba(214,179,106,0.1);border:1px solid rgba(214,179,106,0.2);font-size:11px;font-weight:700;color:var(--gold); }
+    .rank-badge span { font-family:'JetBrains Mono',monospace;font-size:13px; }
+
+    /* STREAK BANNER */
+    .streak-bar { display:none;margin-bottom:16px;padding:14px 20px;border-radius:var(--r-lg);border:1px solid rgba(255,107,136,0.15);background:rgba(255,107,136,0.05);display:flex;align-items:center;gap:12px; }
+    .streak-bar.active { display:flex; }
+    .streak-fire { font-size:22px;line-height:1; }
+    .streak-info { flex:1; }
+    .streak-title { font-size:13px;font-weight:700;color:var(--text); }
+    .streak-sub { font-size:11px;color:var(--text-soft);margin-top:1px; }
+    .streak-count { font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:var(--danger); }
 
     /* PROGRESS */
     .overall-progress { margin-top:22px;position:relative;z-index:1; }
@@ -89,8 +110,31 @@
     .info-card-value.success { color:var(--success); }
     .info-card-value.gold { color:var(--gold); }
 
+    /* ── MAPA DE JORNADA ─────────────────────────────────────────── */
+    .journey-section { margin-bottom:22px; }
+    .journey-label { font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint);margin-bottom:12px; }
+    .journey-track { display:flex;align-items:center;gap:0;overflow-x:auto;padding-bottom:8px;scrollbar-width:none; }
+    .journey-track::-webkit-scrollbar { display:none; }
+    .journey-node { flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative; }
+    .journey-circle {
+      width:44px;height:44px;border-radius:50%;display:grid;place-items:center;
+      font-size:12px;font-weight:800;border:2px solid;
+      transition:transform .2s,box-shadow .2s;cursor:default;position:relative;z-index:1;
+    }
+    .journey-node.done .journey-circle    { background:var(--success-dim);border-color:var(--success);color:var(--success); }
+    .journey-node.active .journey-circle  { background:var(--cyan-dim);border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 18px rgba(89,225,255,0.3);animation:pulse 2s ease-in-out infinite; }
+    .journey-node.locked .journey-circle  { background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.1);color:var(--text-faint); }
+    @keyframes pulse { 0%,100%{box-shadow:0 0 14px rgba(89,225,255,0.25)} 50%{box-shadow:0 0 28px rgba(89,225,255,0.5)} }
+    .journey-label-text { font-size:9px;font-weight:700;color:var(--text-faint);text-align:center;max-width:60px;line-height:1.3;letter-spacing:.04em; }
+    .journey-node.done .journey-label-text   { color:var(--success); }
+    .journey-node.active .journey-label-text { color:var(--cyan); }
+    .journey-connector { flex-shrink:0;height:2px;width:28px;margin-top:-22px;position:relative;z-index:0; }
+    .journey-connector.done   { background:var(--success); }
+    .journey-connector.active { background:linear-gradient(90deg,var(--success),rgba(89,225,255,0.3)); }
+    .journey-connector.locked { background:rgba(255,255,255,0.07); }
+
     /* MÓDULOS */
-    .modules { display:grid;gap:14px; }
+    .modules { display:grid;gap:14px;margin-bottom:22px; }
     .module-card { background:var(--panel);border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;transition:border-color .2s; }
     .module-card.locked { opacity:.5; }
     .module-card.complete { border-color:rgba(126,240,194,0.2); }
@@ -145,6 +189,15 @@
     .cert-banner p  { color:var(--text-soft);font-size:14px;margin-bottom:18px; }
     .btn-cert { display:inline-block;padding:13px 28px;border-radius:var(--r-md);background:linear-gradient(135deg,var(--gold),#f0d090);color:#1a1000;font-weight:800;font-size:13px;letter-spacing:.07em;text-transform:uppercase;text-decoration:none;cursor:pointer;border:none;font-family:'Inter',sans-serif; }
 
+    /* BANNER WHATSAPP */
+    .wpp-banner { margin-bottom:18px;padding:16px 20px;border-radius:var(--r-lg);border:1px solid rgba(37,211,102,0.2);background:rgba(37,211,102,0.05);display:flex;align-items:center;gap:14px;flex-wrap:wrap; }
+    .wpp-banner-icon { font-size:24px;flex-shrink:0; }
+    .wpp-banner-text { flex:1;min-width:160px; }
+    .wpp-banner-title { font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#25d366;margin-bottom:2px; }
+    .wpp-banner-sub { font-size:12px;color:var(--text-soft); }
+    .btn-wpp { flex-shrink:0;padding:9px 16px;border-radius:10px;background:rgba(37,211,102,0.12);border:1px solid rgba(37,211,102,0.25);color:#25d366;font-family:'Inter',sans-serif;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap; }
+    .btn-wpp.ativo { background:rgba(37,211,102,0.06);color:var(--text-faint);border-color:rgba(37,211,102,0.1);cursor:default; }
+
     /* LOADING / FOOTER */
     .loading { min-height:60vh;display:grid;place-items:center;color:var(--text-soft);font-size:14px; }
     .footer { text-align:center;padding:24px 0 0;color:var(--text-faint);font-size:12px; }
@@ -154,7 +207,7 @@
     @media (max-width: 768px) {
       .hero { padding: 20px 18px; border-radius: 20px; }
       .hero h1 { font-size: 28px; }
-      .hero-user { display: none; }
+      .hero-right .hero-email { display:none; }
       .info-row { grid-template-columns: 1fr 1fr; }
       .module-header { padding: 14px 16px; gap: 10px; }
       .module-title { font-size: 13px; }
@@ -163,8 +216,9 @@
       .aula-num { font-size: 9px; }
       .btn-praticar { font-size: 10px; padding: 6px 10px; }
       .aula-nota { font-size: 11px; padding: 2px 6px; }
+      .journey-connector { width: 18px; }
+      .journey-circle { width: 38px; height: 38px; font-size: 11px; }
     }
-
     @media (max-width: 480px) {
       .info-row { grid-template-columns: 1fr; }
       .module-num { width: 30px; height: 30px; font-size: 12px; border-radius: 9px; }
@@ -173,7 +227,6 @@
       .cert-banner h2 { font-size: 16px; }
       .cert-banner p { font-size: 13px; }
     }
-
     @keyframes toastIn {
       from { opacity: 0; transform: translateY(12px) scale(0.97); }
       to   { opacity: 1; transform: translateY(0) scale(1); }
@@ -182,6 +235,7 @@
 </head>
 <body>
 
+  <!-- MODAL EMAIL -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal-card">
       <div class="modal-icon">S</div>
@@ -194,16 +248,54 @@
     </div>
   </div>
 
+  <!-- MODAL WHATSAPP (CallMeBot) -->
+  <div class="modal-overlay" id="modalWpp">
+    <div class="modal-card">
+      <div class="modal-icon" style="background:rgba(37,211,102,0.1);border-color:rgba(37,211,102,0.25);color:#25d366;">💬</div>
+      <h2>Ativar alertas no WhatsApp</h2>
+
+      <!-- Passo 1 -->
+      <div class="wpp-step active" id="wppStep1">
+        <p>Receba uma mensagem automática se ficar mais de 10 dias sem praticar. É gratuito — basta ativar em 2 passos.</p>
+        <p style="color:var(--text-faint);font-size:12px;margin-bottom:16px;">Passo 1 de 2 — Informe seu número</p>
+        <input class="modal-input" type="tel" id="wppNumero" placeholder="+55 11 99999-9999" />
+        <div class="modal-error" id="wppError"></div>
+        <button class="btn-primary" onclick="wppPasso2()">Continuar</button>
+        <button class="btn-secondary" onclick="fecharModalWpp()">Agora não</button>
+      </div>
+
+      <!-- Passo 2 -->
+      <div class="wpp-step" id="wppStep2">
+        <p>Passo 2 de 2 — Ative o serviço enviando esta mensagem exata para o número abaixo:</p>
+        <div class="wpp-code" id="wppCodigo">I allow callmebot to send me messages</div>
+        <a id="wppLink" href="#" target="_blank" class="wpp-link">
+          📲 Abrir WhatsApp e enviar
+        </a>
+        <p style="color:var(--text-faint);font-size:12px;margin-bottom:16px;">Após enviar a mensagem, clique em "Já ativei"</p>
+        <button class="btn-primary" onclick="confirmarWpp()">✓ Já ativei</button>
+        <button class="btn-secondary" onclick="fecharModalWpp()">Cancelar</button>
+      </div>
+
+      <!-- Passo 3 — confirmação -->
+      <div class="wpp-step" id="wppStep3">
+        <p style="font-size:32px;margin-bottom:12px;">✅</p>
+        <p>Perfeito! Você receberá uma mensagem no WhatsApp se ficar mais de 10 dias sem praticar.</p>
+        <button class="btn-primary" onclick="fecharModalWpp()" style="margin-top:8px;">Entendi</button>
+      </div>
+    </div>
+  </div>
+
   <div class="loading" id="loadingEl">Carregando seu progresso...</div>
 
   <div class="shell" id="appShell">
 
     <div class="cert-banner" id="certBanner">
       <h2>🏆 Você está elegível para a certificação!</h2>
-      <p>Concluiu todas as 42 aulas do Practitioner em PNL. Emita agora seu certificado oficial do IBSDH.</p>
+      <p>Concluiu todas as aulas do curso. Emita agora seu certificado oficial do IBSDH.</p>
       <button class="btn-cert" onclick="irParaCertificado()">Emitir meu certificado</button>
     </div>
 
+    <!-- HERO -->
     <div class="hero">
       <div class="hero-top">
         <div class="seal">S</div>
@@ -212,15 +304,18 @@
           <h1>SENA</h1>
           <div class="hero-sub" id="heroSub">Carregando...</div>
         </div>
-        <div class="hero-user">
+        <div class="hero-right">
           <div class="hero-email" id="emailDisplay"></div>
+          <div class="rank-badge" id="rankBadge" style="display:none;">
+            🏆 Ranking <span id="rankPos">—</span>º
+          </div>
           <button class="hero-sair" onclick="sair()">Trocar e-mail</button>
         </div>
       </div>
       <div class="overall-progress">
         <div class="progress-header">
           <span class="progress-label">Progresso geral</span>
-          <span class="progress-count" id="progressCount">0 / 42 aulas</span>
+          <span class="progress-count" id="progressCount">0 / 0 aulas</span>
         </div>
         <div class="progress-track">
           <div class="progress-fill" id="progressFill" style="width:0%"></div>
@@ -228,6 +323,17 @@
       </div>
     </div>
 
+    <!-- STREAK -->
+    <div class="streak-bar" id="streakBar">
+      <div class="streak-fire">🔥</div>
+      <div class="streak-info">
+        <div class="streak-title" id="streakTitle">Sequência ativa!</div>
+        <div class="streak-sub" id="streakSub">Continue praticando para não perder</div>
+      </div>
+      <div class="streak-count" id="streakCount">0</div>
+    </div>
+
+    <!-- INFO CARDS -->
     <div class="info-row">
       <div class="info-card">
         <div class="info-card-label">Aprovadas</div>
@@ -243,7 +349,24 @@
       </div>
     </div>
 
+    <!-- MAPA DE JORNADA -->
+    <div class="journey-section">
+      <div class="journey-label">Sua jornada</div>
+      <div class="journey-track" id="journeyTrack"></div>
+    </div>
+
+    <!-- MÓDULOS -->
     <div class="modules" id="modulesContainer"></div>
+
+    <!-- BANNER WHATSAPP -->
+    <div class="wpp-banner" id="wppBanner">
+      <div class="wpp-banner-icon">💬</div>
+      <div class="wpp-banner-text">
+        <div class="wpp-banner-title">Alertas no WhatsApp</div>
+        <div class="wpp-banner-sub" id="wppBannerSub">Receba uma mensagem se ficar mais de 10 dias sem praticar</div>
+      </div>
+      <button class="btn-wpp" id="btnWpp" onclick="abrirModalWpp()">Ativar grátis</button>
+    </div>
 
     <!-- Navegação premium -->
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;">
@@ -297,13 +420,16 @@
     const CURSO = urlParams.get('curso') || 'Practitioner';
     const APPS_SCRIPT_URL = '/api';
 
+    // CallMeBot — número do bot fixo
+    const CALLMEBOT_NUMBER = '34631001117';
+
     let MODULOS = [];
     let TITULOS = {};
     let TOTAL_AULAS = 0;
-
     let email = '';
     let progresso = {};
 
+    // ── INIT ──────────────────────────────────────────────────────────
     (function init() {
       const salvo = localStorage.getItem('sena_email');
       if (salvo && !/\{\{/.test(salvo) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(salvo)) {
@@ -342,6 +468,192 @@
       location.reload();
     }
 
+    // ── STREAK ────────────────────────────────────────────────────────
+    function calcularStreak() {
+      // Lê histórico de datas de prática salvo no localStorage
+      const key = 'sena_streak_' + email;
+      const hoje = new Date().toISOString().slice(0,10);
+
+      // Pega todas as datas em que houve prática (salvas pelo simulador)
+      const historico = JSON.parse(localStorage.getItem('sena_datas_pratica_' + email) || '[]');
+
+      if (!historico.length) return 0;
+
+      // Ordena desc e conta dias consecutivos até hoje ou ontem
+      const datas = [...new Set(historico)].sort().reverse();
+      const ontem = new Date(Date.now() - 86400000).toISOString().slice(0,10);
+
+      if (datas[0] !== hoje && datas[0] !== ontem) return 0;
+
+      let streak = 1;
+      for (let i = 1; i < datas.length; i++) {
+        const prev = new Date(datas[i-1]);
+        const curr = new Date(datas[i]);
+        const diff = (prev - curr) / 86400000;
+        if (diff === 1) { streak++; } else { break; }
+      }
+      return streak;
+    }
+
+    function registrarPraticaHoje() {
+      const hoje = new Date().toISOString().slice(0,10);
+      const key = 'sena_datas_pratica_' + email;
+      const historico = JSON.parse(localStorage.getItem(key) || '[]');
+      if (!historico.includes(hoje)) {
+        historico.push(hoje);
+        // Mantém só os últimos 60 dias
+        const recentes = historico.slice(-60);
+        localStorage.setItem(key, JSON.stringify(recentes));
+      }
+    }
+
+    function renderStreak(streak) {
+      const bar = document.getElementById('streakBar');
+      if (streak < 1) { bar.classList.remove('active'); return; }
+      bar.classList.add('active');
+      document.getElementById('streakCount').textContent = streak + (streak === 1 ? ' dia' : ' dias');
+
+      if (streak >= 7) {
+        document.getElementById('streakTitle').textContent = '🔥 Sequência incrível!';
+        document.getElementById('streakSub').textContent = streak + ' dias seguidos praticando — você está on fire!';
+      } else if (streak >= 3) {
+        document.getElementById('streakTitle').textContent = 'Sequência ativa!';
+        document.getElementById('streakSub').textContent = streak + ' dias seguidos — continue assim!';
+      } else {
+        document.getElementById('streakTitle').textContent = 'Você está praticando!';
+        document.getElementById('streakSub').textContent = 'Pratique amanhã para manter a sequência';
+      }
+    }
+
+    // ── DIAS SEM PRATICAR (para alerta WPP) ──────────────────────────
+    function diasSemPraticar() {
+      const key = 'sena_datas_pratica_' + email;
+      const historico = JSON.parse(localStorage.getItem(key) || '[]');
+      if (!historico.length) return 999;
+      const ultima = historico.sort().slice(-1)[0];
+      const diff = (Date.now() - new Date(ultima)) / 86400000;
+      return Math.floor(diff);
+    }
+
+    // ── WHATSAPP (CallMeBot) ───────────────────────────────────────────
+    function wppSalvo() {
+      return localStorage.getItem('sena_wpp_' + email);
+    }
+
+    function abrirModalWpp() {
+      // Reseta steps
+      document.querySelectorAll('.wpp-step').forEach(s => s.classList.remove('active'));
+      document.getElementById('wppStep1').classList.add('active');
+      document.getElementById('wppNumero').value = '';
+      document.getElementById('wppError').textContent = '';
+      document.getElementById('modalWpp').classList.add('visible');
+    }
+
+    function fecharModalWpp() {
+      document.getElementById('modalWpp').classList.remove('visible');
+    }
+
+    function wppPasso2() {
+      const num = (document.getElementById('wppNumero').value || '').replace(/\s/g,'');
+      const err = document.getElementById('wppError');
+      if (!num || num.length < 10) { err.textContent = 'Informe um número válido com DDD.'; return; }
+      err.textContent = '';
+
+      // Formata para CallMeBot (apenas dígitos, com código de país)
+      const numLimpo = num.replace(/\D/g,'');
+      const numFinal = numLimpo.startsWith('55') ? numLimpo : '55' + numLimpo;
+
+      localStorage.setItem('sena_wpp_pendente_' + email, numFinal);
+
+      // Gera link do WhatsApp para ativar CallMeBot
+      const msg = encodeURIComponent('I allow callmebot to send me messages');
+      document.getElementById('wppLink').href = 'https://wa.me/' + CALLMEBOT_NUMBER + '?text=' + msg;
+
+      document.querySelectorAll('.wpp-step').forEach(s => s.classList.remove('active'));
+      document.getElementById('wppStep2').classList.add('active');
+    }
+
+    function confirmarWpp() {
+      const numFinal = localStorage.getItem('sena_wpp_pendente_' + email);
+      if (numFinal) {
+        localStorage.setItem('sena_wpp_' + email, numFinal);
+        localStorage.removeItem('sena_wpp_pendente_' + email);
+      }
+      document.querySelectorAll('.wpp-step').forEach(s => s.classList.remove('active'));
+      document.getElementById('wppStep3').classList.add('active');
+      atualizarBannerWpp();
+    }
+
+    function atualizarBannerWpp() {
+      const numSalvo = wppSalvo();
+      const btn = document.getElementById('btnWpp');
+      const sub = document.getElementById('wppBannerSub');
+      if (numSalvo) {
+        btn.textContent = '✓ Ativo';
+        btn.classList.add('ativo');
+        btn.onclick = null;
+        const numMask = '+' + numSalvo.slice(0,2) + ' (' + numSalvo.slice(2,4) + ') ****-' + numSalvo.slice(-4);
+        sub.textContent = 'Alertas ativos para ' + numMask;
+      }
+    }
+
+    async function enviarAlertaWpp(numero, mensagem) {
+      try {
+        const apikey = localStorage.getItem('sena_wpp_apikey_' + email) || '';
+        // CallMeBot não precisa de apikey própria — usa a do número registrado
+        const url = 'https://api.callmebot.com/whatsapp.php?phone=' + numero +
+          '&text=' + encodeURIComponent(mensagem) + '&apikey=' + apikey;
+        await fetch(url, { mode: 'no-cors' });
+      } catch(e) {}
+    }
+
+    function verificarAlertaInatividade() {
+      const numSalvo = wppSalvo();
+      if (!numSalvo) return;
+
+      const dias = diasSemPraticar();
+      if (dias < 10) return;
+
+      // Só envia uma vez por semana para não spam
+      const keyUltimoAlerta = 'sena_wpp_ultimo_alerta_' + email;
+      const ultimoAlerta = localStorage.getItem(keyUltimoAlerta);
+      const hoje = new Date().toISOString().slice(0,10);
+
+      if (ultimoAlerta) {
+        const diffDias = (Date.now() - new Date(ultimoAlerta)) / 86400000;
+        if (diffDias < 7) return;
+      }
+
+      localStorage.setItem(keyUltimoAlerta, hoje);
+
+      const msg = '⚠️ Olá! Faz ' + dias + ' dias que você não pratica no SENA. ' +
+        'Que tal retomar hoje? Seu progresso está esperando por você! ' +
+        'Acesse: https://sena-ibsdh.netlify.app/dashboard.html';
+      enviarAlertaWpp(numSalvo, msg);
+    }
+
+    // ── RANKING ───────────────────────────────────────────────────────
+    async function buscarPosicaoRanking() {
+      try {
+        const res = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'ranking', curso: CURSO })
+        });
+        const data = await res.json();
+        if (!data || data.erro || !Array.isArray(data.ranking)) return;
+
+        const pos = data.ranking.findIndex(function(r) {
+          return (r.email || '').toLowerCase() === email.toLowerCase();
+        });
+
+        if (pos !== -1) {
+          document.getElementById('rankPos').textContent = pos + 1;
+          document.getElementById('rankBadge').style.display = 'inline-flex';
+        }
+      } catch(e) {}
+    }
+
+    // ── CARREGAR PROGRESSO ────────────────────────────────────────────
     async function carregarProgresso() {
       try {
         const [resEst, resProg] = await Promise.all([
@@ -366,7 +678,6 @@
         }
 
         progresso = await resProg.json() || {};
-
         document.getElementById('loadingEl').style.display = 'none';
 
         if (!MODULOS.length) {
@@ -377,12 +688,16 @@
         }
 
         renderDashboard();
+        buscarPosicaoRanking();
+        verificarAlertaInatividade();
+
       } catch(err) {
         document.getElementById('loadingEl').textContent =
           'Erro ao carregar progresso. Recarregue a página.';
       }
     }
 
+    // ── RENDER DASHBOARD ──────────────────────────────────────────────
     function renderDashboard() {
       document.getElementById('appShell').classList.add('visible');
       document.getElementById('heroSub').textContent = CURSO.replace(/_/g, ' ') + ' — IBSDH';
@@ -413,8 +728,20 @@
 
       if (aprovadas >= TOTAL) document.getElementById('certBanner').classList.add('visible');
 
+      // Streak
+      const streak = calcularStreak();
+      renderStreak(streak);
+
+      // WhatsApp banner
+      atualizarBannerWpp();
+
       const bloqueados = calcularBloqueados();
-      const container  = document.getElementById('modulesContainer');
+
+      // Mapa de jornada
+      renderJornada(bloqueados);
+
+      // Módulos
+      const container = document.getElementById('modulesContainer');
       container.innerHTML = '';
 
       MODULOS.forEach(function(mod, idx) {
@@ -430,7 +757,6 @@
         else if (aprovMod>0) { badgeClass = 'partial'; badgeText = aprovMod + '/' + totalMod + ' aprovadas'; }
         else                 { badgeClass = 'pending'; badgeText = 'Não iniciado'; }
 
-        // Todos os módulos começam fechados
         const card = document.createElement('div');
         card.className = 'module-card' +
           (bloqueado ? ' locked' : '') +
@@ -452,6 +778,66 @@
           '<div class="aulas-list">' + renderAulas(mod.aulas, bloqueado) + '</div>';
 
         container.appendChild(card);
+      });
+    }
+
+    // ── MAPA DE JORNADA ───────────────────────────────────────────────
+    function renderJornada(bloqueados) {
+      const track = document.getElementById('journeyTrack');
+      track.innerHTML = '';
+
+      MODULOS.forEach(function(mod, idx) {
+        const bloqueado = bloqueados[idx];
+        const aprovMod  = mod.aulas.filter(a => { const p = progresso[a.aula]; return p && p.aprovado === 'SIM'; }).length;
+        const totalMod  = mod.aulas.length;
+        const completo  = aprovMod === totalMod;
+        const emAndamento = !bloqueado && !completo && aprovMod > 0;
+        const proximo   = !bloqueado && !completo && aprovMod === 0 && idx > 0;
+
+        let estado = bloqueado ? 'locked' : completo ? 'done' : 'active';
+
+        // Ícone do nó
+        let icone = completo ? '✓' : bloqueado ? '🔒' : (idx + 1);
+
+        // Nome curto do módulo (tira "Módulo X — ")
+        const nomePartes = mod.nome.split('—');
+        const nomeCurto = nomePartes.length > 1
+          ? nomePartes[1].trim().split(' ').slice(0,2).join(' ')
+          : 'Módulo ' + (idx + 1);
+
+        // Conector antes (exceto no primeiro)
+        if (idx > 0) {
+          const prevCompleto = MODULOS[idx-1].aulas.every(a => { const p = progresso[a.aula]; return p && p.aprovado === 'SIM'; });
+          const connClass = prevCompleto ? 'done' : (bloqueados[idx] ? 'locked' : 'active');
+          const conn = document.createElement('div');
+          conn.className = 'journey-connector ' + connClass;
+          track.appendChild(conn);
+        }
+
+        const node = document.createElement('div');
+        node.className = 'journey-node ' + estado;
+        node.innerHTML =
+          '<div class="journey-circle">' + icone + '</div>' +
+          '<div class="journey-label-text">' + nomeCurto + '</div>';
+
+        // Clique no nó abre o módulo correspondente
+        if (!bloqueado) {
+          node.style.cursor = 'pointer';
+          node.addEventListener('click', function() {
+            const cards = document.querySelectorAll('.module-card');
+            if (cards[idx]) {
+              cards[idx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+              setTimeout(function() {
+                if (!cards[idx].classList.contains('open')) {
+                  document.querySelectorAll('.module-card.open').forEach(c => c.classList.remove('open'));
+                  cards[idx].classList.add('open');
+                }
+              }, 400);
+            }
+          });
+        }
+
+        track.appendChild(node);
       });
     }
 
@@ -509,21 +895,14 @@
     function toggleModulo(header) {
       const card = header.parentElement;
       if (card.classList.contains('locked')) return;
-
       const jaAberto = card.classList.contains('open');
-
-      // Fecha todos os módulos abertos
-      document.querySelectorAll('.module-card.open').forEach(function(c) {
-        c.classList.remove('open');
-      });
-
-      // Se não estava aberto, abre ele; se já estava, ficou fechado (toggle)
-      if (!jaAberto) {
-        card.classList.add('open');
-      }
+      document.querySelectorAll('.module-card.open').forEach(function(c) { c.classList.remove('open'); });
+      if (!jaAberto) card.classList.add('open');
     }
 
     function abrirSimulador(codigoAula) {
+      // Registra prática hoje para o streak
+      registrarPraticaHoje();
       const url = '/index.html?email=' + encodeURIComponent(email) +
         '&curso=' + encodeURIComponent(CURSO) +
         '&aula=' + encodeURIComponent(codigoAula);
@@ -534,28 +913,22 @@
       window.open('/certificado.html', '_blank');
     }
 
-    // ── ATUALIZAÇÃO AUTOMÁTICA DE PROGRESSO ──────────────────────────
+    // ── ATUALIZAÇÃO AUTOMÁTICA ────────────────────────────────────────
     window.addEventListener('storage', function(e) {
       if (e.key !== 'sena_progresso_atualizado') return;
       if (!e.newValue) return;
-
       try {
         const sinal = JSON.parse(e.newValue);
         if (sinal.curso !== CURSO) return;
         if (Date.now() - sinal.ts > 30000) return;
-
         mostrarToastAtualizacao(sinal.aula, sinal.nota, sinal.aprovado);
-
-        setTimeout(function() {
-          recarregarProgressoSilencioso();
-        }, 800);
+        setTimeout(function() { recarregarProgressoSilencioso(); }, 800);
       } catch(err) {}
     });
 
     function mostrarToastAtualizacao(aula, nota, aprovado) {
       const existing = document.getElementById('toastAtualiz');
       if (existing) existing.remove();
-
       const numAula = String(aula).replace('Aula_', '');
       const cor = aprovado ? 'rgba(126,240,194,0.12)' : 'rgba(255,107,136,0.12)';
       const borda = aprovado ? 'rgba(126,240,194,0.25)' : 'rgba(255,107,136,0.2)';
@@ -564,36 +937,19 @@
       const msg = aprovado
         ? 'Aula ' + numAula + ' aprovada com ' + Number(nota).toFixed(1) + '/10'
         : 'Aula ' + numAula + ' — ' + Number(nota).toFixed(1) + '/10 (não aprovada)';
-
       const toast = document.createElement('div');
       toast.id = 'toastAtualiz';
       toast.style.cssText = [
-        'position:fixed', 'bottom:24px', 'right:24px', 'z-index:9999',
-        'background:' + cor,
-        'border:1px solid ' + borda,
-        'border-radius:14px',
-        'padding:14px 18px',
-        'font-family:Inter,sans-serif',
-        'font-size:14px',
-        'font-weight:600',
-        'color:' + txtCor,
-        'box-shadow:0 16px 32px rgba(0,0,0,0.35)',
-        'display:flex',
-        'align-items:center',
-        'gap:10px',
-        'animation:toastIn .25s ease',
-        'max-width:320px'
+        'position:fixed','bottom:24px','right:24px','z-index:9999',
+        'background:'+cor,'border:1px solid '+borda,'border-radius:14px',
+        'padding:14px 18px','font-family:Inter,sans-serif','font-size:14px',
+        'font-weight:600','color:'+txtCor,'box-shadow:0 16px 32px rgba(0,0,0,0.35)',
+        'display:flex','align-items:center','gap:10px','animation:toastIn .25s ease','max-width:320px'
       ].join(';');
-
-      toast.innerHTML =
-        '<span style="font-size:16px">' + icone + '</span>' +
-        '<span>' + msg + ' &mdash; Atualizando painel...</span>';
-
+      toast.innerHTML = '<span style="font-size:16px">'+icone+'</span><span>'+msg+' &mdash; Atualizando painel...</span>';
       document.body.appendChild(toast);
-
       setTimeout(function() {
-        toast.style.opacity = '0';
-        toast.style.transition = 'opacity .3s';
+        toast.style.opacity = '0'; toast.style.transition = 'opacity .3s';
         setTimeout(function() { toast.remove(); }, 300);
       }, 4000);
     }
