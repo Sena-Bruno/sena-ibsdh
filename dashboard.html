@@ -51,6 +51,7 @@
     .modal-error { color:var(--danger);font-size:13px;min-height:18px;margin-bottom:10px; }
     .btn-primary { width:100%;padding:14px 20px;border:none;border-radius:var(--r-md);background:linear-gradient(135deg,var(--cyan),#9be9ff);color:#061018;font-family:'Inter',sans-serif;font-size:13px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;transition:transform .18s,box-shadow .18s; }
     .btn-primary:hover { transform:translateY(-1px);box-shadow:0 12px 24px rgba(89,225,255,0.2); }
+    .btn-primary:disabled { opacity:.55;cursor:not-allowed;transform:none;box-shadow:none; }
     .modal-note { margin-top:14px;color:var(--text-faint);font-size:11px; }
 
     /* MODAL WHATSAPP */
@@ -258,7 +259,7 @@
       <p>Informe o e-mail da sua matrícula para acessar seu painel de progresso no SENA.</p>
       <input class="modal-input" type="email" id="emailInput" placeholder="seu@email.com" autocomplete="email" />
       <div class="modal-error" id="emailError"></div>
-      <button class="btn-primary" onclick="confirmarEmail()">Acessar meu painel</button>
+      <button class="btn-primary" id="btnConfirmarEmail" onclick="confirmarEmail()">Acessar meu painel</button>
       <div class="modal-note">IBSDH — Instituto Bruno Sena de Desenvolvimento Humano</div>
     </div>
   </div>
@@ -444,16 +445,36 @@
     let email = '';
     let progresso = {};
 
+    // ── VERIFICAÇÃO DE ACESSO (Alunos_Hotmart) ────────────────────────
+    async function verificarAcesso(emailCheck) {
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'verificar_acesso', email: emailCheck, curso: CURSO })
+      });
+      if (!res.ok) throw new Error('Servidor indisponível');
+      return await res.json();
+    }
+
     // ── INIT ──────────────────────────────────────────────────────────
-    (function init() {
+    (async function init() {
       const salvo = localStorage.getItem('sena_email');
       if (salvo && !/\{\{/.test(salvo) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(salvo)) {
-        email = salvo;
-        carregarProgresso();
-      } else {
-        document.getElementById('loadingEl').style.display = 'none';
-        mostrarModal();
+        try {
+          const acesso = await verificarAcesso(salvo);
+          if (acesso && acesso.liberado) {
+            email = salvo;
+            carregarProgresso();
+            return;
+          }
+          // E-mail salvo não tem mais acesso — limpa e pede de novo
+          localStorage.removeItem('sena_email');
+        } catch(e) {
+          // Falha de rede na verificação — pede o e-mail de novo
+          localStorage.removeItem('sena_email');
+        }
       }
+      document.getElementById('loadingEl').style.display = 'none';
+      mostrarModal();
     })();
 
     document.getElementById('emailInput').addEventListener('keydown', function(e) {
@@ -465,12 +486,36 @@
       setTimeout(() => document.getElementById('emailInput').focus(), 100);
     }
 
-    function confirmarEmail() {
+    async function confirmarEmail() {
       const val = (document.getElementById('emailInput').value || '').trim().toLowerCase();
       const err = document.getElementById('emailError');
+      const btn = document.getElementById('btnConfirmarEmail');
+
       if (!val) { err.textContent = 'Informe seu e-mail.'; return; }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { err.textContent = 'E-mail inválido.'; return; }
+
       err.textContent = '';
+      btn.disabled = true;
+      btn.textContent = 'Verificando acesso...';
+
+      let acesso = null;
+      try {
+        acesso = await verificarAcesso(val);
+      } catch(e) {
+        btn.disabled = false;
+        btn.textContent = 'Acessar meu painel';
+        err.textContent = 'Não foi possível verificar seu acesso. Tente novamente em instantes.';
+        return;
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Acessar meu painel';
+
+      if (!acesso || !acesso.liberado) {
+        err.textContent = (acesso && acesso.mensagem) || 'Acesso não autorizado para este e-mail.';
+        return;
+      }
+
       email = val;
       localStorage.setItem('sena_email', email);
       document.getElementById('modalOverlay').classList.remove('visible');
@@ -481,6 +526,52 @@
     function sair() {
       localStorage.removeItem('sena_email');
       location.reload();
+    }
+
+    // ── RELATÓRIO DE EVOLUÇÃO CLÍNICA ─────────────────────────────────
+    async function gerarRelatorio() {
+      const btn = document.getElementById('btnRelatorio');
+      const overlay = document.getElementById('relatorioOverlay');
+      const conteudo = document.getElementById('relatorioConteudo');
+
+      btn.disabled = true;
+      btn.textContent = '⏳ Gerando...';
+      overlay.style.display = 'grid';
+      conteudo.innerHTML = '<div style="text-align:center;padding:48px;color:var(--text-faint);">A IA está analisando sua evolução clínica...</div>';
+
+      try {
+        const res = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'relatorio_evolucao', email: email, curso: CURSO })
+        });
+        const data = await res.json();
+
+        if (data.insuficiente) {
+          conteudo.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-soft);">' + data.mensagem + '</div>';
+          return;
+        }
+        if (data.erro) throw new Error(data.mensagem);
+
+        const stats = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">' +
+          '<div style="text-align:center;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);"><div style="font-size:24px;font-weight:800;color:var(--success);">' + data.aulas_aprovadas + '</div><div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.08em;">Aprovadas</div></div>' +
+          '<div style="text-align:center;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);"><div style="font-size:24px;font-weight:800;color:var(--cyan);">' + data.media_geral + '</div><div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.08em;">Média geral</div></div>' +
+          '<div style="text-align:center;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);"><div style="font-size:24px;font-weight:800;color:var(--gold);">' + data.total_aulas + '</div><div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.08em;">Realizadas</div></div>' +
+          '</div>';
+
+        const analise = '<div style="padding:18px;border-radius:14px;border:1px solid rgba(214,179,106,0.15);background:rgba(214,179,106,0.04);">' +
+          '<div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;">Análise da IA — Supervisão Clínica</div>' +
+          '<div style="font-size:14px;color:var(--text-soft);line-height:1.8;white-space:pre-line;">' + String(data.analise || '').replace(/</g,'&lt;') + '</div>' +
+          '</div>';
+
+        const dataGerada = '<div style="text-align:right;font-size:11px;color:var(--text-faint);margin-top:14px;">Gerado em ' + (data.data_geracao || '') + ' · ' + (data.curso || '') + '</div>';
+
+        conteudo.innerHTML = stats + analise + dataGerada;
+      } catch(e) {
+        conteudo.innerHTML = '<div style="padding:24px;text-align:center;color:var(--danger);">Erro ao gerar relatório. Tente novamente.</div>';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '✨ Gerar relatório';
+      }
     }
 
     // ── STREAK ────────────────────────────────────────────────────────
