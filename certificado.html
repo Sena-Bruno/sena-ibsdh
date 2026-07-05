@@ -138,6 +138,7 @@
       cursor: pointer;
       text-decoration: none;
       display: inline-block;
+      font-family: 'Inter', sans-serif;
     }
 
     .btn {
@@ -298,6 +299,33 @@
   </div>
 
   <script>
+    // ── PONTE DE API ──────────────────────────────────────────────
+    // Funciona nos dois ambientes:
+    // - Dentro do Apps Script (?certificado): usa google.script.run
+    // - No Netlify (certificado.html): usa fetch no proxy /api
+    const API_URL = '/api';
+
+    function chamarBackend(gsFuncao, gsArgs, fetchPayload, onSuccess, onFailure) {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        var runner = google.script.run
+          .withSuccessHandler(onSuccess)
+          .withFailureHandler(onFailure);
+        runner[gsFuncao].apply(runner, gsArgs);
+      } else {
+        fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify(fetchPayload)
+        })
+          .then(function(res) {
+            if (!res.ok) throw new Error('Servidor respondeu com erro ' + res.status);
+            return res.json();
+          })
+          .then(onSuccess)
+          .catch(onFailure);
+      }
+    }
+
+    // ── UI HELPERS ────────────────────────────────────────────────
     function showError(msg) {
       hideSuccess();
       const el = document.getElementById('alertError');
@@ -344,8 +372,8 @@
 
       document.getElementById('sNome').textContent = data.nome_aluno || getFormData().nome || '-';
       document.getElementById('sCurso').textContent = data.curso || getFormData().curso || '-';
-      document.getElementById('sMedia').textContent = (data.media ?? '-') === '' ? '-' : String(data.media ?? '-');
-      document.getElementById('sAulas').textContent = (data.aulasAprovadas ?? 0) + '/' + (data.totalAulas ?? 0);
+      document.getElementById('sMedia').textContent = (data.media === undefined || data.media === null || data.media === '') ? '-' : String(data.media);
+      document.getElementById('sAulas').textContent = (data.aulasAprovadas || 0) + '/' + (data.totalAulas || 0);
       document.getElementById('sCertificado').textContent = data.nome_certificado || 'Certificado de Proficiência Clínica — IBSDH';
       document.getElementById('sCodigo').textContent = data.codigo_certificado || '-';
       document.getElementById('sData').textContent = data.data_emissao || '-';
@@ -366,6 +394,7 @@
       }
     }
 
+    // ── AÇÕES ─────────────────────────────────────────────────────
     function consultarStatus() {
       const { email, curso } = getFormData();
       const btn = document.getElementById('consultarBtn');
@@ -383,8 +412,11 @@
       btn.disabled = true;
       btn.textContent = 'Consultando...';
 
-      google.script.run
-        .withSuccessHandler(function(data) {
+      chamarBackend(
+        'consultarStatusCertificacao',
+        [email, curso],
+        { action: 'consultar_certificado', email: email, curso: curso },
+        function(data) {
           btn.disabled = false;
           btn.textContent = 'Consultar status';
 
@@ -407,13 +439,13 @@
               showError(data.mensagem);
             }
           }
-        })
-        .withFailureHandler(function(err) {
+        },
+        function(err) {
           btn.disabled = false;
           btn.textContent = 'Consultar status';
           showError((err && err.message) || 'Falha de conexão.');
-        })
-        .consultarStatusCertificacao(email, curso);
+        }
+      );
     }
 
     function emitirCertificado() {
@@ -430,8 +462,11 @@
       btn.disabled = true;
       btn.textContent = 'Emitindo...';
 
-      google.script.run
-        .withSuccessHandler(function(data) {
+      chamarBackend(
+        'emitirCertificadoPagina',
+        [email, curso, nome],
+        { action: 'emitir_certificado', email: email, curso: curso, nome: nome },
+        function(data) {
           btn.disabled = false;
           btn.textContent = 'Emitir certificado';
 
@@ -447,13 +482,13 @@
 
           renderStatus(data);
           showSuccess(data.mensagem || 'Certificado emitido com sucesso.');
-        })
-        .withFailureHandler(function(err) {
+        },
+        function(err) {
           btn.disabled = false;
           btn.textContent = 'Emitir certificado';
           showError((err && err.message) || 'Falha de conexão.');
-        })
-        .emitirCertificadoPagina(email, curso, nome);
+        }
+      );
     }
 
     function reenviarCertificado() {
@@ -470,8 +505,11 @@
       btn.disabled = true;
       btn.textContent = 'Reenviando...';
 
-      google.script.run
-        .withSuccessHandler(function(data) {
+      chamarBackend(
+        'reenviarCertificadoExistente',
+        [email, curso],
+        { action: 'reenviar_certificado', email: email, curso: curso },
+        function(data) {
           btn.disabled = false;
           btn.textContent = 'Reenviar por e-mail';
 
@@ -486,14 +524,24 @@
           }
 
           showSuccess(data.mensagem || 'Certificado reenviado com sucesso.');
-        })
-        .withFailureHandler(function(err) {
+        },
+        function(err) {
           btn.disabled = false;
           btn.textContent = 'Reenviar por e-mail';
           showError((err && err.message) || 'Falha de conexão.');
-        })
-        .reenviarCertificadoExistente(email, curso);
+        }
+      );
     }
+
+    // Pré-preenche e-mail salvo do painel, se existir
+    (function() {
+      try {
+        const salvo = localStorage.getItem('sena_email');
+        if (salvo && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(salvo)) {
+          document.getElementById('emailInput').value = salvo;
+        }
+      } catch(e) {}
+    })();
   </script>
 </body>
 </html>
