@@ -2115,10 +2115,10 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
 
   <!-- Mobile Navigation -->
   <nav class="mobile-nav" id="mobileNav">
-    <a href="#" onclick="scrollParaTopo()" class="mobile-nav-item">🏠<span>Início</span></a>
-    <a href="#" onclick="scrollPara('patientCard')" class="mobile-nav-item">👤<span>Paciente</span></a>
-    <a href="#" onclick="scrollPara('inputModule')" class="mobile-nav-item">✍️<span>Resposta</span></a>
-    <a href="#" onclick="scrollPara('resultModule')" class="mobile-nav-item">📊<span>Resultado</span></a>
+    <a href="#inicio" onclick="scrollParaTopo(); return false;" class="mobile-nav-item" data-nav="inicio">🏠<span>Início</span></a>
+    <a href="#paciente" onclick="scrollPara('patientCard'); return false;" class="mobile-nav-item" data-nav="paciente">👤<span>Paciente</span></a>
+    <a href="#resposta" onclick="scrollPara('inputModule'); return false;" class="mobile-nav-item" data-nav="resposta">✍️<span>Resposta</span></a>
+    <a href="#resultado" onclick="scrollPara('resultModule'); return false;" class="mobile-nav-item" data-nav="resultado">📊<span>Resultado</span></a>
   </nav>
   
   <button class="btn-flutuante" onclick="acaoFlutuante()" title="Ação rápida">⚡</button>
@@ -3319,7 +3319,7 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
     function atualizarNavMobile(itemAtivo) {
       document.querySelectorAll('.mobile-nav-item').forEach(btn => {
         btn.classList.remove('active');
-        if (btn.getAttribute('onclick')?.includes(itemAtivo === 'inicio' ? 'scrollParaTopo' : itemAtivo)) {
+        if (btn.dataset.nav === itemAtivo) {
           btn.classList.add('active');
         }
       });

@@ -68,17 +68,119 @@
     .onboard-step { display:none; }
     .onboard-step.active { display:block; }
 
-    /* Acessibilidade */
+    /* Tema Claro */
+    body.tema-claro {
+      --bg: #f8fafc;
+      --panel: rgba(255,255,255,0.85);
+      --border: rgba(112,141,173,0.2);
+      --text: #1e293b;
+      --text-soft: #64748b;
+      --text-faint: #94a3b8;
+      --cyan: #0891b2;
+      --cyan-dim: rgba(8,145,178,0.1);
+      --gold: #b45309;
+      --gold-dim: rgba(180,83,9,0.1);
+      --success: #059669;
+      --success-dim: rgba(5,150,105,0.1);
+      --danger: #dc2626;
+      --danger-dim: rgba(220,38,38,0.1);
+    }
+    body.tema-claro { background: radial-gradient(circle at top left,rgba(8,145,178,0.08),transparent 28%), radial-gradient(circle at bottom right,rgba(180,83,9,0.06),transparent 22%), linear-gradient(180deg,#f8fafc 0%,#e2e8f0 100%); }
+    body.tema-claro .hero { background: linear-gradient(180deg,rgba(255,255,255,0.95) 0%,rgba(241,245,249,0.98) 100%); border-color: rgba(112,141,173,0.25); }
+    body.tema-claro .hero::before { background: linear-gradient(135deg,rgba(8,145,178,0.1),transparent 40%),linear-gradient(225deg,rgba(180,83,9,0.08),transparent 35%); }
+    body.tema-claro .seal { background: radial-gradient(circle at 30% 30%,rgba(8,145,178,0.2),transparent 45%),linear-gradient(180deg,rgba(255,255,255,1),rgba(241,245,249,1)); border-color: rgba(8,145,178,0.3); }
+    body.tema-claro .eyebrow { background: rgba(8,145,178,0.08); border-color: rgba(8,145,178,0.2); color: var(--gold); }
+    body.tema-claro .acess-btn { background: rgba(8,145,178,0.08); border-color: rgba(8,145,178,0.2); color: var(--text); }
+    body.tema-claro .acess-btn:hover { background: rgba(8,145,178,0.15); }
+    body.tema-claro .card, body.tema-claro .premium-card, body.tema-claro .module-card, body.tema-claro .info-card { background: rgba(255,255,255,0.7); border-color: rgba(112,141,173,0.2); }
+    body.tema-claro .module-header { background: rgba(255,255,255,0.6); border-color: rgba(112,141,173,0.2); }
+    body.tema-claro .aula-row { background: rgba(255,255,255,0.5); border-color: rgba(112,141,173,0.15); }
+    body.tema-claro .aula-row:hover { background: rgba(255,255,255,0.8); }
+    body.tema-claro .aula-row.concluido { background: rgba(5,150,105,0.1); border-color: rgba(5,150,105,0.3); }
+    body.tema-claro .btn-praticar { background: linear-gradient(135deg,var(--cyan),rgba(8,145,178,0.85)); color: #fff; }
+    body.tema-claro .btn-praticar.retry { background: rgba(220,38,38,0.15); color: var(--danger); border: 1px solid rgba(220,38,38,0.3); }
+    body.tema-claro .btn-praticar.rever { background: rgba(112,141,173,0.15); color: var(--text-soft); border: 1px solid rgba(112,141,173,0.25); }
+    body.tema-claro .aula-status.pending { background: rgba(112,141,173,0.15); color: var(--text-faint); }
+    body.tema-claro .aula-status.approved { background: rgba(5,150,105,0.15); color: var(--success); }
+    body.tema-claro .aula-status.rejected { background: rgba(220,38,38,0.15); color: var(--danger); }
+    body.tema-claro .btn-primary { background: linear-gradient(135deg,var(--cyan),rgba(8,145,178,0.85)); color: #fff; }
+    body.tema-claro .btn-secondary { background: rgba(112,141,173,0.15); color: var(--text); border-color: rgba(112,141,173,0.25); }
+    body.tema-claro .btn-secondary:hover { background: rgba(112,141,173,0.25); }
+    body.tema-claro .mobile-nav { background: rgba(255,255,255,0.95); border-top-color: rgba(112,141,173,0.2); }
+    body.tema-claro .mobile-nav-item { color: var(--text-soft); }
+    body.tema-claro .mobile-nav-item:hover { background: rgba(8,145,178,0.08); color: var(--cyan); }
+    body.tema-claro .mobile-nav-item.active { color: var(--cyan); background: rgba(8,145,178,0.12); }
+    body.tema-claro .progress-bar { background: rgba(112,141,173,0.15); }
+    body.tema-claro .progress-fill { background: linear-gradient(90deg,var(--cyan),rgba(8,145,178,0.85)); }
+    body.tema-claro .conquista-badge { background: rgba(8,145,178,0.08); border-color: rgba(8,145,178,0.2); }
+    body.tema-claro .meta-btn { background: rgba(8,145,178,0.08); border-color: rgba(8,145,178,0.2); }
+    body.tema-claro .meta-btn:hover { background: rgba(8,145,178,0.15); }
+    body.tema-claro .meta-btn.ativo { background: var(--cyan); color: #fff; }
+    body.tema-claro .rank-badge { background: rgba(180,83,9,0.1); border-color: rgba(180,83,9,0.2); }
+    body.tema-claro .hero-stats { border-top-color: rgba(112,141,173,0.2); }
+    body.tema-claro .hero-stat { border-right-color: rgba(112,141,173,0.15); }
+    body.tema-claro .skeleton-card { background: linear-gradient(90deg, rgba(112,141,173,0.1) 25%, rgba(112,141,173,0.2) 50%, rgba(112,141,173,0.1) 75%); }
+
+    /* Acessibilidade - Alto Contraste aprimorado */
     body.alto-contraste {
-      --bg: #000;
-      --text: #fff;
-      --text-soft: #ddd;
-      --cyan: #0ff;
+      --bg: #000000;
+      --panel: rgba(0,0,0,0.95);
+      --border: rgba(255,255,255,0.4);
+      --text: #ffffff;
+      --text-soft: #f0f0f0;
+      --text-faint: #c0c0c0;
+      --cyan: #00ffff;
+      --cyan-dim: rgba(0,255,255,0.15);
       --gold: #ffd700;
+      --gold-dim: rgba(255,215,0,0.15);
+      --success: #00ff88;
+      --success-dim: rgba(0,255,136,0.15);
+      --danger: #ff4466;
+      --danger-dim: rgba(255,68,102,0.15);
+    }
+    body.alto-contraste .card, body.alto-contraste .premium-card, body.alto-contraste .module-card {
+      background: rgba(0,0,0,0.9);
+      border: 2px solid rgba(255,255,255,0.4);
+    }
+    body.alto-contraste .btn-primary {
+      background: #00ffff;
+      color: #000;
+      border: 2px solid #00ffff;
+    }
+    body.alto-contraste .btn-secondary {
+      background: transparent;
+      color: #fff;
+      border: 2px solid rgba(255,255,255,0.5);
+    }
+    body.alto-contraste .progress-bar {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    body.alto-contraste .progress-fill {
+      background: #00ffff;
+    }
+    body.alto-contraste .aula-row.concluido {
+      background: rgba(0,255,136,0.15);
+      border: 2px solid #00ff88;
+    }
+    body.alto-contraste .aula-status.pending { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff; }
+    body.alto-contraste .aula-status.approved { background: rgba(0,255,136,0.15); border: 1px solid #00ff88; color: #00ff88; }
+    body.alto-contraste .aula-status.rejected { background: rgba(255,68,102,0.15); border: 1px solid #ff4466; color: #ff4466; }
+    body.alto-contraste .btn-praticar { background: #00ffff; color: #000; border: 2px solid #00ffff; }
+    body.alto-contraste .btn-praticar.retry { background: #ff4466; color: #000; border: 2px solid #ff4466; }
+    body.alto-contraste .btn-praticar.rever { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.5); }
+    body.alto-contraste .conquista-badge {
+      background: rgba(0,255,255,0.15);
+      border: 2px solid #00ffff;
+    }
+    body.alto-contraste .rank-badge {
+      background: rgba(255,215,0,0.15);
+      border: 2px solid #ffd700;
     }
     body.reduzir-movimento * {
       animation: none !important;
       transition: none !important;
+      scroll-behavior: auto !important;
     }
 
     /* Skeleton */
@@ -535,6 +637,7 @@
           <div class="hero-email" id="emailDisplay"></div>
           <div class="rank-badge" id="rankBadge">🏆 Ranking <span id="rankPos">—</span>º</div>
           <div style="display:flex;gap:8px;margin-top:4px;">
+            <button class="acess-btn" onclick="toggleTema()" title="Alternar tema claro/escuro">☀️</button>
             <button class="acess-btn" onclick="toggleAltoContraste()" title="Alto contraste">◐</button>
             <button class="acess-btn" onclick="toggleReduzirMovimento()" title="Reduzir animações">⊘</button>
           </div>
@@ -738,8 +841,13 @@
 
     // Funções de acessibilidade
     function carregarPreferenciasAcessibilidade() {
+      if (localStorage.getItem('sena_tema') === 'claro') document.body.classList.add('tema-claro');
       if (localStorage.getItem('sena_alto_contraste') === 'true') document.body.classList.add('alto-contraste');
       if (localStorage.getItem('sena_reduzir_movimento') === 'true') document.body.classList.add('reduzir-movimento');
+    }
+    function toggleTema() {
+      document.body.classList.toggle('tema-claro');
+      localStorage.setItem('sena_tema', document.body.classList.contains('tema-claro') ? 'claro' : 'escuro');
     }
     function toggleAltoContraste() {
       document.body.classList.toggle('alto-contraste');
