@@ -63,8 +63,27 @@
     .btn-secondary:hover { background:rgba(255,255,255,0.08); }
 
     /* SHELL */
-    .shell { display:none;max-width:1020px;margin:0 auto;padding:28px 18px 48px; }
+    .shell { display:none;max-width:1100px;margin:0 auto;padding:32px 24px 60px; }
     .shell.visible { display:block; }
+
+    /* SECTION TITLES */
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.06);
+    }
 
     /* HERO */
     .hero { background:linear-gradient(180deg,rgba(16,21,29,0.92) 0%,rgba(10,14,20,0.98) 100%);border:1px solid var(--border);border-radius:26px;box-shadow:var(--shadow);padding:28px;margin-bottom:22px;position:relative;overflow:hidden; }
@@ -81,9 +100,24 @@
     .hero-sair { font-size:11px;color:var(--text-faint);text-decoration:none;cursor:pointer;background:none;border:none;font-family:inherit;padding:0; }
     .hero-sair:hover { color:var(--text-soft); }
 
+    /* HERO STATS */
+    .hero-stats {
+      display: flex;
+      gap: 24px;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      position: relative;
+      z-index: 1;
+    }
+    .hero-stat { flex: 1; }
+    .hero-stat-value { font-size: 24px; font-weight: 800; color: var(--cyan); margin-bottom: 4px; }
+    .hero-stat-label { font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; }
+
     /* RANKING BADGE no hero */
     .rank-badge { display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:rgba(214,179,106,0.1);border:1px solid rgba(214,179,106,0.2);font-size:11px;font-weight:700;color:var(--gold); }
     .rank-badge span { font-family:'JetBrains Mono',monospace;font-size:13px; }
+
     /* STREAK BANNER */
     .streak-bar { display:none;margin-bottom:16px;padding:14px 20px;border-radius:var(--r-lg);border:1px solid rgba(255,107,136,0.15);background:rgba(255,107,136,0.05);display:flex;align-items:center;gap:12px; }
     .streak-bar.active { display:flex; }
@@ -110,7 +144,49 @@
     .info-card-value.success { color:var(--success); }
     .info-card-value.gold { color:var(--gold); }
 
-    /* ── MAPA DE JORNADA ─────────────────────────────────────────── */
+    /* PREMIUM NAVIGATION */
+    .premium-nav { margin-bottom: 24px; }
+    .premium-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .premium-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .premium-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(89,225,255,0.3);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+    .premium-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .premium-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+    .premium-sub { font-size: 11px; color: var(--text-faint); }
+    .premium-arrow {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-faint);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .premium-card:hover .premium-arrow { opacity: 1; }
+
+    /* MAPA DE JORNADA */
     .journey-section { margin-bottom:22px; }
     .journey-label { font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint);margin-bottom:14px; }
     .journey-track { display:flex;align-items:center;gap:0;padding:4px 0 16px;overflow-x:auto;scrollbar-width:none; }
@@ -126,7 +202,6 @@
     .journey-node.locked .journey-circle  { background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.1);color:var(--text-faint); }
     @keyframes pulse { 0%,100%{box-shadow:0 0 14px rgba(89,225,255,0.25)} 50%{box-shadow:0 0 28px rgba(89,225,255,0.5)} }
 
-    /* Tooltip */
     .journey-node .journey-tooltip {
       position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);
       background:rgba(10,14,20,0.97);border:1px solid var(--border);border-radius:8px;
@@ -139,7 +214,6 @@
     }
     .journey-node:hover .journey-tooltip { opacity:1; }
 
-    /* Número do módulo abaixo */
     .journey-num { font-size:9px;font-weight:700;color:var(--text-faint);letter-spacing:.06em; }
     .journey-node.done .journey-num   { color:var(--success); }
     .journey-node.active .journey-num { color:var(--cyan); }
@@ -191,8 +265,10 @@
     .aula-nota.approved { background:var(--success-dim);color:var(--success); }
     .aula-nota.rejected { background:var(--danger-dim);color:var(--danger); }
     .aula-nota.pending  { color:var(--text-faint); }
-    .btn-praticar { flex-shrink:0;padding:7px 14px;border:none;border-radius:8px;background:linear-gradient(135deg,var(--cyan),#9be9ff);color:#061018;font-family:'Inter',sans-serif;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;transition:transform .15s,box-shadow .15s;white-space:nowrap; }
+    .btn-praticar { flex-shrink:0;padding:9px 18px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--cyan),#9be9ff);color:#061018;font-family:'Inter',sans-serif;font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;transition:transform .15s,box-shadow .15s;white-space:nowrap;position:relative;overflow:hidden;box-shadow:0 2px 8px rgba(89,225,255,0.2); }
     .btn-praticar:hover { transform:translateY(-1px);box-shadow:0 6px 14px rgba(89,225,255,0.22); }
+    .btn-praticar::after { content:'';position:absolute;top:50%;left:50%;width:0;height:0;border-radius:50%;background:rgba(255,255,255,0.3);transform:translate(-50%,-50%);transition:width 0.3s,height 0.3s; }
+    .btn-praticar:hover::after { width:100px;height:100px; }
     .btn-praticar.retry { background:rgba(255,107,136,0.12);color:var(--danger);border:1px solid rgba(255,107,136,0.2);box-shadow:none; }
     .btn-praticar.retry:hover { background:rgba(255,107,136,0.18);box-shadow:none;transform:translateY(-1px); }
     .btn-praticar.rever { background:rgba(255,255,255,0.06);color:var(--text-soft);border:1px solid rgba(255,255,255,0.08);box-shadow:none; }
@@ -203,7 +279,8 @@
     .cert-banner.visible { display:block; }
     .cert-banner h2 { font-size:20px;font-weight:800;color:var(--gold);margin-bottom:6px; }
     .cert-banner p  { color:var(--text-soft);font-size:14px;margin-bottom:18px; }
-    .btn-cert { display:inline-block;padding:13px 28px;border-radius:var(--r-md);background:linear-gradient(135deg,var(--gold),#f0d090);color:#1a1000;font-weight:800;font-size:13px;letter-spacing:.07em;text-transform:uppercase;text-decoration:none;cursor:pointer;border:none;font-family:'Inter',sans-serif; }
+    .btn-cert { display:inline-block;padding:13px 28px;border-radius:var(--r-md);background:linear-gradient(135deg,var(--gold),#f0d090);color:#1a1000;font-weight:800;font-size:13px;letter-spacing:.07em;text-transform:uppercase;text-decoration:none;cursor:pointer;border:none;font-family:'Inter',sans-serif;transition:transform .18s,box-shadow .18s; }
+    .btn-cert:hover { transform:translateY(-1px);box-shadow:0 8px 20px rgba(214,179,106,0.3); }
 
     /* BANNER WHATSAPP */
     .wpp-banner { margin-bottom:18px;padding:16px 20px;border-radius:var(--r-lg);border:1px solid rgba(37,211,102,0.2);background:rgba(37,211,102,0.05);display:flex;align-items:center;gap:14px;flex-wrap:wrap; }
@@ -211,8 +288,14 @@
     .wpp-banner-text { flex:1;min-width:160px; }
     .wpp-banner-title { font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#25d366;margin-bottom:2px; }
     .wpp-banner-sub { font-size:12px;color:var(--text-soft); }
-    .btn-wpp { flex-shrink:0;padding:9px 16px;border-radius:10px;background:rgba(37,211,102,0.12);border:1px solid rgba(37,211,102,0.25);color:#25d366;font-family:'Inter',sans-serif;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap; }
+    .btn-wpp { flex-shrink:0;padding:9px 16px;border-radius:10px;background:rgba(37,211,102,0.12);border:1px solid rgba(37,211,102,0.25);color:#25d366;font-family:'Inter',sans-serif;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;transition:background .18s; }
+    .btn-wpp:hover { background:rgba(37,211,102,0.2); }
     .btn-wpp.ativo { background:rgba(37,211,102,0.06);color:var(--text-faint);border-color:rgba(37,211,102,0.1);cursor:default; }
+
+    /* RELATÓRIO BANNER */
+    .relatorio-banner { padding:20px 22px;border-radius:16px;border:1px solid rgba(214,179,106,0.18);background:linear-gradient(135deg,rgba(214,179,106,0.06),rgba(89,225,255,0.03));margin-bottom:18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap; }
+    .btn-relatorio { flex-shrink:0;padding:11px 20px;border-radius:11px;border:1px solid rgba(214,179,106,0.25);background:rgba(214,179,106,0.1);color:var(--gold);font-family:'Inter',sans-serif;font-size:12px;font-weight:800;cursor:pointer;transition:background .18s,transform .18s; }
+    .btn-relatorio:hover { background:rgba(214,179,106,0.2);transform:translateY(-1px); }
 
     /* LOADING / FOOTER */
     .loading { min-height:60vh;display:grid;place-items:center;color:var(--text-soft);font-size:14px; }
@@ -220,11 +303,18 @@
     .footer a { color:var(--text-faint);text-decoration:none; }
     .footer a:hover { color:var(--text-soft); }
 
+    /* RESPONSIVIDADE */
     @media (max-width: 768px) {
+      .shell { padding: 24px 16px 40px; }
       .hero { padding: 20px 18px; border-radius: 20px; }
       .hero h1 { font-size: 28px; }
       .hero-right .hero-email { display:none; }
+      .hero-stats { gap: 12px; }
+      .hero-stat-value { font-size: 20px; }
       .info-row { grid-template-columns: 1fr 1fr; }
+      .premium-grid { grid-template-columns: 1fr; }
+      .premium-card { padding: 14px; }
+      .premium-icon { width: 36px; height: 36px; font-size: 16px; }
       .module-header { padding: 14px 16px; gap: 10px; }
       .module-title { font-size: 13px; }
       .aula-row { gap: 8px; padding: 10px 12px; }
@@ -237,11 +327,17 @@
     }
     @media (max-width: 480px) {
       .info-row { grid-template-columns: 1fr; }
+      .hero-stats { flex-direction: column; gap: 8px; }
       .module-num { width: 30px; height: 30px; font-size: 12px; border-radius: 9px; }
       .module-badge { font-size: 10px; padding: 3px 7px; }
-      .aula-title { max-width: 110px; }
+      .aula-row { flex-wrap: wrap; }
+      .btn-praticar { width: 100%; margin-top: 8px; }
+      .aula-title { max-width: 100%; }
       .cert-banner h2 { font-size: 16px; }
       .cert-banner p { font-size: 13px; }
+      .journey-circle { width: 36px; height: 36px; font-size: 11px; }
+      .journey-connector { width: 16px; }
+      .module-title { font-size: 12px; }
     }
     @keyframes toastIn {
       from { opacity: 0; transform: translateY(12px) scale(0.97); }
@@ -328,6 +424,23 @@
           <button class="hero-sair" onclick="sair()">Trocar e-mail</button>
         </div>
       </div>
+      
+      <!-- HERO STATS -->
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-value" id="heroAprovadas">0</div>
+          <div class="hero-stat-label">Aprovadas</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value" id="heroSequencia">0</div>
+          <div class="hero-stat-label">Dias de prática</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value" id="heroPosicao">—</div>
+          <div class="hero-stat-label">Posição ranking</div>
+        </div>
+      </div>
+      
       <div class="overall-progress">
         <div class="progress-header">
           <span class="progress-label">Progresso geral</span>
@@ -365,6 +478,39 @@
       </div>
     </div>
 
+    <!-- NAVEGAÇÃO PREMIUM -->
+    <div class="premium-nav">
+      <div class="section-title">Explore</div>
+      <div class="premium-grid">
+        <a href="/ranking.html" class="premium-card">
+          <div class="premium-icon" style="background: rgba(126,240,194,0.1); border-color: rgba(126,240,194,0.2);">🏆</div>
+          <div>
+            <div class="premium-title">Ranking</div>
+            <div class="premium-sub">Compare-se com outros alunos</div>
+          </div>
+          <span class="premium-arrow">→</span>
+        </a>
+        
+        <a href="/desafio.html" class="premium-card">
+          <div class="premium-icon" style="background: rgba(245,193,99,0.1); border-color: rgba(245,193,99,0.2);">⚡</div>
+          <div>
+            <div class="premium-title">Desafio Semanal</div>
+            <div class="premium-sub">Teste seus conhecimentos</div>
+          </div>
+          <span class="premium-arrow">→</span>
+        </a>
+        
+        <a href="/mentor.html" class="premium-card">
+          <div class="premium-icon" style="background: rgba(89,225,255,0.1); border-color: rgba(89,225,255,0.2);">🎓</div>
+          <div>
+            <div class="premium-title">Mentor IA</div>
+            <div class="premium-sub">Feedback personalizado</div>
+          </div>
+          <span class="premium-arrow">→</span>
+        </a>
+      </div>
+    </div>
+
     <!-- MAPA DE JORNADA -->
     <div class="journey-section">
       <div class="journey-label">Sua jornada</div>
@@ -372,6 +518,7 @@
     </div>
 
     <!-- MÓDULOS -->
+    <div class="section-title">Módulos do curso</div>
     <div class="modules" id="modulesContainer"></div>
 
     <!-- BANNER WHATSAPP -->
@@ -384,32 +531,13 @@
       <button class="btn-wpp" id="btnWpp" onclick="abrirModalWpp()">Ativar grátis</button>
     </div>
 
-    <!-- Navegação premium -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;">
-      <a href="/ranking.html" style="display:block;padding:14px;border-radius:14px;border:1px solid rgba(126,240,194,0.15);background:rgba(126,240,194,0.04);text-align:center;text-decoration:none;transition:background .18s;">
-        <div style="font-size:18px;margin-bottom:4px;">🏆</div>
-        <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--success);">Ranking</div>
-        <div style="font-size:11px;color:var(--text-faint);margin-top:2px;">Por perfil</div>
-      </a>
-      <a href="/desafio.html" style="display:block;padding:14px;border-radius:14px;border:1px solid rgba(245,193,99,0.15);background:rgba(245,193,99,0.04);text-align:center;text-decoration:none;transition:background .18s;">
-        <div style="font-size:18px;margin-bottom:4px;">⚡</div>
-        <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#f5c163;">Desafio</div>
-        <div style="font-size:11px;color:var(--text-faint);margin-top:2px;">Semanal</div>
-      </a>
-      <a href="/mentor.html" style="display:block;padding:14px;border-radius:14px;border:1px solid rgba(89,225,255,0.12);background:rgba(89,225,255,0.03);text-align:center;text-decoration:none;transition:background .18s;">
-        <div style="font-size:18px;margin-bottom:4px;">🎓</div>
-        <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);">Mentor</div>
-        <div style="font-size:11px;color:var(--text-faint);margin-top:2px;">Peer review</div>
-      </a>
-    </div>
-
     <!-- Banner relatório de evolução -->
-    <div style="padding:20px 22px;border-radius:16px;border:1px solid rgba(214,179,106,0.18);background:linear-gradient(135deg,rgba(214,179,106,0.06),rgba(89,225,255,0.03));margin-bottom:18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+    <div class="relatorio-banner">
       <div style="flex:1;min-width:200px;">
         <div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;">Relatório de Evolução Clínica</div>
         <div style="font-size:13px;color:var(--text-soft);">Gerado pela IA com base em todas as suas avaliações — assinatura clínica, padrões de força e recomendações personalizadas.</div>
       </div>
-      <button onclick="gerarRelatorio()" id="btnRelatorio" style="flex-shrink:0;padding:11px 20px;border-radius:11px;border:1px solid rgba(214,179,106,0.25);background:rgba(214,179,106,0.1);color:var(--gold);font-family:'Inter',sans-serif;font-size:12px;font-weight:800;cursor:pointer;transition:background .18s;">✨ Gerar relatório</button>
+      <button onclick="gerarRelatorio()" id="btnRelatorio" class="btn-relatorio">✨ Gerar relatório</button>
     </div>
 
     <!-- Modal relatório -->
@@ -466,10 +594,8 @@
             carregarProgresso();
             return;
           }
-          // E-mail salvo não tem mais acesso — limpa e pede de novo
           localStorage.removeItem('sena_email');
         } catch(e) {
-          // Falha de rede na verificação — pede o e-mail de novo
           localStorage.removeItem('sena_email');
         }
       }
@@ -576,16 +702,12 @@
 
     // ── STREAK ────────────────────────────────────────────────────────
     function calcularStreak() {
-      // Lê histórico de datas de prática salvo no localStorage
       const key = 'sena_streak_' + email;
       const hoje = new Date().toISOString().slice(0,10);
-
-      // Pega todas as datas em que houve prática (salvas pelo simulador)
       const historico = JSON.parse(localStorage.getItem('sena_datas_pratica_' + email) || '[]');
 
       if (!historico.length) return 0;
 
-      // Ordena desc e conta dias consecutivos até hoje ou ontem
       const datas = [...new Set(historico)].sort().reverse();
       const ontem = new Date(Date.now() - 86400000).toISOString().slice(0,10);
 
@@ -607,7 +729,6 @@
       const historico = JSON.parse(localStorage.getItem(key) || '[]');
       if (!historico.includes(hoje)) {
         historico.push(hoje);
-        // Mantém só os últimos 60 dias
         const recentes = historico.slice(-60);
         localStorage.setItem(key, JSON.stringify(recentes));
       }
@@ -618,6 +739,9 @@
       if (streak < 1) { bar.classList.remove('active'); return; }
       bar.classList.add('active');
       document.getElementById('streakCount').textContent = streak + (streak === 1 ? ' dia' : ' dias');
+
+      // Atualiza também no hero
+      document.getElementById('heroSequencia').textContent = streak;
 
       if (streak >= 7) {
         document.getElementById('streakTitle').textContent = '🔥 Sequência incrível!';
@@ -647,7 +771,6 @@
     }
 
     function abrirModalWpp() {
-      // Reseta steps
       document.querySelectorAll('.wpp-step').forEach(s => s.classList.remove('active'));
       document.getElementById('wppStep1').classList.add('active');
       document.getElementById('wppNumero').value = '';
@@ -665,13 +788,11 @@
       if (!num || num.length < 10) { err.textContent = 'Informe um número válido com DDD.'; return; }
       err.textContent = '';
 
-      // Formata para CallMeBot (apenas dígitos, com código de país)
       const numLimpo = num.replace(/\D/g,'');
       const numFinal = numLimpo.startsWith('55') ? numLimpo : '55' + numLimpo;
 
       localStorage.setItem('sena_wpp_pendente_' + email, numFinal);
 
-      // Gera link do WhatsApp para ativar CallMeBot
       const msg = encodeURIComponent('I allow callmebot to send me messages');
       document.getElementById('wppLink').href = 'https://wa.me/' + CALLMEBOT_NUMBER + '?text=' + msg;
 
@@ -706,7 +827,6 @@
     async function enviarAlertaWpp(numero, mensagem) {
       try {
         const apikey = localStorage.getItem('sena_wpp_apikey_' + email) || '';
-        // CallMeBot não precisa de apikey própria — usa a do número registrado
         const url = 'https://api.callmebot.com/whatsapp.php?phone=' + numero +
           '&text=' + encodeURIComponent(mensagem) + '&apikey=' + apikey;
         await fetch(url, { mode: 'no-cors' });
@@ -720,7 +840,6 @@
       const dias = diasSemPraticar();
       if (dias < 10) return;
 
-      // Só envia uma vez por semana para não spam
       const keyUltimoAlerta = 'sena_wpp_ultimo_alerta_' + email;
       const ultimoAlerta = localStorage.getItem(keyUltimoAlerta);
       const hoje = new Date().toISOString().slice(0,10);
@@ -754,6 +873,7 @@
 
         if (pos !== -1) {
           document.getElementById('rankPos').textContent = pos + 1;
+          document.getElementById('heroPosicao').textContent = pos + 1 + 'º';
         }
       } catch(e) {}
     }
@@ -830,6 +950,7 @@
       document.getElementById('countAprov').textContent    = aprovadas;
       document.getElementById('countPend').textContent     = (TOTAL - aprovadas);
       document.getElementById('mediaGeral').textContent    = media ? media + '/10' : '—';
+      document.getElementById('heroAprovadas').textContent = aprovadas;
 
       if (aprovadas >= TOTAL) document.getElementById('certBanner').classList.add('visible');
 
@@ -884,12 +1005,42 @@
 
         container.appendChild(card);
       });
+
+      // Abre automaticamente o primeiro módulo não completo
+      const primeiroModuloAberto = MODULOS.findIndex((mod, idx) => {
+        return !bloqueados[idx] && !mod.aulas.every(a => {
+          const p = progresso[a.aula];
+          return p && p.aprovado === 'SIM';
+        });
+      });
+
+      if (primeiroModuloAberto !== -1) {
+        setTimeout(() => {
+          const cards = document.querySelectorAll('.module-card');
+          if (cards[primeiroModuloAberto]) {
+            cards[primeiroModuloAberto].classList.add('open');
+          }
+        }, 100);
+      }
     }
 
     // ── MAPA DE JORNADA ───────────────────────────────────────────────
     function renderJornada(bloqueados) {
       const track = document.getElementById('journeyTrack');
       track.innerHTML = '';
+
+      // Atualiza label com progresso
+      const totalModulos = MODULOS.length;
+      const modulosCompletos = MODULOS.filter((mod, idx) => {
+        return !bloqueados[idx] && mod.aulas.every(a => {
+          const p = progresso[a.aula];
+          return p && p.aprovado === 'SIM';
+        });
+      }).length;
+
+      document.querySelector('.journey-label').innerHTML = 
+        'Sua jornada <span style="color:var(--cyan);font-weight:400;">(' + 
+        modulosCompletos + '/' + totalModulos + ' módulos completos)</span>';
 
       MODULOS.forEach(function(mod, idx) {
         const bloqueado = bloqueados[idx];
@@ -901,14 +1052,11 @@
 
         let estado = bloqueado ? 'locked' : completo ? 'done' : 'active';
 
-        // Ícone do nó
         let icone = completo ? '✓' : bloqueado ? '🔒' : (idx + 1);
 
-        // Nome completo para tooltip
         const nomePartes = mod.nome.split('—');
         const nomeCompleto = nomePartes.length > 1 ? nomePartes[1].trim() : mod.nome;
 
-        // Conector antes (exceto no primeiro)
         if (idx > 0) {
           const prevCompleto = MODULOS[idx-1].aulas.every(a => { const p = progresso[a.aula]; return p && p.aprovado === 'SIM'; });
           const connClass = prevCompleto ? 'done' : (bloqueados[idx] ? 'locked' : 'active');
@@ -924,7 +1072,6 @@
           '<div class="journey-circle">' + icone + '</div>' +
           '<div class="journey-num">M' + (idx+1) + '</div>';
 
-        // Clique no nó abre o módulo correspondente
         if (!bloqueado) {
           node.style.cursor = 'pointer';
           node.addEventListener('click', function() {
@@ -1005,7 +1152,6 @@
     }
 
     function abrirSimulador(codigoAula) {
-      // Registra prática hoje para o streak
       registrarPraticaHoje();
       const url = '/index.html?email=' + encodeURIComponent(email) +
         '&curso=' + encodeURIComponent(CURSO) +
