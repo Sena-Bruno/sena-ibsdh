@@ -5,25 +5,143 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SENA | Simulador Clínico IBSDH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
-      --bg: #07090d; --bg-soft: #0b0f15;
-      --border: rgba(112,141,173,0.18); --border-strong: rgba(89,225,255,0.22);
-      --text: #edf3f8; --text-soft: #9aa7b5; --text-faint: #6f7d8c;
-      --cyan: #59e1ff; --cyan-soft: rgba(89,225,255,0.14);
-      --gold: #d6b36a; --gold-soft: rgba(214,179,106,0.12);
-      --success: #7ef0c2; --success-soft: rgba(126,240,194,0.12);
-      --danger: #ff6b88; --danger-soft: rgba(255,107,136,0.12);
-      --shadow-lg: 0 24px 60px rgba(0,0,0,0.42); --shadow-md: 0 16px 32px rgba(0,0,0,0.28);
+      --bg: #05070a; --bg-soft: #0b0f15;
+      --panel: rgba(16,21,29,0.7);
+      --border: rgba(112,141,173,0.15); --border-strong: rgba(110,231,255,0.22);
+      --text: #edf3f8; --text-soft: #9aa7b5; --text-faint: #5a6470;
+      --cyan: #6ee7ff; --cyan-soft: rgba(110,231,255,0.12); --cyan-dim: rgba(110,231,255,0.12);
+      --gold: #e0c078; --gold-soft: rgba(224,192,120,0.12); --gold-dim: rgba(224,192,120,0.12);
+      --success: #7ef0c2; --success-soft: rgba(126,240,194,0.1); --success-dim: rgba(126,240,194,0.1);
+      --danger: #ff6b88; --danger-soft: rgba(255,107,136,0.1); --danger-dim: rgba(255,107,136,0.1);
+      --shadow-premium: 0 4px 6px rgba(0,0,0,0.1), 0 12px 24px rgba(0,0,0,0.3), 0 24px 48px rgba(0,0,0,0.2);
+      --shadow-lg: var(--shadow-premium); --shadow-md: var(--shadow-premium);
       --radius-xl: 24px; --radius-lg: 18px; --radius-md: 14px; --radius-sm: 10px;
+    }
+
+    /* ── TEMA CLARO (bônus de acessibilidade) ────────── */
+    body.tema-claro {
+      --bg: #f5f7fa;
+      --panel: rgba(255,255,255,0.9);
+      --border: rgba(0,0,0,0.1);
+      --text: #1a1a2e;
+      --text-soft: #4a5568;
+      --text-faint: #718096;
+      --cyan: #0e7490;
+      --cyan-soft: rgba(14,116,144,0.1); --cyan-dim: rgba(14,116,144,0.1);
+      --gold: #b8860b;
+      --gold-soft: rgba(184,134,11,0.1); --gold-dim: rgba(184,134,11,0.1);
+      --success: #047857;
+      --success-soft: rgba(4,120,87,0.1); --success-dim: rgba(4,120,87,0.1);
+      --danger: #be123c;
+      --danger-soft: rgba(190,18,60,0.1); --danger-dim: rgba(190,18,60,0.1);
+    }
+
+    /* ── ALTO CONTRASTE / REDUÇÃO DE MOVIMENTO ───────── */
+    body.alto-contraste {
+      --bg: #000;
+      --text: #fff;
+      --text-soft: #ddd;
+      --cyan: #0ff;
+      --gold: #ffd700;
+    }
+    body.reduzir-movimento * {
+      animation: none !important;
+      transition: none !important;
+    }
+
+    /* ── ANIMAÇÕES DE ENTRADA (SCROLL REVEAL) ────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── BOTÕES DE ACESSIBILIDADE ─────────────────────── */
+    .hero-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .acess-btn {
+      width: 38px; height: 38px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      color: var(--text-soft);
+      font-size: 16px;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: background .18s, transform .18s, color .18s;
+    }
+    .acess-btn:hover { background: rgba(255,255,255,0.08); color: var(--text); transform: translateY(-1px); }
+
+    /* ── SCROLLBAR CUSTOMIZADA ────────────────────────── */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+    ::-webkit-scrollbar-thumb { background: rgba(110,231,255,0.2); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(110,231,255,0.4); }
+
+    /* ── MENU INFERIOR FIXO (MOBILE) ──────────────────── */
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(10,14,20,0.95);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding: 8px 16px;
+      z-index: 1000;
+      justify-content: space-around;
+    }
+    .mobile-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      color: var(--text-faint);
+      text-decoration: none;
+      font-size: 10px;
+    }
+    @media (max-width: 768px) {
+      .mobile-nav { display: flex; }
+      body { padding-bottom: 70px; }
+    }
+
+    /* ── BOTÃO FLUTUANTE DE AÇÃO RÁPIDA ───────────────── */
+    .btn-flutuante {
+      display: none;
+      position: fixed;
+      bottom: 80px; right: 20px;
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg,var(--cyan),#9be9ff);
+      color: #061018;
+      font-size: 24px;
+      border: none;
+      box-shadow: 0 8px 24px rgba(110,231,255,0.4);
+      cursor: pointer;
+      z-index: 999;
+    }
+    @media (max-width: 768px) {
+      .btn-flutuante { display: grid; place-items: center; }
+    }
+
+    /* ── BOTÃO DE ENCERRAR CHAT — ESTADO "PRONTO" ─────── */
+    .chat-encerrar.ready {
+      background: rgba(126,240,194,0.15);
+      border-color: rgba(126,240,194,0.4);
+      color: var(--success);
     }
     html, body { min-height: 100%; }
     body { font-family: 'Inter', sans-serif; background: radial-gradient(circle at top left,rgba(89,225,255,0.08),transparent 28%), radial-gradient(circle at top right,rgba(214,179,106,0.06),transparent 22%), linear-gradient(180deg,#06080c 0%,#0a0d12 100%); color: var(--text); line-height: 1.6; overflow-x: hidden; }
     .shell { width: 100%; max-width: 1080px; margin: 0 auto; padding: 28px 18px 36px; }
-    .hero { position: relative; overflow: hidden; background: linear-gradient(180deg,rgba(17,24,32,0.92) 0%,rgba(11,16,22,0.98) 100%); border: 1px solid var(--border); border-radius: 28px; box-shadow: var(--shadow-lg); padding: 28px; margin-bottom: 18px; }
-    .hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg,rgba(89,225,255,0.08),transparent 40%),linear-gradient(225deg,rgba(214,179,106,0.06),transparent 35%); pointer-events: none; }
+    .hero { position: relative; overflow: hidden; background: linear-gradient(180deg,rgba(17,24,32,0.92) 0%,rgba(11,16,22,0.98) 100%); border: 1px solid var(--border); border-radius: 28px; box-shadow: var(--shadow-premium); padding: 28px; margin-bottom: 18px; }
+    .hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg,rgba(110,231,255,0.08),transparent 40%),linear-gradient(225deg,rgba(224,192,120,0.06),transparent 35%); pointer-events: none; }
+    .hero::after { content: ''; position: absolute; inset: 0; border-radius: 28px; padding: 1px; background: linear-gradient(135deg,rgba(110,231,255,0.35),rgba(224,192,120,0.18),transparent 60%); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
     .hero-top { position: relative; z-index: 1; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
     .seal { width: 74px; height: 74px; flex-shrink: 0; border-radius: 22px; position: relative; display: grid; place-items: center; background: radial-gradient(circle at 30% 30%,rgba(89,225,255,0.24),transparent 45%),linear-gradient(180deg,rgba(20,28,38,0.96),rgba(10,14,20,1)); border: 1px solid rgba(89,225,255,0.22); box-shadow: inset 0 1px 0 rgba(255,255,255,0.04),0 10px 30px rgba(0,0,0,0.28); }
     .seal::before { content: 'S'; font-size: 30px; font-weight: 800; letter-spacing: 1px; color: var(--text); }
@@ -40,7 +158,7 @@
     .status-value.primary { color: var(--cyan); }
     .status-value.critical { color: var(--danger); }
     .layout { display: grid; grid-template-columns: 1.08fr 0.92fr; gap: 18px; align-items: start; }
-    .card { background: linear-gradient(180deg,rgba(16,21,29,0.95) 0%,rgba(12,17,23,0.98) 100%); border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--shadow-md); overflow: hidden; }
+    .card { background: var(--panel); backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--shadow-premium); overflow: hidden; }
     .card-header { display: flex; align-items: center; gap: 12px; padding: 18px 22px; border-bottom: 1px solid rgba(255,255,255,0.06); background: linear-gradient(180deg,rgba(255,255,255,0.02) 0%,rgba(255,255,255,0.01) 100%); }
     .card-dot { width: 11px; height: 11px; border-radius: 999px; background: var(--gold); box-shadow: 0 0 12px rgba(214,179,106,0.55); }
     .card-dot.active { background: var(--cyan); box-shadow: 0 0 14px rgba(89,225,255,0.55); }
@@ -113,7 +231,7 @@
     /* MODAL EMAIL */
     .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); z-index:9999; place-items:center; padding:24px; }
     .modal-overlay.visible { display:grid; }
-    .modal-card { width:100%; max-width:440px; background:linear-gradient(180deg,rgba(16,21,29,0.99),rgba(10,14,20,1)); border:1px solid var(--border); border-radius:var(--radius-xl); box-shadow:var(--shadow-lg); padding:36px 30px 30px; text-align:center; animation:popIn .2s ease; }
+    .modal-card { width:100%; max-width:440px; background:linear-gradient(180deg,rgba(16,21,29,0.99),rgba(10,14,20,1)); border:1px solid var(--border); border-radius:var(--radius-xl); box-shadow:var(--shadow-premium); padding:36px 30px 30px; text-align:center; animation:popIn .2s ease; }
     @keyframes popIn { from{opacity:0;transform:scale(.96) translateY(12px)} to{opacity:1;transform:scale(1) translateY(0)} }
     .modal-icon { width:52px;height:52px;margin:0 auto 18px;border-radius:16px;display:grid;place-items:center;background:var(--cyan-soft);border:1px solid rgba(89,225,255,0.2);font-size:20px;font-weight:800;color:var(--cyan); }
     .modal-card h2 { font-size:20px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px; }
@@ -364,10 +482,11 @@
     .supervisor-card {
       width: 100%;
       max-width: 580px;
-      background: linear-gradient(180deg, rgba(16,21,29,0.99), rgba(10,14,20,1));
+      background: var(--panel);
+      backdrop-filter: blur(12px);
       border: 1px solid var(--border);
       border-radius: 24px;
-      box-shadow: 0 32px 64px rgba(0,0,0,0.55);
+      box-shadow: var(--shadow-premium);
       overflow: hidden;
       animation: popIn .22s ease;
     }
@@ -1496,7 +1615,7 @@
       background: #fff;
       border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 32px 64px rgba(0,0,0,0.4);
+      box-shadow: var(--shadow-premium);
       animation: popIn .2s ease;
       color: #1a1a2e;
     }
@@ -1704,13 +1823,18 @@
 <div class="gate-loading" id="gateLoading">Verificando seu acesso...</div>
 
   <div class="shell" id="appShell" style="display:none;">
-    <section class="hero">
+    <section class="hero reveal">
       <div class="hero-top">
         <div class="seal"></div>
         <div class="hero-copy">
           <div class="eyebrow">Ambiente de simulação clínica</div>
           <h1>SENA</h1>
           <p>Sistema Evolutivo de Neuroaprendizagem Aplicada. Um ambiente de prática guiado pela base curricular do IBSDH.</p>
+        </div>
+        <div class="hero-right">
+          <button class="acess-btn" onclick="toggleTemaClaro()" title="Alternar tema">◐</button>
+          <button class="acess-btn" onclick="toggleAltoContraste()" title="Alto contraste">◑</button>
+          <button class="acess-btn" onclick="toggleReduzirMovimento()" title="Reduzir animações">⊘</button>
         </div>
       </div>
       <div class="status-grid">
@@ -1722,7 +1846,7 @@
     </section>
 
     <div class="layout">
-      <section class="card">
+      <section class="card reveal">
         <div class="card-header">
           <div class="card-dot" id="statusDot"></div>
           <div class="card-title">Paciente virtual e cenário clínico</div>
@@ -1773,7 +1897,7 @@
         </div>
       </section>
 
-      <section class="card">
+      <section class="card reveal">
         <div class="card-header">
           <div class="card-dot active"></div>
           <div class="card-title">Resposta clínica e avaliação</div>
@@ -2092,6 +2216,7 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
         document.getElementById('gateLoading').style.display = 'none';
         document.getElementById('appShell').style.display = 'block';
         setInitialUI();
+        setupScrollAnimations();
       } catch(err) {
         document.getElementById('gateLoading').textContent =
           'Erro ao carregar dados da aula: ' + err.message;
@@ -2125,6 +2250,11 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
     // ── SIMULAÇÃO ──────────────────────────────────────────────────────
     function initializeSimulation() {
       try {
+        // Mini-loader: suaviza a transição de conteúdo do cartão do paciente
+        const card = document.getElementById('patientCard');
+        card.style.transition = 'opacity 0.3s';
+        card.style.opacity = '0.5';
+
         const profiles = Object.keys(PERFIS_CLINICOS);
         const selectedKey = profiles[Math.floor(Math.random() * profiles.length)];
         const p = PERFIS_CLINICOS[selectedKey];
@@ -2149,6 +2279,7 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
         document.getElementById('desafioNivelSelector').classList.remove('visible');
         document.getElementById('inputModule').classList.add('visible');
         document.getElementById('modeSelector').classList.add('visible');
+        setTimeout(() => { card.style.opacity = '1'; }, 300);
         setTimeout(() => document.getElementById('inputModule').scrollIntoView({behavior:'smooth',block:'start'}), 100);
       } catch(err) {
         showAlert('Erro ao gerar paciente: ' + err.message);
@@ -2275,6 +2406,7 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
       if (modoAtual === 'conversa') setMode('texto');
       chatHistorico = [];
       chatAtivo = false;
+      document.getElementById('chatEncerrarBtn').classList.remove('ready');
       replayGerado = false;
       comparacaoGerada = false;
       document.getElementById('replaySection').classList.remove('visible', 'open');
@@ -2361,792 +2493,4 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
             '</div>' +
             '<div class="tentativa-body">' +
               (t.fortes ? '<div class="tentativa-label good">Pontos fortes</div><div>' + t.fortes + '</div><div class="tentativa-sep"></div>' : '') +
-              (t.atencao ? '<div class="tentativa-label bad">Pontos de atenção</div><div>' + t.atencao + '</div><div class="tentativa-sep"></div>' : '') +
-              (t.prescricao ? '<div class="tentativa-label mid">Prescrição</div><div>' + t.prescricao + '</div>' : '') +
-            '</div>' +
-          '</div>';
-        }).join('');
-
-        document.getElementById('historicoSection').classList.add('visible');
-      } catch(err) {
-        // Silencioso — histórico é opcional
-      }
-    }
-
-    function toggleHistorico() {
-      const toggle = document.getElementById('historicoToggle');
-      toggle.classList.toggle('open');
-    }
-
-    function voltarAoPainel() {
-      // Tenta fechar a aba (se foi aberta pelo dashboard)
-      // Se não conseguir, redireciona para o dashboard
-      try {
-        window.close();
-        // Se window.close() não funcionar (aba não foi aberta por script),
-        // aguarda 300ms e redireciona
-        setTimeout(function() {
-          window.location.href = '/dashboard.html';
-        }, 300);
-      } catch(e) {
-        window.location.href = '/dashboard.html';
-      }
-    }
-
-    function showAlert(msg) { const b = document.getElementById('alertBox'); b.textContent = msg; b.classList.add('visible'); }
-    function hideAlert() { document.getElementById('alertBox').classList.remove('visible'); }
-
-    // ── RECONHECIMENTO DE VOZ ──────────────────────────────────────────
-    let recognition = null;
-    let gravando = false;
-    let transcricaoAcumulada = '';
-
-    (function initSpeech() {
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const btn = document.getElementById('micBtn');
-      const statusEl = document.getElementById('audioStatus');
-
-      if (!SR) {
-        btn.classList.add('unsupported');
-        btn.title = 'Reconhecimento de voz não suportado. Use Chrome.';
-        statusEl.textContent = 'Use o Chrome para ativar resposta por voz';
-        return;
-      }
-
-      recognition = new SR();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-
-      recognition.onstart = function() {
-        gravando = true;
-        btn.classList.add('recording'); btn.textContent = '⏹️';
-        statusEl.textContent = 'Ouvindo... fale sua resposta';
-        statusEl.className = 'audio-status active';
-      };
-
-      recognition.onresult = function(event) {
-        let interim = '', final = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const t = event.results[i][0].transcript;
-          if (event.results[i].isFinal) final += t + ' '; else interim += t;
-        }
-        if (final) transcricaoAcumulada += final;
-        const ta = document.getElementById('clinicalInput');
-        ta.value = (transcricaoAcumulada + interim).trim();
-        ta.dispatchEvent(new Event('input'));
-        statusEl.textContent = interim
-          ? '🔴 "' + interim.slice(0,50) + (interim.length>50?'...':'') + '"'
-          : 'Ouvindo... continue falando';
-      };
-
-      recognition.onerror = function(event) {
-        if (event.error === 'no-speech') return;
-        if (event.error === 'not-allowed') {
-          document.getElementById('audioStatus').textContent = 'Permissão de microfone negada.';
-          pararGravacao(); return;
-        }
-        pararGravacao();
-      };
-
-      recognition.onend = function() {
-        if (gravando) { try { recognition.start(); } catch(e) { pararGravacao(); } }
-      };
-    })();
-
-    function toggleGravacao() {
-      const btn = document.getElementById('micBtn');
-      if (btn.classList.contains('unsupported')) return;
-      gravando ? pararGravacao() : iniciarGravacao();
-    }
-
-    function iniciarGravacao() {
-      if (!recognition) return;
-      recognition.lang = document.getElementById('audioLang').value;
-      transcricaoAcumulada = '';
-      try { recognition.start(); } catch(e) {}
-    }
-
-    function pararGravacao() {
-      if (!recognition) return;
-      gravando = false;
-      try { recognition.stop(); } catch(e) {}
-      const btn = document.getElementById('micBtn');
-      btn.classList.remove('recording'); btn.textContent = '🎙️';
-      const statusEl = document.getElementById('audioStatus');
-      const texto = document.getElementById('clinicalInput').value.trim();
-      if (texto.length > 0) {
-        statusEl.textContent = '✓ Transcrição concluída — revise o texto antes de enviar';
-        statusEl.className = 'audio-status done';
-      } else {
-        statusEl.textContent = 'Clique no microfone para falar sua resposta';
-        statusEl.className = 'audio-status';
-      }
-    }
-
-    // ── MODO SUPERVISOR ────────────────────────────────────────────────
-    const SUPERVISOR_ITENS = [
-      { id: 'rapport',     label: 'Estabeleci rapport e conexão com o perfil do paciente' },
-      { id: 'perfil',      label: 'Identifiquei e adaptei minha condução ao perfil clínico sorteado' },
-      { id: 'tecnica',     label: 'Apliquei uma técnica ou estratégia compatível com esta aula' },
-      { id: 'resistencia', label: 'Manejei as resistências específicas do paciente adequadamente' },
-      { id: 'validacao',   label: 'Validei se houve avanço ou mudança antes de encerrar' },
-      { id: 'etica',       label: 'Mantive postura ética e respeitei os limites do papel profissional' }
-    ];
-
-    let supervisorRespostas = {};
-    let pendingPayload = null;
-
-    function abrirSupervisor(payload) {
-      pendingPayload = payload;
-      supervisorRespostas = {};
-      const container = document.getElementById('supervisorItems');
-      container.innerHTML = '';
-      SUPERVISOR_ITENS.forEach(function(item) {
-        supervisorRespostas[item.id] = null;
-        const div = document.createElement('div');
-        div.className = 'supervisor-item';
-        div.id = 'sup_' + item.id;
-        div.innerHTML = '<div class="supervisor-toggle"><div class="supervisor-knob"></div></div><div class="supervisor-label">' + item.label + '</div>';
-        div.addEventListener('click', function() {
-          const atual = supervisorRespostas[item.id];
-          supervisorRespostas[item.id] = (atual !== true);
-          div.classList.toggle('sim', supervisorRespostas[item.id]);
-          div.classList.toggle('nao', !supervisorRespostas[item.id]);
-        });
-        container.appendChild(div);
-      });
-      document.getElementById('supervisorOverlay').classList.add('visible');
-    }
-
-    function cancelarSupervisor() {
-      document.getElementById('supervisorOverlay').classList.remove('visible');
-      pendingPayload = null;
-      processing = false;
-      document.getElementById('submitBtn').disabled = false;
-      document.getElementById('submitBtn').textContent = 'Enviar resposta';
-      document.getElementById('clinicalInput').disabled = false;
-      document.getElementById('processingModule').classList.remove('visible');
-    }
-
-    async function confirmarSupervisor() {
-      if (!pendingPayload) return;
-      SUPERVISOR_ITENS.forEach(function(item) {
-        if (supervisorRespostas[item.id] === null) supervisorRespostas[item.id] = false;
-      });
-      document.getElementById('supervisorOverlay').classList.remove('visible');
-      document.getElementById('processingModule').classList.add('visible');
-      document.getElementById('resultModule').classList.remove('visible');
-      const payload = Object.assign({}, pendingPayload, { autoavaliacao: supervisorRespostas });
-      const autoav = supervisorRespostas;
-      pendingPayload = null;
-      try {
-        const res = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'avaliar', dados: payload })
-        });
-        const data = await res.json();
-        handleResult(data, autoav);
-      } catch(err) {
-        handleError(err);
-      }
-    }
-
-    function inferirCriteriosIA(data) {
-      const texto = ((data.fortes || '') + ' ' + (data.atencao || '') + ' ' + (data.justificativa || '')).toLowerCase();
-      return {
-        rapport:     /rapport|v[íi]nculo|conex[aã]o|confian/.test(texto) && !/sem rapport|falta.*rapport/.test(texto),
-        perfil:      /perfil|adapt|paciente/.test(texto) && !/ignorou.*perfil|n[aã]o.*adapt/.test(texto),
-        tecnica:     /t[eé]cnica|estrat[eé]gia|interven/.test(texto) && !/sem t[eé]cnica/.test(texto),
-        resistencia: /resist[eê]n|manejo|contornou/.test(texto) && !/n[aã]o.*resistên/.test(texto),
-        validacao:   /valid|verific|confirm|fechamento/.test(texto) && !/sem valid/.test(texto),
-        etica:       !/[eé]tico|limite|escopo|fora do papel/.test(data.atencao || '')
-      };
-    }
-
-    function renderComparacao(autoavaliacao, iaAnalise) {
-      if (!autoavaliacao || !iaAnalise) return;
-      const grid = document.getElementById('compareGrid');
-      grid.innerHTML = '';
-      SUPERVISOR_ITENS.forEach(function(item) {
-        const aluno = autoavaliacao[item.id];
-        const ia    = iaAnalise[item.id];
-        if (aluno === undefined || ia === undefined) return;
-        const row = document.createElement('div');
-        row.className = 'compare-row';
-        row.innerHTML = '<span class="compare-row-label">' + item.label + '</span>' +
-          '<span class="compare-pill ' + (aluno ? 'sim-aluno' : 'nao-aluno') + '">' + (aluno ? 'Você: ✓' : 'Você: ✗') + '</span>' +
-          '<span class="compare-pill ' + (ia ? 'sim-ia' : 'nao-ia') + '">' + (ia ? 'IA: ✓' : 'IA: ✗') + '</span>';
-        grid.appendChild(row);
-      });
-      document.getElementById('supervisorCompare').style.display = 'block';
-    }
-
-    // ── MODO CONVERSA ──────────────────────────────────────────────────
-    let modoAtual = 'texto';
-    let chatHistorico = [];
-    let chatAtivo = false;
-
-    function setMode(modo) {
-      if (modoAtual === modo) return;
-      modoAtual = modo;
-      const txtBtn  = document.getElementById('modeTxtBtn');
-      const convBtn = document.getElementById('modeConvBtn');
-      const inputPanel = document.getElementById('inputModule');
-      const chatPanel  = document.getElementById('chatPanel');
-      if (modo === 'texto') {
-        txtBtn.classList.add('active'); convBtn.classList.remove('active');
-        inputPanel.style.display = 'grid'; chatPanel.classList.remove('visible');
-      } else {
-        convBtn.classList.add('active'); txtBtn.classList.remove('active');
-        inputPanel.style.display = 'none'; chatPanel.classList.add('visible');
-        if (!chatAtivo) {
-          chatAtivo = true; chatHistorico = [];
-          document.getElementById('chatMessages').innerHTML = '<div class="chat-empty">O paciente está aguardando.<br>Inicie a sessão com sua primeira fala.</div>';
-          document.getElementById('chatTurns').textContent = '0 trocas';
-          document.getElementById('chatEncerrarBtn').disabled = true;
-        }
-        setTimeout(() => document.getElementById('chatInput').focus(), 100);
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-      const chatInput = document.getElementById('chatInput');
-      if (chatInput) {
-        chatInput.addEventListener('input', function() {
-          this.style.height = 'auto';
-          this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-        });
-        chatInput.addEventListener('keydown', function(e) {
-          if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarMensagemChat(); }
-        });
-      }
-    });
-
-    function adicionarMensagemChat(role, texto) {
-      const messages = document.getElementById('chatMessages');
-      const empty = messages.querySelector('.chat-empty');
-      if (empty) empty.remove();
-      const div = document.createElement('div');
-      // Mensagem de sistema (erro/aviso) — exibe centralizado
-      if (role === 'sistema') {
-        div.style.cssText = 'text-align:center;font-size:12px;color:var(--danger);padding:8px;opacity:.8;';
-        div.textContent = texto;
-        messages.appendChild(div);
-        messages.scrollTop = messages.scrollHeight;
-        return;
-      }
-      div.className = 'chat-msg ' + role;
-      const textoEsc = String(texto).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/[\r\n]+/g,'<br>');
-      div.innerHTML = '<div class="chat-avatar">' + (role === 'terapeuta' ? 'T' : 'P') + '</div>' +
-        '<div class="chat-bubble">' + textoEsc + '</div>';
-      messages.appendChild(div);
-      messages.scrollTop = messages.scrollHeight;
-    }
-
-    async function enviarMensagemChat() {
-      const input = document.getElementById('chatInput');
-      const sendBtn = document.getElementById('chatSendBtn');
-      const mensagem = (input.value || '').trim();
-      if (!mensagem || !activeProfile || sendBtn.disabled) return;
-      adicionarMensagemChat('terapeuta', mensagem);
-      chatHistorico.push({ role: 'terapeuta', texto: mensagem });
-      input.value = ''; input.style.height = 'auto';
-      sendBtn.disabled = true;
-      const typing = document.getElementById('chatTyping');
-      typing.classList.add('visible');
-      document.getElementById('chatMessages').scrollTop = 99999;
-      try {
-        const res = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify({
-            action: 'conversar',
-            perfil: activeProfile.name,
-            historico: chatHistorico.slice(-10),
-            curso: SYSTEM.protocol,
-            aula: SYSTEM.module,
-            mensagem: mensagem
-          })
-        });
-
-        // Verificar se a resposta HTTP foi ok
-        if (!res.ok) {
-          throw new Error('Servidor retornou ' + res.status);
-        }
-
-        const data = await res.json();
-        typing.classList.remove('visible');
-
-        if (data.erro) {
-          // Mostrar erro como mensagem do sistema no chat
-          adicionarMensagemChat('sistema', '⚠️ ' + (data.mensagem || 'Erro ao processar.'));
-          return;
-        }
-
-        const resposta = data.resposta || '...';
-        adicionarMensagemChat('paciente', resposta);
-        chatHistorico.push({ role: 'paciente', texto: resposta });
-        falarTexto(resposta);
-        atualizarEstadoPaciente(resposta);
-        const trocas = Math.floor(chatHistorico.length / 2);
-        document.getElementById('chatTurns').textContent = trocas + ' troca' + (trocas !== 1 ? 's' : '');
-        if (trocas >= 3) document.getElementById('chatEncerrarBtn').disabled = false;
-
-      } catch(err) {
-        typing.classList.remove('visible');
-        // Mostrar erro diretamente no chat para o aluno ver
-        adicionarMensagemChat('sistema', '⚠️ Falha de conexão: ' + (err.message || 'tente novamente.'));
-      } finally {
-        sendBtn.disabled = false;
-        input.focus();
-      }
-    }
-
-    async function encerrarSessaoChat() {
-      const trocas = Math.floor(chatHistorico.length / 2);
-      if (trocas < 3) { showAlert('Realize pelo menos 3 trocas antes de encerrar.'); return; }
-      const transcricao = chatHistorico.map(function(m) {
-        return (m.role === 'terapeuta' ? '[TERAPEUTA]' : '[PACIENTE]') + ' ' + m.texto;
-      }).join('\n\n');
-      if (transcricao.length < MIN_CHARS) { showAlert('Sessão muito curta.'); return; }
-      hideAlert();
-      processing = true;
-      document.getElementById('chatEncerrarBtn').disabled = true;
-      document.getElementById('chatSendBtn').disabled = true;
-      const payload = {
-        email: SYSTEM.operator, curso: SYSTEM.protocol, aula: SYSTEM.module,
-        resposta: transcricao, perfil: activeProfile.name, modo: 'conversa'
-      };
-      abrirSupervisor(payload);
-    }
-
-    // ── REPLAY COM MARCAÇÕES ───────────────────────────────────────────
-    let replayGerado = false;
-
-    function toggleReplay() {
-      const sec = document.getElementById('replaySection');
-      sec.classList.toggle('open');
-      if (sec.classList.contains('open') && !replayGerado) carregarReplay();
-    }
-
-    async function carregarReplay() {
-      replayGerado = true;
-      const body = document.getElementById('replayBody');
-      const resposta = document.getElementById('clinicalInput').value.trim() ||
-        chatHistorico.filter(function(m){return m.role==='terapeuta';}).map(function(m){return m.texto;}).join(' ');
-      if (!resposta) { body.innerHTML = '<div class="replay-loading">Resposta não disponível.</div>'; return; }
-      body.innerHTML = '<div class="replay-loading">Gerando análise...</div>';
-      try {
-        const res = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify({
-            action: 'replay', resposta: resposta,
-            fortes: document.getElementById('positiveAnalysis').textContent,
-            atencao: document.getElementById('negativeAnalysis').textContent,
-            prescricao: document.getElementById('prescriptionAnalysis').textContent,
-            perfil: activeProfile ? activeProfile.name : '',
-            curso: SYSTEM.protocol, aula: SYSTEM.module
-          })
-        });
-        const data = await res.json();
-        if (data.erro) { body.innerHTML = '<div class="replay-loading">Não foi possível gerar o replay.</div>'; return; }
-        renderReplay(data, body);
-      } catch(err) { body.innerHTML = '<div class="replay-loading">Erro ao gerar replay.</div>'; }
-    }
-
-    function renderReplay(data, container) {
-      let html = '<div class="replay-legend">' +
-        '<span class="replay-legend-item"><span class="replay-dot" style="background:rgba(126,240,194,0.5)"></span>Forte</span>' +
-        '<span class="replay-legend-item"><span class="replay-dot" style="background:rgba(245,193,99,0.5)"></span>Atenção</span>' +
-        '<span class="replay-legend-item"><span class="replay-dot" style="background:rgba(255,107,136,0.4)"></span>Inconsistente</span>' +
-        '</div><div class="replay-text">';
-      if (Array.isArray(data.segmentos)) {
-        data.segmentos.forEach(function(seg) {
-          if (!seg.texto) return;
-          const esc = seg.texto.replace(/&/g,'&amp;').replace(/</g,'&lt;');
-          if (!seg.tipo || seg.tipo === 'neutro') { html += esc; }
-          else {
-            const title = seg.nota ? ' title="' + seg.nota.replace(/"/g,'&quot;') + '"' : '';
-            html += '<span class="replay-mark ' + seg.tipo + '"' + title + '>' + esc + '</span>';
-          }
-        });
-      }
-      html += '</div>';
-      if (Array.isArray(data.ausencias) && data.ausencias.length > 0) {
-        html += '<div class="replay-ausencias"><div class="replay-ausencias-title">Elementos ausentes</div><ul>';
-        data.ausencias.forEach(function(a) { html += '<li>' + a.replace(/</g,'&lt;') + '</li>'; });
-        html += '</ul></div>';
-      }
-      container.innerHTML = html;
-    }
-
-    // ── COMPARAÇÃO ANÔNIMA ─────────────────────────────────────────────
-    let comparacaoGerada = false;
-
-    function toggleComparacao() {
-      const sec = document.getElementById('comparacaoSection');
-      sec.classList.toggle('open');
-      if (sec.classList.contains('open') && !comparacaoGerada) carregarComparacao();
-    }
-
-    async function carregarComparacao() {
-      comparacaoGerada = true;
-      const body = document.getElementById('comparacaoBody');
-      body.innerHTML = '<div class="comp-aviso">Buscando exemplos...</div>';
-      try {
-        const res = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify({
-            action: 'comparacao_anonima',
-            curso: SYSTEM.protocol, aula: SYSTEM.module,
-            perfil: activeProfile ? activeProfile.name : '', email: SYSTEM.operator
-          })
-        });
-        const data = await res.json();
-        if (!data.exemplos || data.exemplos.length === 0) {
-          body.innerHTML = '<div class="comp-aviso">Ainda não há outros alunos aprovados nesta aula. Volte depois!</div>';
-          return;
-        }
-        let html = '';
-        data.exemplos.forEach(function(ex) {
-          html += '<div class="comp-card"><div class="comp-card-header">' +
-            '<div class="comp-card-id">🎭 ' + ex.id + ' · Perfil: ' + (ex.perfil||'—') + '</div>' +
-            '<span class="comp-card-nota">' + Number(ex.nota).toFixed(1) + '/10</span></div>' +
-            '<div class="comp-card-body">' +
-            '<div class="comp-label">Trecho da resposta</div>' +
-            '<div class="comp-text">"' + (ex.trecho||'').replace(/</g,'&lt;').substring(0,600) + (ex.trecho&&ex.trecho.length>=600?'...':'"') + '</div>' +
-            (ex.fortes ? '<div class="comp-label">Pontos fortes identificados</div><div class="comp-text">' + ex.fortes.replace(/</g,'&lt;') + '</div>' : '') +
-            '</div></div>';
-        });
-        body.innerHTML = html;
-      } catch(err) { body.innerHTML = '<div class="comp-aviso">Erro ao carregar.</div>'; }
-    }
-
-    // ── DIÁRIO CLÍNICO ─────────────────────────────────────────────────
-    function toggleDiario() {
-      const sec = document.getElementById('diarioSection');
-      sec.classList.toggle('open');
-      if (sec.classList.contains('open')) carregarEntradasDiario();
-    }
-
-    async function salvarDiario() {
-      const texto = (document.getElementById('diarioInput').value || '').trim();
-      const status = document.getElementById('diarioStatus');
-      const btn = document.getElementById('diarioBtnSalvar');
-      if (!texto) { status.textContent = 'Escreva algo antes de salvar.'; status.className = 'diario-status erro'; return; }
-      btn.disabled = true; status.textContent = 'Salvando...'; status.className = 'diario-status';
-      try {
-        const res = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'salvar_diario', email: SYSTEM.operator, curso: SYSTEM.protocol, aula: SYSTEM.module, reflexao: texto })
-        });
-        const data = await res.json();
-        if (data.sucesso) {
-          status.textContent = '✓ Reflexão salva.'; status.className = 'diario-status ok';
-          document.getElementById('diarioInput').value = '';
-          carregarEntradasDiario();
-        } else { throw new Error('erro'); }
-      } catch(err) { status.textContent = 'Erro ao salvar.'; status.className = 'diario-status erro'; }
-      finally { btn.disabled = false; }
-    }
-
-    async function analisarDiario() {
-      const btn = document.getElementById('diarioBtnAnalise');
-      const box = document.getElementById('diarioAnaliseBox');
-      const txt = document.getElementById('diarioAnaliseText');
-      btn.disabled = true; btn.textContent = 'Analisando...';
-      box.classList.remove('visible');
-      try {
-        const res = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'analise_diario', email: SYSTEM.operator, curso: SYSTEM.protocol })
-        });
-        const data = await res.json();
-        txt.textContent = data.analise || 'Sem análise disponível.';
-        box.classList.add('visible');
-      } catch(err) { txt.textContent = 'Erro ao gerar análise.'; box.classList.add('visible'); }
-      finally { btn.disabled = false; btn.textContent = '✨ Ver análise semanal da IA'; }
-    }
-
-    async function carregarEntradasDiario() {
-      const container = document.getElementById('diarioEntradas');
-      try {
-        const res = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'buscar_diario', email: SYSTEM.operator, curso: SYSTEM.protocol, aula: SYSTEM.module })
-        });
-        const data = await res.json();
-        if (!data.entradas || data.entradas.length === 0) { container.classList.remove('visible'); return; }
-        container.innerHTML = '<div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--text-faint);margin-bottom:4px;">Entradas anteriores</div>';
-        data.entradas.forEach(function(e) {
-          const dt = e.timestamp ? new Date(e.timestamp).toLocaleDateString('pt-BR') : '';
-          const div = document.createElement('div');
-          div.className = 'diario-entrada';
-          div.innerHTML = '<div class="diario-entrada-meta">' + e.aula + ' · ' + dt + '</div>' +
-            '<div class="diario-entrada-text">' + e.reflexao.substring(0,200).replace(/</g,'&lt;') + (e.reflexao.length>200?'...':'') + '</div>';
-          container.appendChild(div);
-        });
-        container.classList.add('visible');
-      } catch(err) { container.classList.remove('visible'); }
-    }
-
-    // ── MODO DESAFIO ───────────────────────────────────────────────────
-    let modoDesafio = false;
-    let perfilDesafio = null;
-    let notaMinimaDesafio = 7;
-
-    function mostrarSeletorNivel() {
-      document.getElementById('desafioNivelSelector').classList.toggle('visible');
-    }
-
-    async function gerarDesafio(nivel) {
-      document.getElementById('desafioNivelSelector').classList.remove('visible');
-      document.getElementById('desafioBtn').disabled = true;
-      document.getElementById('desafioBtn').textContent = '⚡ Gerando...';
-      try {
-        const res = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'gerar_desafio', curso: SYSTEM.protocol, aula: SYSTEM.module, nivel: nivel })
-        });
-        const data = await res.json();
-        if (data.erro) { showAlert('Erro ao gerar desafio.'); return; }
-        modoDesafio = true; notaMinimaDesafio = data.nota_minima_desafio || 8; perfilDesafio = data;
-        activeProfile = {
-          name: data.perfis_base ? data.perfis_base[0] : 'Ansioso',
-          desc: data.descricao, resistances: data.resistencias || [],
-          approach: data.abordagem_ideal, type: 'DESAFIO'
-        };
-        document.getElementById('statusDot').classList.add('active');
-        document.getElementById('patientId').textContent = '⚡ ' + data.nivel;
-        document.getElementById('patientType').textContent = data.nome.toUpperCase();
-        document.getElementById('patientDesc').textContent = data.descricao;
-        document.getElementById('patientStats').style.display = 'grid';
-        const list = document.getElementById('resistanceList');
-        list.innerHTML = '';
-        (data.resistencias||[]).forEach(function(r){const li=document.createElement('li');li.textContent=r;list.appendChild(li);});
-        document.getElementById('approachText').textContent = data.abordagem_ideal;
-        document.getElementById('desafioCard').style.display = 'block';
-        document.getElementById('desafioCard').innerHTML = '<div class="desafio-card"><div class="desafio-card-badge">⚡ ' + data.nivel + '</div><div class="desafio-card-nome">' + data.nome + '</div><div class="desafio-nota-min">Nota mínima para o selo: ' + notaMinimaDesafio + '/10</div></div>';
-        document.getElementById('thresholdValue').textContent = notaMinimaDesafio + '/10';
-        document.getElementById('thresholdDisplay').textContent = notaMinimaDesafio;
-        document.getElementById('initBtn').style.display = 'none';
-        document.getElementById('desafioBtn').style.display = 'none';
-        document.getElementById('inputModule').classList.add('visible');
-        document.getElementById('modeSelector').classList.add('visible');
-        setTimeout(()=>document.getElementById('inputModule').scrollIntoView({behavior:'smooth',block:'start'}),100);
-      } catch(err) { showAlert('Erro ao gerar desafio.'); }
-      finally { document.getElementById('desafioBtn').disabled=false; document.getElementById('desafioBtn').textContent='⚡ Modo Desafio — paciente composto'; }
-    }
-
-    function verificarSeloDesafio(nota, aprovado) {
-      if (!modoDesafio || !perfilDesafio) return;
-      if (aprovado && nota >= notaMinimaDesafio) {
-        document.getElementById('seloNome').textContent = perfilDesafio.selo || 'Desafio Clínico';
-        document.getElementById('seloDesafio').classList.add('visible');
-      }
-    }
-
-
-    // ── #2: VOZ DO PACIENTE ────────────────────────────────────────────
-    let vozAtiva = false;
-    let synth = window.speechSynthesis;
-    let vozAtual = null;
-
-    function toggleVozPaciente() {
-      const suportado = 'speechSynthesis' in window;
-      if (!suportado) {
-        document.getElementById('vozLabel').textContent = 'Sem suporte (use Chrome)';
-        return;
-      }
-      vozAtiva = !vozAtiva;
-      const toggle = document.getElementById('vozToggle');
-      const label = document.getElementById('vozLabel');
-      if (vozAtiva) {
-        toggle.classList.add('ativo');
-        label.textContent = 'Voz ativa';
-        // Testar com uma fala curta
-        falarTexto('Voz do paciente ativada.');
-      } else {
-        toggle.classList.remove('ativo');
-        label.textContent = 'Voz do paciente';
-        if (synth) synth.cancel();
-      }
-    }
-
-    function falarTexto(texto) {
-      if (!vozAtiva || !synth) return;
-      synth.cancel();
-      const utter = new SpeechSynthesisUtterance(texto);
-      utter.lang = 'pt-BR';
-      utter.rate = 0.92;
-      utter.pitch = 0.88; // ligeiramente mais grave — tom sério/neutro
-      // Buscar voz em português se disponível
-      const vozes = synth.getVoices();
-      const vozPT = vozes.find(v => v.lang.startsWith('pt')) || vozes[0];
-      if (vozPT) utter.voice = vozPT;
-      vozAtual = utter;
-      // Animar bolha enquanto fala
-      utter.onstart = function() {
-        const msgs = document.getElementById('chatMessages');
-        const bubbles = msgs.querySelectorAll('.chat-msg.paciente');
-        const ultima = bubbles[bubbles.length - 1];
-        if (ultima) ultima.classList.add('chat-speaking');
-      };
-      utter.onend = function() {
-        const msgs = document.getElementById('chatMessages');
-        msgs.querySelectorAll('.chat-speaking').forEach(function(el) {
-          el.classList.remove('chat-speaking');
-        });
-      };
-      synth.speak(utter);
-    }
-
-    // ── #6: ESTADO EMOCIONAL DO PACIENTE ──────────────────────────────
-    const ESTADOS_EMOCIONAIS = {
-      aberto:     { icon: '🟢', label: 'Aberto',      cor: 'var(--success)', pct: 85 },
-      engajado:   { icon: '🔵', label: 'Engajado',    cor: 'var(--cyan)',    pct: 70 },
-      neutro:     { icon: '⚪', label: 'Neutro',      cor: 'var(--text-faint)', pct: 50 },
-      resistente: { icon: '🟡', label: 'Resistente',  cor: '#f5c163',       pct: 35 },
-      fechado:    { icon: '🔴', label: 'Fechado',     cor: 'var(--danger)', pct: 15 }
-    };
-
-    function inferirEstadoPaciente(texto) {
-      const t = texto.toLowerCase();
-      if (/aguardando/.test(t)) return 'neutro';
-      // Sinais de abertura
-      if (/entendo|faz sentido|nunca pensei|interessante|me ajuda|tô pronto|consegui/.test(t))
-        return 'aberto';
-      if (/talvez|pode ser|vou tentar|ok|certo|sim/.test(t))
-        return 'engajado';
-      // Sinais de resistência
-      if (/não sei|mas|porém|difícil|complicado|duvido|não funciona/.test(t))
-        return 'resistente';
-      if (/não|nunca|impossível|não quero|para de|deixa pra lá/.test(t))
-        return 'fechado';
-      return 'neutro';
-    }
-
-    function atualizarEstadoPaciente(texto) {
-      const estado = inferirEstadoPaciente(texto);
-      const def = ESTADOS_EMOCIONAIS[estado];
-      const wrap = document.getElementById('estadoPaciente');
-      wrap.classList.add('visible');
-      document.getElementById('estadoIcon').textContent = def.icon;
-      document.getElementById('estadoValor').textContent = def.label;
-      document.getElementById('estadoValor').style.color = def.cor;
-      document.getElementById('estadoBarra').style.width = def.pct + '%';
-      document.getElementById('estadoBarra').style.background = def.cor;
-    }
-
-    // ── #4: BOAS-VINDAS PERSONALIZADAS ────────────────────────────────
-    async function carregarBoasVindas() {
-      // Mostrar mensagem padrão imediatamente enquanto carrega
-      const nomeExibir = SYSTEM.operator.split('@')[0];
-      const aulaNum = SYSTEM.module.replace('Aula_', '');
-      const msgPadrao = nomeExibir + ', você está na Aula ' + aulaNum + ' de ' + SYSTEM.protocol + '. Gere um paciente virtual para iniciar a simulação clínica.';
-      document.getElementById('boasVindasTexto').textContent = msgPadrao;
-      document.getElementById('boasVindasBar').classList.add('visible');
-
-      function sumir() {
-        setTimeout(function() {
-          document.getElementById('boasVindasBar').style.opacity = '0';
-          document.getElementById('boasVindasBar').style.transition = 'opacity 1s';
-          setTimeout(function() {
-            document.getElementById('boasVindasBar').classList.remove('visible');
-            document.getElementById('boasVindasBar').style.opacity = '';
-            document.getElementById('boasVindasBar').style.transition = '';
-          }, 1000);
-        }, 10000);
-      }
-
-      // Tentar carregar mensagem personalizada da IA
-      try {
-        const res = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify({
-            action: 'boas_vindas',
-            email: SYSTEM.operator,
-            curso: SYSTEM.protocol,
-            aula: SYSTEM.module,
-            nome: nomeExibir
-          })
-        });
-        const data = await res.json();
-        if (data && data.mensagem && data.mensagem.length > 10) {
-          document.getElementById('boasVindasTexto').textContent = data.mensagem;
-        }
-      } catch(e) {
-        // Mantém a mensagem padrão — silencioso
-      } finally {
-        sumir();
-      }
-    }
-
-    // ── #3: PRONTUÁRIO CLÍNICO ────────────────────────────────────────
-    let prontuarioDados = null;
-
-    function abrirProntuario() {
-      if (!prontuarioDados) return;
-      const modal = document.getElementById('prontuarioConteudo');
-      const d = prontuarioDados;
-      const aprovClass = d.aprovado === 'Aprovado' ? 'aprovado' : 'reprovado';
-
-      modal.innerHTML =
-        '<div class="prontuario-header">' +
-          '<div class="prontuario-logo">IBSDH<small>Instituto Bruno Sena de Desenvolvimento Humano</small></div>' +
-          '<span class="prontuario-tipo">Prontuário de Sessão</span>' +
-        '</div>' +
-        '<div class="prontuario-body">' +
-          '<div class="prontuario-titulo">Registro de Sessão Clínica</div>' +
-          '<div class="prontuario-subtitulo">' + d.data + ' às ' + d.hora + '</div>' +
-          '<div class="prontuario-grid">' +
-            '<div class="prontuario-campo"><div class="prontuario-campo-label">Terapeuta</div><div class="prontuario-campo-valor">' + d.terapeuta + '</div></div>' +
-            '<div class="prontuario-campo"><div class="prontuario-campo-label">Paciente</div><div class="prontuario-campo-valor">' + d.paciente + '</div></div>' +
-            '<div class="prontuario-campo"><div class="prontuario-campo-label">Modalidade</div><div class="prontuario-campo-valor">' + d.modalidade + '</div></div>' +
-            '<div class="prontuario-campo"><div class="prontuario-campo-label">Tema da sessão</div><div class="prontuario-campo-valor">' + d.tema + '</div></div>' +
-          '</div>' +
-          (d.transcricao ? '<div class="prontuario-secao"><div class="prontuario-secao-titulo">Transcrição da sessão</div><div class="prontuario-secao-texto">' + d.transcricao.replace(/</g,'&lt;') + '</div></div>' : '') +
-          (d.fortes ? '<div class="prontuario-secao"><div class="prontuario-secao-titulo">Pontos de competência identificados</div><div class="prontuario-secao-texto">' + d.fortes.replace(/</g,'&lt;') + '</div></div>' : '') +
-          (d.atencao ? '<div class="prontuario-secao"><div class="prontuario-secao-titulo">Pontos de atenção</div><div class="prontuario-secao-texto">' + d.atencao.replace(/</g,'&lt;') + '</div></div>' : '') +
-          (d.prescricao ? '<div class="prontuario-secao"><div class="prontuario-secao-titulo">Prescrição de desenvolvimento</div><div class="prontuario-secao-texto">' + d.prescricao.replace(/</g,'&lt;') + '</div></div>' : '') +
-        '</div>' +
-        '<div class="prontuario-footer">' +
-          '<div><div style="font-size:11px;color:#999;margin-bottom:2px;">Nota final</div><div class="prontuario-nota-num">' + d.nota + '/10</div><span class="prontuario-resultado ' + aprovClass + '">' + d.aprovado + '</span></div>' +
-          '<div class="prontuario-action-btns">' +
-            '<button class="pron-btn-fechar" onclick="fecharProntuario()">Fechar</button>' +
-            '<button class="pron-btn-imprimir" onclick="imprimirProntuario()">🖨️ Imprimir / Salvar PDF</button>' +
-          '</div>' +
-        '</div>';
-
-      document.getElementById('prontuarioOverlay').classList.add('visible');
-    }
-
-    function fecharProntuario() {
-      document.getElementById('prontuarioOverlay').classList.remove('visible');
-    }
-
-    function imprimirProntuario() {
-      window.print();
-    }
-
-    async function gerarProntuarioAposSessao(resultado) {
-      try {
-        const historico = chatHistorico.length > 0 ? chatHistorico : [];
-        const res = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify({
-            action: 'prontuario',
-            email: SYSTEM.operator,
-            curso: SYSTEM.protocol,
-            aula: SYSTEM.module,
-            historico: historico,
-            perfil: activeProfile ? activeProfile.name : '',
-            resultado: resultado
-          })
-        });
-        prontuarioDados = await res.json();
-        document.getElementById('prontuarioBtn').classList.add('visible');
-      } catch(e) { /* silencioso */ }
-    }
-  </script>
-</body>
-</html>
+              (t.
