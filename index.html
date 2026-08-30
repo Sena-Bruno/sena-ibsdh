@@ -4,24 +4,73 @@
   <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SENA | Simulador Clínico IBSDH</title>
+  <title>SENA | Simulador Clínico IBSDH - Ultra Edition</title>
   
-  <!-- SENAI UI/UX Premium - Modern Design System -->
-  <link rel="stylesheet" href="styles-modern.css">
-  
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    :root {
-      --bg: #07090d; --bg-soft: #0b0f15;
-      --border: rgba(112,141,173,0.18); --border-strong: rgba(89,225,255,0.22);
-      --text: #edf3f8; --text-soft: #9aa7b5; --text-faint: #6f7d8c;
-      --cyan: #59e1ff; --cyan-soft: rgba(89,225,255,0.14);
-      --gold: #d6b36a; --gold-soft: rgba(214,179,106,0.12);
-      --success: #7ef0c2; --success-soft: rgba(126,240,194,0.12);
-      --danger: #ff6b88; --danger-soft: rgba(255,107,136,0.12);
-      --shadow-lg: 0 24px 60px rgba(0,0,0,0.42); --shadow-md: 0 16px 32px rgba(0,0,0,0.28);
-      --radius-xl: 24px; --radius-lg: 18px; --radius-md: 14px; --radius-sm: 10px;
+  <!-- SENAI UI/UX Ultra Premium - Next Gen Design System -->
+  <link rel="stylesheet" href="styles-ultra.css">
+  <script src="animations-ultra.js" defer></script>
+</head>
+<body>
+
+  <div class="shell">
+    <header class="hero">
+      <div class="hero-top">
+        <div class="seal"></div>
+        <div class="hero-copy">
+          <div class="eyebrow">Simulador Clínico</div>
+          <h1>SENAI - Ultra Edition</h1>
+          <p>Experimente a próxima geração de simulação clínica com IA avançada. Interface cinematográfica, animações fluidas e feedback em tempo real para aprimorar suas habilidades de anamnese.</p>
+          
+          <div class="status-grid">
+            <div class="status-card">
+              <div class="status-label">Paciente</div>
+              <div class="status-value primary" id="patientName">Carregando...</div>
+            </div>
+            <div class="status-card">
+              <div class="status-label">Estado</div>
+              <div class="status-value" id="patientState">Aguardando início</div>
+            </div>
+            <div class="status-card">
+              <div class="status-label">Tempo</div>
+              <div class="status-value" id="sessionTime">00:00</div>
+            </div>
+            <div class="status-card">
+              <div class="status-label">IA Status</div>
+              <div class="status-value primary">Online</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <main class="card">
+        <div class="card-header">
+          <div class="card-dot active"></div>
+          <div class="card-title">Simulação em Andamento</div>
+        </div>
+        <div class="card-body">
+          <!-- Conteúdo principal será inserido dinamicamente -->
+        </div>
+      </main>
+
+      <aside class="card">
+        <div class="card-header">
+          <div class="card-dot"></div>
+          <div class="card-title">Informações</div>
+        </div>
+        <div class="card-body">
+          <!-- Sidebar -->
+        </div>
+      </aside>
+    </div>
+
+    <footer class="footer-note">
+      SENAI - Simulador Clínico IBSDH | Ultra Premium Edition<br>
+      Desenvolvido com tecnologias de ponta para educação médica
+    </footer>
+  </div>
+
     }
     html, body { min-height: 100%; }
     body { font-family: 'Inter', sans-serif; background: radial-gradient(circle at top left,rgba(89,225,255,0.08),transparent 28%), radial-gradient(circle at top right,rgba(214,179,106,0.06),transparent 22%), linear-gradient(180deg,#06080c 0%,#0a0d12 100%); color: var(--text); line-height: 1.6; overflow-x: hidden; }
@@ -1991,79 +2040,51 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
         nome: 'Ansioso',
         descricao: 'Paciente agitado, fala acelerada, respiração superficial, catastrofização frequente, necessidade de controle excessivo, dificuldade de tolerância à incerteza',
         resistencias: ['Interrompe com "e se"', 'Antecipa problemas', 'Não tolera silêncio terapêutico'],
-        abordagem_ideal: 'Rapport respiratório primeiro, validação antes de intervenção, ritmo mais lento',
-        intensidade: 1,
-        tags: ['ansiedade', 'controle', 'incerteza']
+        abordagem_ideal: 'Rapport respiratório primeiro, validação antes de intervenção, ritmo mais lento'
       },
       'Cético': {
         nome: 'Cético',
         descricao: 'Paciente desconfiado, questiona metodologia, testa credibilidade do terapeuta, linguagem racional excessiva, dificuldade de vulnerabilidade',
         resistencias: ['"Isso realmente funciona?"', 'Pede evidências', 'Testa autoridade'],
-        abordagem_ideal: 'Credibilização rápida, referenciação, convite à experiência direta, menos promessas',
-        intensidade: 1,
-        tags: ['desconfiança', 'racional', 'controle']
+        abordagem_ideal: 'Credibilização rápida, referenciação, convite à experiência direta, menos promessas'
       },
       'Evitativo': {
         nome: 'Evitativo',
         descricao: 'Paciente com respostas vagas, muda de assunto quando aprofundado, dificuldade de acesso emocional, intelectualização defensiva, evita contato visual',
         resistencias: ['Respostas de uma palavra', 'Muda de assunto', '"Não sei"/"Talvez"'],
-        abordagem_ideal: 'Perguntas mais específicas, confronto gentil, foco no corporal, paciência',
-        intensidade: 1,
-        tags: ['evasão', 'emoção', 'defesa']
+        abordagem_ideal: 'Perguntas mais específicas, confronto gentil, foco no corporal, paciência'
       },
       'Intelectualizador': {
         nome: 'Intelectualizador',
         descricao: 'Paciente que raciocina demais, distanciamento somático, analisa próprio processo, dificuldade de experiência direta, teorização excessiva',
         resistencias: ['Explicações longas', 'Analisa a técnica em vez de fazê-la', 'Distância emocional'],
-        abordagem_ideal: 'Convite à experiência direta, interromper raciocínio, foco em sensações corporais',
-        intensidade: 1,
-        tags: ['racionalização', 'distanciamento', 'análise']
+        abordagem_ideal: 'Convite à experiência direta, interromper raciocínio, foco em sensações corporais'
       },
       'Dissociado': {
         nome: 'Dissociado',
         descricao: 'Paciente desconectado do presente, narrativa fragmentada, pouca presença corporal, olhar perdido, dificuldade de foco sustentado',
         resistencias: ['Falta de continuidade na fala', 'Não responde diretamente', 'Ausência de contato'],
-        abordagem_ideal: 'Ancoragem no presente, orientação espacial, ativação corporal, fragmentação da sessão',
-        intensidade: 2,
-        tags: ['dissociação', 'presença', 'fragmentação']
+        abordagem_ideal: 'Ancoragem no presente, orientação espacial, ativação corporal, fragmentação da sessão'
       },
       'Depressivo': {
         nome: 'Depressivo',
         descricao: 'Paciente com energia baixa, fala lenta, pessimismo, retraimento, dificuldade de engajamento, possível ideação suicida (avaliação de risco)',
         resistencias: ['"Não adianta nada"', 'Falta de motivação', 'Desistência rápida'],
-        abordagem_ideal: 'Ativação gradual, pequenos passos, validação do sofrimento, estruturação, avaliação de segurança',
-        intensidade: 2,
-        tags: ['depressão', 'energia', 'pessimismo']
+        abordagem_ideal: 'Ativação gradual, pequenos passos, validação do sofrimento, estruturação, avaliação de segurança'
       },
       'Histriônico': {
         nome: 'Histriônico',
         descricao: 'Paciente dramático, emoções intensas e rápidas, busca atenção, linguagem colorida, sedução, dificuldade de foco',
         resistencias: ['Dramatização', 'Fuga em emoções', 'Não completa tarefas'],
-        abordagem_ideal: 'Contenção, estrutura firme, direcionamento, foco em resultados concretos',
-        intensidade: 1,
-        tags: ['drama', 'atenção', 'emoção']
+        abordagem_ideal: 'Contenção, estrutura firme, direcionamento, foco em resultados concretos'
       },
       'Obsessivo': {
         nome: 'Obsessivo',
         descricao: 'Paciente rígido, detalhista, perfeccionista, dificuldade de delegar, controle excessivo, ansiedade com imperfeição',
         resistencias: ['Detalhes excessivos', 'Não aceita "bom o suficiente"', 'Procrastinação por perfeição'],
-        abordagem_ideal: 'Estrutura clara, flexibilidade modelada, foco no processo não no resultado',
-        intensidade: 1,
-        tags: ['controle', 'perfeição', 'rigidez']
+        abordagem_ideal: 'Estrutura clara, flexibilidade modelada, foco no processo não no resultado'
       }
     };
-
-    // Perfis compostos para modo desafio
-    const COMBINACOES_PERFIS = [
-      ['Ansioso', 'Obsessivo'],
-      ['Cético', 'Intelectualizador'],
-      ['Evitativo', 'Depressivo'],
-      ['Dissociado', 'Ansioso'],
-      ['Histriônico', 'Ansioso'],
-      ['Obsessivo', 'Cético'],
-      ['Depressivo', 'Evitativo'],
-      ['Intelectualizador', 'Dissociado']
-    ];
 
     let activeProfile = null;
     let processing = false;
@@ -3034,33 +3055,11 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
 
     // ── #6: ESTADO EMOCIONAL DO PACIENTE ──────────────────────────────
     const ESTADOS_EMOCIONAIS = {
-      engajado:   { icon: '😊', label: 'Engajado',    pct: 90, cor: 'var(--success)' },
-      entendendo: { icon: '🤔', label: 'Entendendo',  pct: 75, cor: 'var(--cyan)' },
-      neutro:     { icon: '😐', label: 'Neutro',      pct: 50, cor: 'var(--text-faint)' },
-      resistente: { icon: '😟', label: 'Resistente',  pct: 35, cor: 'var(--gold)' },
-      fechado:    { icon: '😠', label: 'Fechado',     pct: 20, cor: 'var(--danger)' },
-      confiante:  { icon: '💪', label: 'Confiante',   pct: 85, cor: 'var(--success)' },
-      confuso:    { icon: '😕', label: 'Confuso',     pct: 40, cor: 'var(--gold)' },
-      aliviado:   { icon: '😌', label: 'Aliviado',    pct: 80, cor: 'var(--cyan)' },
-      frustrado:  { icon: '😤', label: 'Frustrado',   pct: 25, cor: 'var(--danger)' }
-    };
-
-    // Critérios CNV (Comunicação Não-Violenta)
-    const CRITERIOS_CNV = {
-      observacao: { nome: 'Observação sem julgamento', peso: 2, desc: 'Descreve fatos sem avaliar ou interpretar' },
-      sentimentos: { nome: 'Identificação de sentimentos', peso: 2, desc: 'Reconhece e valida emoções do paciente' },
-      necessidades: { nome: 'Conexão com necessidades', peso: 2, desc: 'Identifica necessidades subjacentes' },
-      pedido: { nome: 'Pedido claro e positivo', peso: 2, desc: 'Formula pedidos específicos e realizáveis' },
-      empatia: { nome: 'Empatia genuína', peso: 2, desc: 'Demonstra compreensão profunda' }
-    };
-
-    // Erros comuns e referências
-    const ERROS_COMUNS = {
-      'julgamento_precoce': { erro: 'Julgamento precoce do paciente', como_evitar: 'Pratique observação neutra antes de interpretar', aula_ref: 'Módulo 2 - Rapport e Observação' },
-      'falta_validacao': { erro: 'Falta de validação emocional', como_evitar: 'Sempre valide sentimentos antes de intervir', aula_ref: 'Módulo 3 - Validação Emocional' },
-      'intervencao_rapida': { erro: 'Intervenção muito rápida', como_evitar: 'Espere o momento adequado, crie segurança primeiro', aula_ref: 'Módulo 4 - Timing Terapêutico' },
-      'linguagem_tecnica': { erro: 'Uso excessivo de termos técnicos', como_evitar: 'Adapte linguagem ao nível do paciente', aula_ref: 'Módulo 1 - Comunicação Efetiva' },
-      'ignorar_resistencia': { erro: 'Ignorar sinais de resistência', como_evitar: 'Observe e ajuste abordagem conforme resistência', aula_ref: 'Módulo 5 - Lidando com Resistência' }
+      aberto:     { icon: '🟢', label: 'Aberto',      cor: 'var(--success)', pct: 85 },
+      engajado:   { icon: '🔵', label: 'Engajado',    cor: 'var(--cyan)',    pct: 70 },
+      neutro:     { icon: '⚪', label: 'Neutro',      cor: 'var(--text-faint)', pct: 50 },
+      resistente: { icon: '🟡', label: 'Resistente',  cor: '#f5c163',       pct: 35 },
+      fechado:    { icon: '🔴', label: 'Fechado',     cor: 'var(--danger)', pct: 15 }
     };
 
     function inferirEstadoPaciente(texto) {
@@ -3202,8 +3201,5 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
       } catch(e) { /* silencioso */ }
     }
   </script>
-  
-  <!-- SENAI UI/UX Premium - Animações e Microinterações -->
-  <script src="animations-modern.js"></script>
 </body>
 </html>
