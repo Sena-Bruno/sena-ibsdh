@@ -26,6 +26,54 @@
       --shadow-premium: 0 4px 6px rgba(0,0,0,0.1), 0 12px 24px rgba(0,0,0,0.3), 0 24px 48px rgba(0,0,0,0.2);
       --radius-xl: 24px; --radius-lg: 18px; --radius-md: 14px; --radius-sm: 10px;
     }
+    /* Tema Claro */
+    body.tema-claro {
+      --bg: #f8fafc;
+      --panel: rgba(255,255,255,0.85);
+      --border: rgba(112,141,173,0.2);
+      --text: #1e293b;
+      --text-soft: #64748b;
+      --text-faint: #94a3b8;
+      --cyan: #0891b2;
+      --cyan-dim: rgba(8,145,178,0.1);
+      --gold: #b45309;
+      --gold-dim: rgba(180,83,9,0.1);
+      --success: #059669;
+      --success-dim: rgba(5,150,105,0.1);
+      --danger: #dc2626;
+      --danger-dim: rgba(220,38,38,0.1);
+    }
+    body.tema-claro { background: radial-gradient(circle at top left,rgba(8,145,178,0.08),transparent 28%), radial-gradient(circle at bottom right,rgba(180,83,9,0.06),transparent 22%), linear-gradient(180deg,#f8fafc 0%,#e2e8f0 100%); }
+    body.tema-claro .hero { background: linear-gradient(180deg,rgba(255,255,255,0.95) 0%,rgba(241,245,249,0.98) 100%); border-color: rgba(112,141,173,0.25); }
+    body.tema-claro .hero::before { background: linear-gradient(135deg,rgba(8,145,178,0.1),transparent 40%),linear-gradient(225deg,rgba(180,83,9,0.08),transparent 35%); }
+    body.tema-claro .seal { background: radial-gradient(circle at 30% 30%,rgba(8,145,178,0.2),transparent 45%),linear-gradient(180deg,rgba(255,255,255,1),rgba(241,245,249,1)); border-color: rgba(8,145,178,0.3); }
+    body.tema-claro .seal::before { color: var(--text); }
+    body.tema-claro .eyebrow { background: rgba(8,145,178,0.08); border-color: rgba(8,145,178,0.2); color: var(--gold); }
+    body.tema-claro .acess-btn { background: rgba(8,145,178,0.08); border-color: rgba(8,145,178,0.2); color: var(--text); }
+    body.tema-claro .acess-btn:hover { background: rgba(8,145,178,0.15); }
+    body.tema-claro .card, body.tema-claro .premium-card, body.tema-claro .module-card, body.tema-claro .info-card { background: rgba(255,255,255,0.7); border-color: rgba(112,141,173,0.2); }
+    body.tema-claro .patient-shell { background: rgba(255,255,255,0.8); border-color: rgba(112,141,173,0.2); }
+    body.tema-claro .input-panel { background: rgba(255,255,255,0.7); border-color: rgba(112,141,173,0.2); }
+    body.tema-claro textarea, body.tema-claro input, body.tema-claro select { background: rgba(255,255,255,0.9); border-color: rgba(112,141,173,0.3); color: var(--text); }
+    body.tema-claro textarea::placeholder, body.tema-claro input::placeholder { color: var(--text-faint); }
+    body.tema-claro .btn-primary { background: linear-gradient(135deg,var(--cyan),rgba(8,145,178,0.85)); color: #fff; }
+    body.tema-claro .btn-secondary { background: rgba(112,141,173,0.15); color: var(--text); border-color: rgba(112,141,173,0.25); }
+    body.tema-claro .btn-secondary:hover { background: rgba(112,141,173,0.25); }
+    body.tema-claro .chat-bubble.user { background: rgba(8,145,178,0.15); border-color: rgba(8,145,178,0.25); }
+    body.tema-claro .chat-bubble.paciente { background: rgba(241,245,249,0.9); border-color: rgba(112,141,173,0.2); }
+    body.tema-claro .supervisor-item { background: rgba(255,255,255,0.6); border-color: rgba(112,141,173,0.15); }
+    body.tema-claro .historico-toggle { background: rgba(255,255,255,0.5); border-color: rgba(112,141,173,0.2); }
+    body.tema-claro .historico-toggle:hover { background: rgba(255,255,255,0.8); }
+    body.tema-claro .voz-toggle { background: rgba(255,255,255,0.6); border-color: rgba(112,141,173,0.2); }
+    body.tema-claro .voz-toggle:hover { background: rgba(255,255,255,0.9); }
+    body.tema-claro .result-panel { background: rgba(255,255,255,0.85); border-color: rgba(112,141,173,0.25); }
+    body.tema-claro .processing { background: rgba(255,255,255,0.9); border-color: rgba(112,141,173,0.2); }
+    body.tema-claro .mode-selector button { background: rgba(255,255,255,0.7); border-color: rgba(112,141,173,0.25); color: var(--text); }
+    body.tema-claro .mode-selector button.active { background: rgba(8,145,178,0.15); border-color: rgba(8,145,178,0.4); color: var(--cyan); }
+    body.tema-claro .mobile-nav { background: rgba(255,255,255,0.95); border-top-color: rgba(112,141,173,0.2); }
+    body.tema-claro .mobile-nav-btn { color: var(--text-soft); }
+    body.tema-claro .mobile-nav-btn.active { color: var(--cyan); }
+    body.tema-claro .btn-flutuante { background: linear-gradient(135deg,var(--cyan),rgba(8,145,178,0.85)); box-shadow: 0 8px 24px rgba(8,145,178,0.3); }
     html, body { min-height: 100%; }
     body { font-family: 'Inter', sans-serif; background: radial-gradient(circle at top left,rgba(110,231,255,0.07),transparent 28%), radial-gradient(circle at bottom right,rgba(224,192,120,0.05),transparent 22%), linear-gradient(180deg,#05070a 0%,#090c11 100%); color: var(--text); line-height: 1.6; overflow-x: hidden; }
     body.alto-contraste { --bg: #000000; --panel: rgba(0,0,0,0.9); --border: rgba(255,255,255,0.3); --text: #ffffff; --text-soft: #e0e0e0; --text-faint: #a0a0a0; --cyan: #00ffff; --gold: #ffd700; --success: #00ff88; --danger: #ff4466; }
@@ -235,6 +283,11 @@
       .audio-bar { flex-wrap: wrap; gap: 8px; }
       .audio-lang { width: 100%; }
       .audio-lang select { width: 100%; }
+
+      /* Mobile Navigation */
+      .mobile-nav { display: flex; }
+      .btn-flutuante { display: grid; place-items: center; }
+      body { padding-bottom: 70px; }
     }
 
     /* Mobile médio (480px) */
@@ -1721,6 +1774,7 @@
   <div class="shell" id="appShell" style="display:none;">
     <section class="hero">
       <div class="acess-btns">
+        <button class="acess-btn" onclick="toggleTema()" title="Alternar tema claro/escuro">☀️</button>
         <button class="acess-btn" onclick="toggleAltoContraste()" title="Alto contraste">◐</button>
         <button class="acess-btn" onclick="toggleReduzirMovimento()" title="Reduzir movimento">⊘</button>
       </div>
@@ -1982,6 +2036,16 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
     </div>
     <div class="footer-note">IBSDH — Instituto Bruno Sena de Desenvolvimento Humano</div>
   </div>
+
+  <!-- Mobile Navigation -->
+  <nav class="mobile-nav" id="mobileNav">
+    <a href="#" onclick="scrollParaTopo()" class="mobile-nav-item">🏠<span>Início</span></a>
+    <a href="#" onclick="scrollPara('patientCard')" class="mobile-nav-item">👤<span>Paciente</span></a>
+    <a href="#" onclick="scrollPara('inputModule')" class="mobile-nav-item">✍️<span>Resposta</span></a>
+    <a href="#" onclick="scrollPara('resultModule')" class="mobile-nav-item">📊<span>Resultado</span></a>
+  </nav>
+  
+  <button class="btn-flutuante" onclick="acaoFlutuante()" title="Ação rápida">⚡</button>
 
   <script>
     // ── CONFIGURAÇÃO ────────────────────────────────────────────────────
@@ -3131,6 +3195,12 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
     }
 
     // ── ACESSIBILIDADE ─────────────────────────────────────────────────
+    function toggleTema() {
+      document.body.classList.toggle('tema-claro');
+      const isClaro = document.body.classList.contains('tema-claro');
+      localStorage.setItem('sen-tema', isClaro ? 'claro' : 'escuro');
+    }
+    
     function toggleAltoContraste() {
       document.body.classList.toggle('alto-contraste');
       localStorage.setItem('sen-alto-contraste', document.body.classList.contains('alto-contraste'));
@@ -3143,6 +3213,9 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
 
     // Carregar preferências de acessibilidade salvas
     (function carregarPreferenciasAcessibilidade() {
+      if (localStorage.getItem('sen-tema') === 'claro') {
+        document.body.classList.add('tema-claro');
+      }
       if (localStorage.getItem('sen-alto-contraste') === 'true') {
         document.body.classList.add('alto-contraste');
       }
