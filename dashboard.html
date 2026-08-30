@@ -125,36 +125,49 @@
     body.alto-contraste {
       --bg: #000000;
       --panel: rgba(0,0,0,0.95);
-      --border: rgba(255,255,255,0.4);
+      --border: rgba(255,255,255,0.5);
       --text: #ffffff;
-      --text-soft: #f0f0f0;
-      --text-faint: #c0c0c0;
+      --text-soft: #ffffff;
+      --text-faint: #e0e0e0;
       --cyan: #00ffff;
-      --cyan-dim: rgba(0,255,255,0.15);
+      --cyan-dim: rgba(0,255,255,0.2);
       --gold: #ffd700;
-      --gold-dim: rgba(255,215,0,0.15);
+      --gold-dim: rgba(255,215,0,0.2);
       --success: #00ff88;
-      --success-dim: rgba(0,255,136,0.15);
+      --success-dim: rgba(0,255,136,0.2);
       --danger: #ff4466;
-      --danger-dim: rgba(255,68,102,0.15);
+      --danger-dim: rgba(255,68,102,0.2);
     }
-    body.alto-contraste .card, body.alto-contraste .premium-card, body.alto-contraste .module-card {
-      background: rgba(0,0,0,0.9);
-      border: 2px solid rgba(255,255,255,0.4);
+    body.alto-contraste {
+      background: #000000;
+    }
+    body.alto-contraste .hero,
+    body.alto-contraste .card,
+    body.alto-contraste .premium-card,
+    body.alto-contraste .module-card,
+    body.alto-contraste .info-card,
+    body.alto-contraste .module-header,
+    body.alto-contraste .aula-row {
+      background: rgba(0,0,0,0.95);
+      border: 2px solid rgba(255,255,255,0.5);
     }
     body.alto-contraste .btn-primary {
       background: #00ffff;
-      color: #000;
+      color: #000000;
       border: 2px solid #00ffff;
+      font-weight: 800;
     }
-    body.alto-contraste .btn-secondary {
+    body.alto-contraste .btn-secondary,
+    body.alto-contraste .btn-ghost,
+    body.alto-contraste .meta-btn {
       background: transparent;
-      color: #fff;
-      border: 2px solid rgba(255,255,255,0.5);
+      color: #ffffff;
+      border: 2px solid rgba(255,255,255,0.6);
+      font-weight: 700;
     }
     body.alto-contraste .progress-bar {
-      background: rgba(255,255,255,0.2);
-      border: 1px solid rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.25);
+      border: 1px solid rgba(255,255,255,0.4);
     }
     body.alto-contraste .progress-fill {
       background: #00ffff;
@@ -163,12 +176,12 @@
       background: rgba(0,255,136,0.15);
       border: 2px solid #00ff88;
     }
-    body.alto-contraste .aula-status.pending { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff; }
-    body.alto-contraste .aula-status.approved { background: rgba(0,255,136,0.15); border: 1px solid #00ff88; color: #00ff88; }
-    body.alto-contraste .aula-status.rejected { background: rgba(255,68,102,0.15); border: 1px solid #ff4466; color: #ff4466; }
-    body.alto-contraste .btn-praticar { background: #00ffff; color: #000; border: 2px solid #00ffff; }
-    body.alto-contraste .btn-praticar.retry { background: #ff4466; color: #000; border: 2px solid #ff4466; }
-    body.alto-contraste .btn-praticar.rever { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.5); }
+    body.alto-contraste .aula-status.pending { background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.4); color: #fff; }
+    body.alto-contraste .aula-status.approved { background: rgba(0,255,136,0.15); border: 2px solid #00ff88; color: #00ff88; }
+    body.alto-contraste .aula-status.rejected { background: rgba(255,68,102,0.15); border: 2px solid #ff4466; color: #ff4466; }
+    body.alto-contraste .btn-praticar { background: #00ffff; color: #000000; border: 2px solid #00ffff; font-weight: 700; }
+    body.alto-contraste .btn-praticar.retry { background: #ff4466; color: #000000; border: 2px solid #ff4466; }
+    body.alto-contraste .btn-praticar.rever { background: transparent; color: #ffffff; border: 2px solid rgba(255,255,255,0.6); }
     body.alto-contraste .conquista-badge {
       background: rgba(0,255,255,0.15);
       border: 2px solid #00ffff;
@@ -176,6 +189,52 @@
     body.alto-contraste .rank-badge {
       background: rgba(255,215,0,0.15);
       border: 2px solid #ffd700;
+    }
+    body.alto-contraste .mobile-nav {
+      background: rgba(0,0,0,0.98);
+      border-top: 2px solid rgba(255,255,255,0.4);
+    }
+    body.alto-contraste .mobile-nav-item {
+      color: #ffffff;
+    }
+    body.alto-contraste .mobile-nav-item.active {
+      background: rgba(0,255,255,0.2);
+      border: 1px solid #00ffff;
+    }
+    body.alto-contraste .btn-flutuante {
+      background: #00ffff;
+      color: #000000;
+      border: 2px solid #00ffff;
+    }
+    body.alto-contraste .seal {
+      border: 2px solid rgba(0,255,255,0.5);
+    }
+    body.alto-contraste .eyebrow {
+      background: rgba(255,215,0,0.15);
+      border: 2px solid #ffd700;
+      color: #ffd700;
+    }
+    body.alto-contraste .acess-btn {
+      background: rgba(255,255,255,0.1);
+      border: 2px solid rgba(255,255,255,0.5);
+      color: #ffffff;
+    }
+    body.alto-contraste .acess-btn:hover {
+      background: rgba(255,255,255,0.25);
+      border-color: #ffffff;
+    }
+    body.alto-contraste .premium-card {
+      border: 2px solid rgba(255,255,255,0.4);
+    }
+    body.alto-contraste .premium-icon {
+      border: 2px solid currentColor;
+    }
+    body.alto-contraste input,
+    body.alto-contraste textarea,
+    body.alto-contraste select {
+      background: rgba(0,0,0,0.8);
+      border: 2px solid rgba(255,255,255,0.4);
+      color: #ffffff;
     }
     body.reduzir-movimento * {
       animation: none !important;
@@ -436,13 +495,13 @@
     .mod-fill { height:100%; border-radius:999px; background:var(--cyan); transition:width .6s ease; }
     .aulas-list { display:none; padding:0 12px 14px; gap:8px; }
     .module-card.open .aulas-list { display:grid; }
-    .aula-row { display:flex; align-items:center; gap:12px; padding:13px 14px; border-radius:var(--r-md); border:1px solid rgba(255,255,255,0.05); background:rgba(255,255,255,0.02); transition:border-color .18s,background .18s; }
-    .aula-row:not(.locked):hover { border-color:rgba(110,231,255,0.15); background:rgba(110,231,255,0.04); }
-    .aula-row.locked { opacity:.4; cursor:not-allowed; }
+    .aula-row { display:flex; align-items:center; gap:12px; padding:13px 14px; border-radius:var(--r-md); border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.03); transition:border-color .18s,background .18s; }
+    .aula-row:not(.locked):hover { border-color:rgba(110,231,255,0.2); background:rgba(110,231,255,0.06); }
+    .aula-row.locked { opacity:.5; cursor:not-allowed; }
     .aula-status { width:28px; height:28px; flex-shrink:0; border-radius:8px; display:grid; place-items:center; font-size:13px; }
-    .aula-status.pending  { background:rgba(255,255,255,0.05); color:var(--text-faint); }
-    .aula-status.approved { background:var(--success-dim); color:var(--success); }
-    .aula-status.rejected { background:var(--danger-dim); color:var(--danger); }
+    .aula-status.pending  { background:rgba(255,255,255,0.08); color:var(--text-faint); border:1px solid rgba(255,255,255,0.15); }
+    .aula-status.approved { background:var(--success-dim); color:var(--success); border:1px solid rgba(126,240,194,0.3); }
+    .aula-status.rejected { background:var(--danger-dim); color:var(--danger); border:1px solid rgba(255,107,136,0.3); }
     .aula-info { flex:1; min-width:0; }
     .aula-num { font-size:10px; font-weight:700; color:var(--text-faint); letter-spacing:.1em; text-transform:uppercase; margin-bottom:2px; }
     .aula-title { font-size:13px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -451,14 +510,14 @@
     .aula-nota.rejected { background:var(--danger-dim); color:var(--danger); }
     .aula-nota.pending  { color:var(--text-faint); }
     .btn-praticar { flex-shrink:0; padding:9px 18px; border:none; border-radius:10px; background:linear-gradient(135deg,var(--cyan),#9be9ff); color:#061018; font-family:'Inter',sans-serif; font-size:12px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; cursor:pointer; transition:all .2s cubic-bezier(.4,0,.2,1); white-space:nowrap; position:relative; overflow:hidden; box-shadow:0 2px 8px rgba(110,231,255,0.2); }
-    .btn-praticar:hover { transform:translateY(-1px); box-shadow:0 6px 14px rgba(110,231,255,0.22); }
+    .btn-praticar:hover { transform:translateY(-1px); box-shadow:0 6px 14px rgba(110,231,255,0.25); }
     .btn-praticar:active { transform:scale(0.98); }
     .btn-praticar::after { content:''; position:absolute; top:50%; left:50%; width:0; height:0; border-radius:50%; background:rgba(255,255,255,0.3); transform:translate(-50%,-50%); transition:width 0.3s,height 0.3s; }
     .btn-praticar:hover::after { width:100px; height:100px; }
-    .btn-praticar.retry { background:rgba(255,107,136,0.12); color:var(--danger); border:1px solid rgba(255,107,136,0.2); box-shadow:none; }
-    .btn-praticar.retry:hover { background:rgba(255,107,136,0.18); box-shadow:none; transform:translateY(-1px); }
-    .btn-praticar.rever { background:rgba(255,255,255,0.06); color:var(--text-soft); border:1px solid rgba(255,255,255,0.08); box-shadow:none; }
-    .btn-praticar.rever:hover { background:rgba(255,255,255,0.1); box-shadow:none; }
+    .btn-praticar.retry { background:rgba(255,107,136,0.15); color:var(--danger); border:1px solid rgba(255,107,136,0.25); box-shadow:none; }
+    .btn-praticar.retry:hover { background:rgba(255,107,136,0.22); box-shadow:none; transform:translateY(-1px); }
+    .btn-praticar.rever { background:rgba(255,255,255,0.08); color:var(--text-soft); border:1px solid rgba(255,255,255,0.12); box-shadow:none; }
+    .btn-praticar.rever:hover { background:rgba(255,255,255,0.12); box-shadow:none; }
 
     /* Certificado */
     .cert-banner { display:none; margin-bottom:22px; padding:24px 28px; border-radius:var(--r-xl); border:1px solid rgba(224,192,120,0.25); background:linear-gradient(135deg,rgba(224,192,120,0.08),rgba(126,240,194,0.05)); text-align:center; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: var(--shadow-premium); }
