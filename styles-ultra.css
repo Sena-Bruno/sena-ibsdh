@@ -1539,3 +1539,825 @@ body::before {
   opacity: 0.3;
   filter: blur(10px);
 }
+
+/* ========================================
+   RESPONSIVIDADE COMPLETA - 100% DISPOSITIVOS
+   ======================================== */
+
+/* Extra Large Devices (1400px and up) */
+@media (max-width: 1400px) {
+  .dashboard-container {
+    max-width: 1320px;
+  }
+  
+  .status-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+  
+  .hero-title {
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+  }
+}
+
+/* Large Devices (1200px to 1399px) */
+@media (max-width: 1200px) {
+  .dashboard-container {
+    max-width: 1140px;
+    padding: 0 20px;
+  }
+  
+  .main-content {
+    padding: 24px 20px;
+  }
+  
+  .sidebar {
+    width: 280px;
+  }
+  
+  .status-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .patient-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .hero-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+  }
+  
+  .stats-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Medium-Large Devices (992px to 1199px) */
+@media (max-width: 992px) {
+  .dashboard-container {
+    max-width: 960px;
+  }
+  
+  .sidebar {
+    width: 260px;
+  }
+  
+  .main-content {
+    margin-left: 260px;
+    padding: 20px 16px;
+  }
+  
+  .status-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  
+  .patient-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .hero-section {
+    padding: 40px 20px;
+  }
+  
+  .hero-title {
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+    line-height: 1.2;
+  }
+  
+  .hero-subtitle {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+  }
+  
+  .stats-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  
+  .action-buttons {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .action-buttons .btn-ultra {
+    flex: 1 1 calc(50% - 10px);
+    max-width: 280px;
+  }
+  
+  .chart-container {
+    height: 280px;
+  }
+  
+  table {
+    font-size: 14px;
+  }
+  
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Medium Devices (768px to 991px) - Tablets Landscape */
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: 0px;
+  }
+  
+  .sidebar {
+    transform: translateX(-100%);
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1000;
+    transition: transform var(--transition-slow);
+    width: 280px;
+  }
+  
+  .sidebar.active {
+    transform: translateX(0);
+  }
+  
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity var(--transition-base);
+  }
+  
+  .sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+  }
+  
+  .main-content {
+    margin-left: 0;
+    padding: 16px 16px;
+  }
+  
+  .mobile-menu-toggle {
+    display: flex !important;
+  }
+  
+  .dashboard-container {
+    max-width: 100%;
+    padding: 0 16px;
+  }
+  
+  .status-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .hero-section {
+    padding: 30px 16px;
+  }
+  
+  .hero-title {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    margin-bottom: 12px;
+  }
+  
+  .hero-subtitle {
+    font-size: clamp(0.875rem, 2vw, 1rem);
+    margin-bottom: 20px;
+  }
+  
+  .stats-cards {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .action-buttons .btn-ultra {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+  
+  .card-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .card-title {
+    font-size: 1.125rem;
+  }
+  
+  .chart-container {
+    height: 240px;
+  }
+  
+  .progress-item {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .progress-bar-container {
+    width: 100%;
+  }
+  
+  /* Table Responsiveness */
+  .table-responsive {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  
+  table {
+    font-size: 13px;
+  }
+  
+  th, td {
+    padding: 12px 10px;
+  }
+  
+  /* Modal Responsiveness */
+  .modal-content {
+    width: 90%;
+    max-width: 500px;
+    max-height: 85vh;
+  }
+  
+  /* Toast Responsiveness */
+  .toast-container {
+    right: 16px;
+    left: 16px;
+    bottom: 16px;
+  }
+  
+  .toast {
+    min-width: auto;
+    width: 100%;
+  }
+}
+
+/* Small Devices (576px to 767px) - Tablets Portrait */
+@media (max-width: 576px) {
+  .dashboard-container {
+    padding: 0 12px;
+  }
+  
+  .main-content {
+    padding: 12px 12px;
+  }
+  
+  .hero-section {
+    padding: 24px 12px;
+  }
+  
+  .hero-title {
+    font-size: clamp(1.25rem, 5vw, 1.75rem);
+  }
+  
+  .hero-subtitle {
+    font-size: 0.875rem;
+  }
+  
+  .status-card {
+    padding: 16px;
+  }
+  
+  .status-value {
+    font-size: 1.75rem;
+  }
+  
+  .status-label {
+    font-size: 0.75rem;
+  }
+  
+  .card {
+    padding: 16px;
+    border-radius: var(--radius-lg);
+  }
+  
+  .card-title {
+    font-size: 1rem;
+  }
+  
+  .btn-ultra {
+    padding: 12px 20px;
+    font-size: 0.875rem;
+  }
+  
+  .btn-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .chart-container {
+    height: 200px;
+  }
+  
+  .patient-card {
+    padding: 16px;
+  }
+  
+  .patient-info h4 {
+    font-size: 1rem;
+  }
+  
+  .patient-details {
+    font-size: 0.8125rem;
+  }
+  
+  .badge {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+  }
+  
+  /* Navigation */
+  .nav-link {
+    padding: 12px 16px;
+    font-size: 0.9375rem;
+  }
+  
+  .nav-link span {
+    display: inline;
+  }
+  
+  /* Logo */
+  .logo-text {
+    font-size: 1.25rem;
+  }
+}
+
+/* Extra Small Devices (320px to 575px) - Mobile Phones */
+@media (max-width: 575px) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  body {
+    font-size: 14px;
+    overflow-x: hidden;
+  }
+  
+  .dashboard-container {
+    padding: 0 8px;
+  }
+  
+  .main-content {
+    padding: 8px 8px;
+  }
+  
+  .hero-section {
+    padding: 20px 12px;
+    border-radius: var(--radius-xl);
+  }
+  
+  .hero-title {
+    font-size: clamp(1.125rem, 6vw, 1.5rem);
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+  
+  .hero-subtitle {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+  
+  .status-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .status-card {
+    padding: 14px;
+    border-radius: var(--radius-md);
+  }
+  
+  .status-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.25rem;
+  }
+  
+  .status-value {
+    font-size: 1.5rem;
+  }
+  
+  .status-label {
+    font-size: 0.6875rem;
+  }
+  
+  .status-change {
+    font-size: 0.75rem;
+  }
+  
+  .card {
+    padding: 14px;
+    border-radius: var(--radius-md);
+    margin-bottom: 12px;
+  }
+  
+  .card-title {
+    font-size: 0.9375rem;
+    margin-bottom: 12px;
+  }
+  
+  .card-header {
+    margin-bottom: 12px;
+  }
+  
+  .btn-ultra {
+    padding: 10px 16px;
+    font-size: 0.8125rem;
+    border-radius: var(--radius-md);
+  }
+  
+  .btn-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+  
+  .action-buttons {
+    gap: 10px;
+  }
+  
+  .action-buttons .btn-ultra {
+    padding: 12px 16px;
+  }
+  
+  .chart-container {
+    height: 180px;
+  }
+  
+  .patient-card {
+    padding: 14px;
+    border-radius: var(--radius-md);
+  }
+  
+  .patient-avatar {
+    width: 44px;
+    height: 44px;
+    font-size: 1.125rem;
+  }
+  
+  .patient-info h4 {
+    font-size: 0.9375rem;
+  }
+  
+  .patient-details {
+    font-size: 0.75rem;
+  }
+  
+  .patient-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .patient-actions .btn-icon {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .badge {
+    padding: 3px 8px;
+    font-size: 0.6875rem;
+    border-radius: var(--radius-full);
+  }
+  
+  /* Tables */
+  th, td {
+    padding: 10px 8px;
+  }
+  
+  th {
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+  
+  td {
+    font-size: 0.8125rem;
+  }
+  
+  /* Navigation Mobile */
+  .sidebar {
+    width: 260px;
+  }
+  
+  .nav-link {
+    padding: 14px 16px;
+    font-size: 0.875rem;
+  }
+  
+  .nav-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.125rem;
+  }
+  
+  .logo-text {
+    font-size: 1.125rem;
+  }
+  
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 1.25rem;
+  }
+  
+  /* Modal Mobile */
+  .modal-content {
+    width: 95%;
+    max-width: 400px;
+    padding: 20px;
+  }
+  
+  .modal-header {
+    padding-bottom: 16px;
+  }
+  
+  .modal-title {
+    font-size: 1.125rem;
+  }
+  
+  .modal-body {
+    padding: 16px 0;
+  }
+  
+  .modal-footer {
+    padding-top: 16px;
+    flex-direction: column-reverse;
+    gap: 10px;
+  }
+  
+  .modal-footer .btn-ultra {
+    width: 100%;
+  }
+  
+  .close-modal {
+    width: 32px;
+    height: 32px;
+    font-size: 1.25rem;
+  }
+  
+  /* Toast Mobile */
+  .toast {
+    padding: 14px 16px;
+    border-radius: var(--radius-md);
+  }
+  
+  .toast-title {
+    font-size: 0.875rem;
+  }
+  
+  .toast-message {
+    font-size: 0.8125rem;
+  }
+  
+  /* Progress Bars */
+  .progress-bar {
+    height: 8px;
+  }
+  
+  .progress-item {
+    padding: 12px 0;
+  }
+  
+  .progress-label {
+    font-size: 0.8125rem;
+    margin-bottom: 6px;
+  }
+  
+  .progress-percentage {
+    font-size: 0.75rem;
+  }
+  
+  /* Form Elements */
+  input, select, textarea {
+    padding: 12px 14px;
+    font-size: 0.875rem;
+    border-radius: var(--radius-md);
+  }
+  
+  label {
+    font-size: 0.8125rem;
+    margin-bottom: 6px;
+  }
+  
+  /* Animations Performance on Mobile */
+  .particle {
+    display: none;
+  }
+  
+  .tilt-effect {
+    transform: none !important;
+  }
+  
+  /* Hide Non-Essential Elements on Very Small Screens */
+  .hidden-xs {
+    display: none !important;
+  }
+}
+
+/* Very Small Devices (320px and below) */
+@media (max-width: 320px) {
+  body {
+    font-size: 13px;
+  }
+  
+  .hero-title {
+    font-size: 1rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 0.75rem;
+  }
+  
+  .status-value {
+    font-size: 1.25rem;
+  }
+  
+  .btn-ultra {
+    padding: 10px 14px;
+    font-size: 0.75rem;
+  }
+  
+  .card {
+    padding: 12px;
+  }
+  
+  .chart-container {
+    height: 160px;
+  }
+}
+
+/* Landscape Orientation on Mobile */
+@media (max-width: 767px) and (orientation: landscape) {
+  .hero-section {
+    padding: 20px 16px;
+  }
+  
+  .hero-title {
+    font-size: 1.25rem;
+  }
+  
+  .status-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .chart-container {
+    height: 160px;
+  }
+  
+  .sidebar {
+    width: 240px;
+  }
+}
+
+/* High DPI / Retina Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .glass-card,
+  .card,
+  .status-card {
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+  }
+  
+  .logo-icon,
+  .nav-icon {
+    image-rendering: -webkit-optimize-contrast;
+  }
+}
+
+/* Dark Mode System Preference */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+  }
+}
+
+/* Reduced Motion Preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .particle {
+    display: none;
+  }
+  
+  .tilt-effect:hover {
+    transform: none;
+  }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .btn-ultra:hover {
+    transform: none;
+  }
+  
+  .card:hover {
+    transform: none;
+    box-shadow: var(--shadow-md);
+  }
+  
+  .nav-link:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  /* Increase touch targets */
+  button,
+  a.btn-ultra,
+  .nav-link,
+  .patient-actions button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .sidebar,
+  .mobile-menu-toggle,
+  .btn-ultra,
+  .particle-container,
+  .toast-container,
+  .modal-overlay {
+    display: none !important;
+  }
+  
+  .main-content {
+    margin-left: 0;
+    padding: 0;
+  }
+  
+  .dashboard-container {
+    max-width: 100%;
+  }
+  
+  .card,
+  .status-card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+  
+  body {
+    background: white;
+    color: black;
+  }
+}
+
+/* ========================================
+   ACESSIBILIDADE
+   ======================================== */
+
+/* Focus Visible */
+:focus-visible {
+  outline: 2px solid var(--neon-cyan);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--neon-cyan);
+  outline-offset: 2px;
+}
+
+/* Skip Link for Accessibility */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--accent-cyan);
+  color: var(--text-inverse);
+  padding: 8px 16px;
+  z-index: 10000;
+  transition: top var(--transition-fast);
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* High Contrast Mode Support */
+@media (forced-colors: active) {
+  .btn-ultra,
+  .card,
+  .status-card {
+    border: 2px solid currentColor;
+  }
+}

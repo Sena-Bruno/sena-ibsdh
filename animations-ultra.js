@@ -431,6 +431,80 @@ window.UltraUI = {
       overlay.style.transition = 'opacity 0.3s ease';
       setTimeout(() => overlay.remove(), 300);
     }
+  },
+  
+  // ========================================
+  // MENU MOBILE RESPONSIVO
+  // ========================================
+  initMobileMenu: () => {
+    const mobileToggle = document.querySelector('.mobile-menu-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
+    const navLinks = document.querySelectorAll('.nav-link');
+    
+    if (!mobileToggle || !sidebar) return;
+    
+    // Toggle menu
+    mobileToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sidebar.classList.toggle('active');
+      
+      // Criar overlay se não existir
+      if (!overlay) {
+        const overlayEl = document.createElement('div');
+        overlayEl.className = 'sidebar-overlay';
+        document.body.appendChild(overlayEl);
+        
+        overlayEl.addEventListener('click', () => {
+          sidebar.classList.remove('active');
+          overlayEl.classList.remove('active');
+        });
+      }
+      
+      const newOverlay = document.querySelector('.sidebar-overlay');
+      if (newOverlay) {
+        newOverlay.classList.toggle('active');
+      }
+    });
+    
+    // Fechar ao clicar em link
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        sidebar.classList.remove('active');
+        const newOverlay = document.querySelector('.sidebar-overlay');
+        if (newOverlay) {
+          newOverlay.classList.remove('active');
+        }
+      });
+    });
+    
+    // Fechar ao clicar fora
+    document.addEventListener('click', (e) => {
+      if (sidebar.classList.contains('active') && 
+          !sidebar.contains(e.target) && 
+          !mobileToggle.contains(e.target)) {
+        sidebar.classList.remove('active');
+        const newOverlay = document.querySelector('.sidebar-overlay');
+        if (newOverlay) {
+          newOverlay.classList.remove('active');
+        }
+      }
+    });
+    
+    // Prevenir scroll quando menu aberto
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          if (sidebar.classList.contains('active')) {
+            document.body.style.overflow = 'hidden';
+          } else {
+            document.body.style.overflow = '';
+          }
+        }
+      });
+    });
+    
+    observer.observe(sidebar, { attributes: true });
   }
 };
 
@@ -452,3 +526,17 @@ if (!document.getElementById('toast-styles')) {
   `;
   document.head.appendChild(style);
 }
+
+// Inicializar quando DOM estiver pronto
+document.addEventListener('DOMContentLoaded', () => {
+  const ultraEffects = new UltraEffects();
+  
+  // Disponibilizar globalmente
+  window.UltraUI = UltraUI;
+  window.ultraEffects = ultraEffects;
+  
+  // Inicializar menu mobile
+  if (UltraUI.initMobileMenu) {
+    UltraUI.initMobileMenu();
+  }
+});
