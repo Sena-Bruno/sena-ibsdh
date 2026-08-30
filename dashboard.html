@@ -5,343 +5,429 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SENA | Painel de Progresso</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@500;700&display=swap');
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
-      --bg: #06080c;
-      --panel: rgba(16,21,29,0.95);
+      --bg: #05070a;
+      --panel: rgba(16,21,29,0.7);
       --border: rgba(112,141,173,0.15);
       --text: #edf3f8;
       --text-soft: #9aa7b5;
       --text-faint: #5a6470;
-      --cyan: #59e1ff;
-      --cyan-dim: rgba(89,225,255,0.12);
-      --gold: #d6b36a;
-      --gold-dim: rgba(214,179,106,0.12);
+      --cyan: #6ee7ff;
+      --cyan-dim: rgba(110,231,255,0.12);
+      --gold: #e0c078;
+      --gold-dim: rgba(224,192,120,0.12);
       --success: #7ef0c2;
       --success-dim: rgba(126,240,194,0.1);
       --danger: #ff6b88;
       --danger-dim: rgba(255,107,136,0.1);
       --shadow: 0 20px 48px rgba(0,0,0,0.38);
+      --shadow-premium: 0 4px 6px rgba(0,0,0,0.1), 0 12px 24px rgba(0,0,0,0.3), 0 24px 48px rgba(0,0,0,0.2);
       --r-xl: 22px; --r-lg: 16px; --r-md: 12px;
     }
     html, body { min-height: 100%; }
     body {
       font-family: 'Inter', sans-serif;
       background:
-        radial-gradient(ellipse at top left, rgba(89,225,255,0.07), transparent 30%),
-        radial-gradient(ellipse at bottom right, rgba(214,179,106,0.05), transparent 28%),
-        linear-gradient(180deg, #06080c 0%, #090c11 100%);
+        radial-gradient(ellipse at top left, rgba(110,231,255,0.07), transparent 30%),
+        radial-gradient(ellipse at bottom right, rgba(224,192,120,0.05), transparent 28%),
+        linear-gradient(180deg, #05070a 0%, #090c11 100%);
       color: var(--text);
       line-height: 1.6;
     }
 
-    /* MODAL EMAIL */
+    /* Scrollbar customizada */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+    ::-webkit-scrollbar-thumb { background: rgba(110,231,255,0.2); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(110,231,255,0.4); }
+
+    /* Modais */
     .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); z-index:9999; place-items:center; padding:24px; }
     .modal-overlay.visible { display:grid; }
-    .modal-card { width:100%; max-width:440px; background:linear-gradient(180deg,rgba(16,21,29,0.99) 0%,rgba(10,14,20,1) 100%); border:1px solid var(--border); border-radius:var(--r-xl); box-shadow:var(--shadow); padding:36px 30px 30px; text-align:center; animation:popIn .2s ease; }
+    .modal-card { width:100%; max-width:440px; background:linear-gradient(180deg,rgba(16,21,29,0.99) 0%,rgba(10,14,20,1) 100%); border:1px solid var(--border); border-radius:var(--r-xl); box-shadow:var(--shadow-premium); padding:36px 30px 30px; text-align:center; animation:popIn .2s ease; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
     @keyframes popIn { from{opacity:0;transform:scale(.96) translateY(12px)} to{opacity:1;transform:scale(1) translateY(0)} }
-    .modal-icon { width:52px;height:52px;margin:0 auto 18px;border-radius:16px;display:grid;place-items:center;background:var(--cyan-dim);border:1px solid rgba(89,225,255,0.2);font-size:20px;font-weight:800;color:var(--cyan); }
+    .modal-icon { width:52px;height:52px;margin:0 auto 18px;border-radius:16px;display:grid;place-items:center;background:var(--cyan-dim);border:1px solid rgba(110,231,255,0.2);font-size:20px;font-weight:800;color:var(--cyan); }
     .modal-card h2 { font-size:20px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px; }
     .modal-card p  { color:var(--text-soft);font-size:14px;line-height:1.7;margin-bottom:22px; }
     .modal-input { width:100%;padding:13px 16px;border-radius:var(--r-md);border:1px solid rgba(255,255,255,0.09);background:rgba(5,9,13,0.6);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;outline:none;text-align:center;transition:border-color .18s,box-shadow .18s;margin-bottom:10px; }
-    .modal-input:focus { border-color:rgba(89,225,255,0.32);box-shadow:0 0 0 3px rgba(89,225,255,0.07); }
+    .modal-input:focus { border-color:rgba(110,231,255,0.32);box-shadow:0 0 0 3px rgba(110,231,255,0.07); }
     .modal-input::placeholder { color:#3d4a56; }
     .modal-error { color:var(--danger);font-size:13px;min-height:18px;margin-bottom:10px; }
-    .btn-primary { width:100%;padding:14px 20px;border:none;border-radius:var(--r-md);background:linear-gradient(135deg,var(--cyan),#9be9ff);color:#061018;font-family:'Inter',sans-serif;font-size:13px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;transition:transform .18s,box-shadow .18s; }
-    .btn-primary:hover { transform:translateY(-1px);box-shadow:0 12px 24px rgba(89,225,255,0.2); }
+    .btn-primary { width:100%;padding:14px 20px;border:none;border-radius:var(--r-md);background:linear-gradient(135deg,var(--cyan),#9be9ff);color:#061018;font-family:'Inter',sans-serif;font-size:13px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;transition:all .2s cubic-bezier(.4,0,.2,1); }
+    .btn-primary:hover { transform:translateY(-1px);box-shadow:0 12px 24px rgba(110,231,255,0.2); }
+    .btn-primary:active { transform:scale(0.98); }
     .btn-primary:disabled { opacity:.55;cursor:not-allowed;transform:none;box-shadow:none; }
     .modal-note { margin-top:14px;color:var(--text-faint);font-size:11px; }
 
-    /* MODAL WHATSAPP */
-    .wpp-step { display:none; }
-    .wpp-step.active { display:block; }
-    .wpp-code { font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--cyan);background:rgba(89,225,255,0.08);border:1px solid rgba(89,225,255,0.2);border-radius:10px;padding:12px 20px;margin:14px 0;letter-spacing:.1em; }
-    .wpp-link { display:inline-flex;align-items:center;gap:8px;padding:13px 22px;border-radius:var(--r-md);background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;font-weight:800;font-size:13px;letter-spacing:.06em;text-decoration:none;margin-bottom:14px; }
-    .btn-secondary { width:100%;padding:12px 20px;border:1px solid rgba(255,255,255,0.1);border-radius:var(--r-md);background:rgba(255,255,255,0.04);color:var(--text-soft);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px; }
-    .btn-secondary:hover { background:rgba(255,255,255,0.08); }
+    /* Onboarding */
+    .onboard-step { display:none; }
+    .onboard-step.active { display:block; }
 
-    /* SHELL */
-    .shell { display:none;max-width:1100px;margin:0 auto;padding:32px 24px 60px; }
-    .shell.visible { display:block; }
+    /* Acessibilidade */
+    body.alto-contraste {
+      --bg: #000;
+      --text: #fff;
+      --text-soft: #ddd;
+      --cyan: #0ff;
+      --gold: #ffd700;
+    }
+    body.reduzir-movimento * {
+      animation: none !important;
+      transition: none !important;
+    }
 
-    /* SECTION TITLES */
-    .section-title {
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-faint);
-      margin-bottom: 14px;
+    /* Skeleton */
+    .skeleton-card {
+      background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+      background-size: 200% 100%;
+      animation: skeleton 1.5s ease-in-out infinite;
+    }
+    @keyframes skeleton {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Conquistas */
+    .conquista-badge {
       display: flex;
       align-items: center;
       gap: 8px;
-    }
-    .section-title::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: rgba(255,255,255,0.06);
+      padding: 8px 12px;
+      border-radius: 10px;
+      background: rgba(110,231,255,0.05);
+      border: 1px solid rgba(110,231,255,0.15);
+      font-size: 12px;
     }
 
-    /* HERO */
-    .hero { background:linear-gradient(180deg,rgba(16,21,29,0.92) 0%,rgba(10,14,20,0.98) 100%);border:1px solid var(--border);border-radius:26px;box-shadow:var(--shadow);padding:28px;margin-bottom:22px;position:relative;overflow:hidden; }
-    .hero::before { content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(89,225,255,0.06),transparent 40%),linear-gradient(225deg,rgba(214,179,106,0.04),transparent 35%);pointer-events:none; }
-    .hero-top { display:flex;align-items:center;gap:18px;flex-wrap:wrap;position:relative;z-index:1; }
-    .seal { width:64px;height:64px;flex-shrink:0;border-radius:20px;display:grid;place-items:center;background:radial-gradient(circle at 30% 30%,rgba(89,225,255,0.22),transparent 50%),linear-gradient(180deg,rgba(20,28,38,0.96),rgba(10,14,20,1));border:1px solid rgba(89,225,255,0.2);font-size:26px;font-weight:800;color:var(--text); }
-    .hero-copy { flex:1;min-width:200px; }
-    .eyebrow { display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);color:var(--gold);font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:10px; }
-    .eyebrow::before { content:'';width:6px;height:6px;border-radius:999px;background:var(--gold);box-shadow:0 0 8px rgba(214,179,106,0.55); }
-    .hero h1 { font-size:clamp(28px,5vw,40px);font-weight:800;letter-spacing:-.03em;line-height:1;margin-bottom:6px; }
-    .hero-sub { color:var(--text-soft);font-size:14px; }
-    .hero-right { text-align:right;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px; }
-    .hero-email { font-size:13px;color:var(--cyan);font-weight:600; }
-    .hero-sair { font-size:11px;color:var(--text-faint);text-decoration:none;cursor:pointer;background:none;border:none;font-family:inherit;padding:0; }
-    .hero-sair:hover { color:var(--text-soft); }
+    /* Meta */
+    .meta-btn {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(110,231,255,0.2);
+      background: rgba(110,231,255,0.05);
+      color: var(--cyan);
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .meta-btn:hover { background: rgba(110,231,255,0.12); border-color: rgba(110,231,255,0.4); }
+    .meta-btn.ativo { background: var(--cyan); color: #061018; border-color: var(--cyan); font-weight: 800; }
 
-    /* HERO STATS */
-    .hero-stats {
+    /* Botões de acessibilidade */
+    .acess-btn {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.03);
+      color: var(--text-soft);
+      font-size: 16px;
+      cursor: pointer;
+      transition: all .2s;
+      display: grid; place-items: center;
+    }
+    .acess-btn:hover { background: rgba(255,255,255,0.08); }
+
+    /* Mobile */
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(10,14,20,0.95);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding: 8px 16px;
+      z-index: 1000;
+      justify-content: space-around;
+    }
+    .mobile-nav-item {
       display: flex;
-      gap: 24px;
-      margin-top: 20px;
-      padding-top: 20px;
-      border-top: 1px solid rgba(255,255,255,0.06);
-      position: relative;
-      z-index: 1;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      color: var(--text-faint);
+      text-decoration: none;
+      font-size: 10px;
     }
-    .hero-stat { flex: 1; }
-    .hero-stat-value { font-size: 24px; font-weight: 800; color: var(--cyan); margin-bottom: 4px; }
-    .hero-stat-label { font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; }
+    .btn-flutuante {
+      display: none;
+      position: fixed;
+      bottom: 80px; right: 20px;
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--cyan), #9be9ff);
+      color: #061018;
+      font-size: 24px;
+      border: none;
+      box-shadow: 0 8px 24px rgba(110,231,255,0.4);
+      cursor: pointer;
+      z-index: 999;
+    }
+    @media (max-width: 768px) {
+      .mobile-nav { display: flex; }
+      .btn-flutuante { display: grid; place-items: center; }
+      body { padding-bottom: 70px; }
+    }
 
-    /* RANKING BADGE no hero */
-    .rank-badge { display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:rgba(214,179,106,0.1);border:1px solid rgba(214,179,106,0.2);font-size:11px;font-weight:700;color:var(--gold); }
-    .rank-badge span { font-family:'JetBrains Mono',monospace;font-size:13px; }
+    /* Shell e estrutura */
+    .shell { display:none; max-width:1100px; margin:0 auto; padding:32px 24px 60px; }
+    .shell.visible { display:block; }
+    .section-title {
+      font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-faint); margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+    }
+    .section-title::after { content:''; flex:1; height:1px; background: rgba(255,255,255,0.06); }
 
-    /* STREAK BANNER */
-    .streak-bar { display:none;margin-bottom:16px;padding:14px 20px;border-radius:var(--r-lg);border:1px solid rgba(255,107,136,0.15);background:rgba(255,107,136,0.05);display:flex;align-items:center;gap:12px; }
+    /* Hero */
+    .hero { 
+      background: linear-gradient(180deg, rgba(16,21,29,0.7) 0%, rgba(10,14,20,0.8) 100%), 
+                  linear-gradient(135deg, rgba(110,231,255,0.3), rgba(224,192,120,0.2), rgba(110,231,255,0.1));
+      background-origin: border-box;
+      background-clip: padding-box, border-box;
+      border: 1px solid transparent;
+      border-radius: 26px;
+      box-shadow: var(--shadow-premium);
+      padding: 28px;
+      margin-bottom: 22px;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .hero::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(110,231,255,0.06),transparent 40%),linear-gradient(225deg,rgba(224,192,120,0.04),transparent 35%); pointer-events:none; }
+    .hero-top { display:flex; align-items:center; gap:18px; flex-wrap:wrap; position:relative; z-index:1; }
+    .seal { width:64px; height:64px; flex-shrink:0; border-radius:20px; display:grid; place-items:center; background:radial-gradient(circle at 30% 30%,rgba(110,231,255,0.22),transparent 50%),linear-gradient(180deg,rgba(20,28,38,0.96),rgba(10,14,20,1)); border:1px solid rgba(110,231,255,0.2); font-size:26px; font-weight:800; color:var(--text); }
+    .hero-copy { flex:1; min-width:200px; }
+    .eyebrow { display:inline-flex; align-items:center; gap:7px; padding:5px 11px; border-radius:999px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); color:var(--gold); font-size:10px; font-weight:700; letter-spacing:.13em; text-transform:uppercase; margin-bottom:10px; }
+    .eyebrow::before { content:''; width:6px; height:6px; border-radius:999px; background:var(--gold); box-shadow:0 0 8px rgba(224,192,120,0.55); }
+    .hero h1 { font-family:'Space Grotesk', sans-serif; font-size:clamp(28px,5vw,40px); font-weight:700; letter-spacing:-.04em; line-height:1; margin-bottom:6px; }
+    .hero-sub { color:var(--text-soft); font-size:14px; }
+    .hero-right { text-align:right; flex-shrink:0; display:flex; flex-direction:column; align-items:flex-end; gap:6px; }
+    .hero-email { font-size:13px; color:var(--cyan); font-weight:600; }
+    .hero-sair { font-size:11px; color:var(--text-faint); text-decoration:none; cursor:pointer; background:none; border:none; font-family:inherit; padding:0; transition:color .2s; }
+    .hero-sair:hover { color:var(--text-soft); }
+    .hero-stats { display:flex; gap:24px; margin-top:20px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.06); position:relative; z-index:1; }
+    .hero-stat { flex:1; }
+    .hero-stat-value { font-size:24px; font-weight:800; color:var(--cyan); margin-bottom:4px; }
+    .hero-stat-label { font-size:11px; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.08em; }
+    .rank-badge { display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border-radius:999px; background:rgba(224,192,120,0.1); border:1px solid rgba(224,192,120,0.2); font-size:11px; font-weight:700; color:var(--gold); }
+    .rank-badge span { font-family:'JetBrains Mono',monospace; font-size:13px; }
+
+    /* Streak */
+    .streak-bar { display:none; margin-bottom:16px; padding:14px 20px; border-radius:var(--r-lg); border:1px solid rgba(255,107,136,0.15); background:rgba(255,107,136,0.05); display:flex; align-items:center; gap:12px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
     .streak-bar.active { display:flex; }
-    .streak-fire { font-size:22px;line-height:1; }
+    .streak-fire { font-size:22px; line-height:1; }
     .streak-info { flex:1; }
-    .streak-title { font-size:13px;font-weight:700;color:var(--text); }
-    .streak-sub { font-size:11px;color:var(--text-soft);margin-top:1px; }
-    .streak-count { font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:var(--danger); }
+    .streak-title { font-size:13px; font-weight:700; color:var(--text); }
+    .streak-sub { font-size:11px; color:var(--text-soft); margin-top:1px; }
+    .streak-count { font-family:'JetBrains Mono',monospace; font-size:24px; font-weight:700; color:var(--danger); }
 
-    /* PROGRESS */
-    .overall-progress { margin-top:22px;position:relative;z-index:1; }
-    .progress-header { display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px; }
-    .progress-label { font-size:12px;font-weight:700;color:var(--text-soft);letter-spacing:.08em;text-transform:uppercase; }
-    .progress-count { font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--cyan); }
-    .progress-track { height:6px;border-radius:999px;background:rgba(255,255,255,0.06);overflow:hidden; }
-    .progress-fill { height:100%;border-radius:999px;background:linear-gradient(90deg,var(--cyan),#9be9ff);transition:width .8s cubic-bezier(.4,0,.2,1);box-shadow:0 0 12px rgba(89,225,255,0.35); }
+    /* Progresso geral */
+    .overall-progress { margin-top:22px; position:relative; z-index:1; }
+    .progress-header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px; }
+    .progress-label { font-size:12px; font-weight:700; color:var(--text-soft); letter-spacing:.08em; text-transform:uppercase; }
+    .progress-count { font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--cyan); }
+    .progress-track { height:6px; border-radius:999px; background:rgba(255,255,255,0.06); overflow:hidden; }
+    .progress-fill { height:100%; border-radius:999px; background:linear-gradient(90deg,var(--cyan),#9be9ff); transition:width .8s cubic-bezier(.4,0,.2,1); box-shadow:0 0 12px rgba(110,231,255,0.35); }
 
-    /* INFO CARDS */
-    .info-row { display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px; }
-    .info-card { background:var(--panel);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px; }
-    .info-card-label { font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint);margin-bottom:6px; }
-    .info-card-value { font-size:15px;font-weight:700;color:var(--text); }
+    /* Info cards */
+    .info-row { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:22px; }
+    .info-card { background:var(--panel); border:1px solid rgba(255,255,255,0.08); border-radius:var(--r-lg); padding:16px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: transform .2s, border-color .2s; }
+    .info-card:hover { transform: translateY(-2px); border-color: rgba(110,231,255,0.3); }
+    .info-card-label { font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--text-faint); margin-bottom:6px; }
+    .info-card-value { font-size:15px; font-weight:700; }
     .info-card-value.cyan { color:var(--cyan); }
     .info-card-value.success { color:var(--success); }
     .info-card-value.gold { color:var(--gold); }
 
-    /* PREMIUM NAVIGATION */
-    .premium-nav { margin-bottom: 24px; }
-    .premium-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    /* Navegação premium */
+    .premium-nav { margin-bottom:24px; }
+    .premium-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
     .premium-card {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 16px;
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      background: var(--panel);
-      text-decoration: none;
-      transition: all 0.2s ease;
-      position: relative;
+      display:flex; align-items:center; gap:12px; padding:16px; border-radius:16px;
+      border:1px solid rgba(255,255,255,0.08); background:var(--panel);
+      text-decoration:none; transition:all 0.2s cubic-bezier(0.4,0,0.2,1);
+      position:relative; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2); overflow:hidden;
     }
-    .premium-card:hover {
-      transform: translateY(-2px);
-      border-color: rgba(89,225,255,0.3);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    .premium-card::before {
+      content:''; position:absolute; inset:0;
+      background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(110,231,255,0.1), transparent 40%);
+      opacity:0; transition:opacity 0.3s; pointer-events:none;
     }
-    .premium-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      display: grid;
-      place-items: center;
-      font-size: 20px;
-      flex-shrink: 0;
-    }
-    .premium-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
-    .premium-sub { font-size: 11px; color: var(--text-faint); }
-    .premium-arrow {
-      position: absolute;
-      right: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-faint);
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-    .premium-card:hover .premium-arrow { opacity: 1; }
+    .premium-card:hover::before { opacity:1; }
+    .premium-card:hover { transform:translateY(-4px); border-color:rgba(110,231,255,0.5); box-shadow:0 8px 24px rgba(0,0,0,0.3); }
+    .premium-icon { width:44px; height:44px; border-radius:12px; display:grid; place-items:center; font-size:20px; flex-shrink:0; }
+    .premium-title { font-size:14px; font-weight:700; color:var(--text); margin-bottom:2px; }
+    .premium-sub { font-size:11px; color:var(--text-faint); }
+    .premium-arrow { position:absolute; right:16px; top:50%; transform:translateY(-50%); color:var(--text-faint); opacity:0; transition:opacity 0.2s; }
+    .premium-card:hover .premium-arrow { opacity:1; }
 
-    /* MAPA DE JORNADA */
+    /* Jornada */
     .journey-section { margin-bottom:22px; }
-    .journey-label { font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint);margin-bottom:14px; }
-    .journey-track { display:flex;align-items:center;gap:0;padding:4px 0 16px;overflow-x:auto;scrollbar-width:none; }
+    .journey-label { font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--text-faint); margin-bottom:14px; }
+    .journey-track { display:flex; align-items:center; gap:0; padding:4px 0 16px; overflow-x:auto; scrollbar-width:none; }
     .journey-track::-webkit-scrollbar { display:none; }
-    .journey-node { flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative; }
+    .journey-node { flex-shrink:0; display:flex; flex-direction:column; align-items:center; gap:6px; position:relative; }
     .journey-circle {
-      width:48px;height:48px;border-radius:50%;display:grid;place-items:center;
-      font-size:14px;font-weight:800;border:2px solid;
-      transition:transform .2s,box-shadow .2s;position:relative;z-index:1;
+      width:48px; height:48px; border-radius:50%; display:grid; place-items:center;
+      font-size:14px; font-weight:800; border:2px solid;
+      transition:transform .2s,box-shadow .2s; position:relative; z-index:1;
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
     }
-    .journey-node.done .journey-circle    { background:var(--success-dim);border-color:var(--success);color:var(--success); }
-    .journey-node.active .journey-circle  { background:var(--cyan-dim);border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 18px rgba(89,225,255,0.3);animation:pulse 2s ease-in-out infinite; }
-    .journey-node.locked .journey-circle  { background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.1);color:var(--text-faint); }
-    @keyframes pulse { 0%,100%{box-shadow:0 0 14px rgba(89,225,255,0.25)} 50%{box-shadow:0 0 28px rgba(89,225,255,0.5)} }
-
+    .journey-node.done .journey-circle    { background:var(--success-dim); border-color:var(--success); color:var(--success); }
+    .journey-node.active .journey-circle  { background:var(--cyan-dim); border-color:var(--cyan); color:var(--cyan); box-shadow:0 0 18px rgba(110,231,255,0.3); animation:pulse 2s ease-in-out infinite; }
+    .journey-node.locked .journey-circle  { background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.1); color:var(--text-faint); }
+    @keyframes pulse { 0%,100%{box-shadow:0 0 14px rgba(110,231,255,0.25)} 50%{box-shadow:0 0 28px rgba(110,231,255,0.5)} }
     .journey-node .journey-tooltip {
-      position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);
-      background:rgba(10,14,20,0.97);border:1px solid var(--border);border-radius:8px;
-      padding:6px 10px;font-size:11px;font-weight:600;color:var(--text);
-      white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:10;
+      position:absolute; bottom:calc(100% + 10px); left:50%; transform:translateX(-50%);
+      background:rgba(10,14,20,0.97); border:1px solid var(--border); border-radius:8px;
+      padding:6px 10px; font-size:11px; font-weight:600; color:var(--text);
+      white-space:nowrap; pointer-events:none; opacity:0; transition:opacity .15s; z-index:10;
     }
-    .journey-node .journey-tooltip::after {
-      content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
-      border:5px solid transparent;border-top-color:rgba(10,14,20,0.97);
-    }
+    .journey-node .journey-tooltip::after { content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:5px solid transparent; border-top-color:rgba(10,14,20,0.97); }
     .journey-node:hover .journey-tooltip { opacity:1; }
-
-    .journey-num { font-size:9px;font-weight:700;color:var(--text-faint);letter-spacing:.06em; }
+    .journey-num { font-size:9px; font-weight:700; color:var(--text-faint); letter-spacing:.06em; }
     .journey-node.done .journey-num   { color:var(--success); }
     .journey-node.active .journey-num { color:var(--cyan); }
-
-    .journey-connector { flex-shrink:0;height:2px;width:32px;margin-top:-28px;position:relative;z-index:0; }
+    .journey-connector { flex-shrink:0; height:2px; width:32px; margin-top:-28px; position:relative; z-index:0; }
     .journey-connector.done   { background:var(--success); }
-    .journey-connector.active { background:linear-gradient(90deg,var(--success),rgba(89,225,255,0.3)); }
+    .journey-connector.active { background:linear-gradient(90deg,var(--success),rgba(110,231,255,0.3)); }
     .journey-connector.locked { background:rgba(255,255,255,0.07); }
 
-    /* MÓDULOS */
-    .modules { display:grid;gap:14px;margin-bottom:22px; }
-    .module-card { background:var(--panel);border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;transition:border-color .2s; }
+    /* Módulos */
+    .modules { display:grid; gap:14px; margin-bottom:22px; }
+    .module-card { 
+      background:var(--panel); border:1px solid rgba(255,255,255,0.08); border-radius:var(--r-xl);
+      overflow:hidden; transition:border-color .2s, transform .2s, opacity .6s ease, transform .6s ease;
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow:0 4px 12px rgba(0,0,0,0.2);
+      opacity:0; transform:translateY(20px);
+    }
+    .module-card.visible { opacity:1; transform:translateY(0); }
     .module-card.locked { opacity:.5; }
     .module-card.complete { border-color:rgba(126,240,194,0.2); }
-    .module-header { display:flex;align-items:center;gap:14px;padding:18px 20px;cursor:pointer;user-select:none;border-bottom:1px solid transparent;transition:border-color .2s; }
+    .module-card:hover:not(.locked) { border-color:rgba(110,231,255,0.3); }
+    .module-header { display:flex; align-items:center; gap:14px; padding:18px 20px; cursor:pointer; user-select:none; border-bottom:1px solid transparent; transition:border-color .2s; }
     .module-card.open .module-header { border-bottom-color:rgba(255,255,255,0.06); }
-    .module-num { width:36px;height:36px;flex-shrink:0;border-radius:11px;display:grid;place-items:center;font-size:13px;font-weight:800;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:var(--text-soft); }
-    .module-card.complete .module-num { background:var(--success-dim);border-color:rgba(126,240,194,0.2);color:var(--success); }
-    .module-card.locked .module-num { background:rgba(255,255,255,0.03);color:var(--text-faint); }
-    .module-info { flex:1;min-width:0; }
-    .module-title { font-size:14px;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
-    .module-meta { font-size:12px;color:var(--text-faint); }
-    .module-badge { flex-shrink:0;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.06em; }
-    .module-badge.done    { background:var(--success-dim);color:var(--success); }
-    .module-badge.partial { background:var(--cyan-dim);color:var(--cyan); }
-    .module-badge.locked  { background:rgba(255,255,255,0.04);color:var(--text-faint); }
-    .module-badge.pending { background:var(--gold-dim);color:var(--gold); }
-    .module-chevron { flex-shrink:0;color:var(--text-faint);font-size:12px;transition:transform .2s; }
+    .module-num { width:36px; height:36px; flex-shrink:0; border-radius:11px; display:grid; place-items:center; font-size:13px; font-weight:800; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:var(--text-soft); }
+    .module-card.complete .module-num { background:var(--success-dim); border-color:rgba(126,240,194,0.2); color:var(--success); }
+    .module-card.locked .module-num { background:rgba(255,255,255,0.03); color:var(--text-faint); }
+    .module-info { flex:1; min-width:0; }
+    .module-title { font-size:14px; font-weight:700; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .module-meta { font-size:12px; color:var(--text-faint); }
+    .module-badge { flex-shrink:0; padding:4px 10px; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:.06em; }
+    .module-badge.done    { background:var(--success-dim); color:var(--success); }
+    .module-badge.partial { background:var(--cyan-dim); color:var(--cyan); }
+    .module-badge.locked  { background:rgba(255,255,255,0.04); color:var(--text-faint); }
+    .module-badge.pending { background:var(--gold-dim); color:var(--gold); }
+    .module-chevron { flex-shrink:0; color:var(--text-faint); font-size:12px; transition:transform .2s; }
     .module-card.open .module-chevron { transform:rotate(180deg); }
-    .module-progress { padding:0 20px 14px;display:none; }
+    .module-progress { padding:0 20px 14px; display:none; }
     .module-card.open .module-progress { display:block; }
-    .mod-track { height:3px;border-radius:999px;background:rgba(255,255,255,0.05);overflow:hidden;margin-top:2px; }
-    .mod-fill { height:100%;border-radius:999px;background:var(--cyan);transition:width .6s ease; }
-    .aulas-list { display:none;padding:0 12px 14px;gap:8px; }
+    .mod-track { height:3px; border-radius:999px; background:rgba(255,255,255,0.05); overflow:hidden; margin-top:2px; }
+    .mod-fill { height:100%; border-radius:999px; background:var(--cyan); transition:width .6s ease; }
+    .aulas-list { display:none; padding:0 12px 14px; gap:8px; }
     .module-card.open .aulas-list { display:grid; }
-
-    /* AULAS */
-    .aula-row { display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:var(--r-md);border:1px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.02);transition:border-color .18s,background .18s; }
-    .aula-row:not(.locked):hover { border-color:rgba(89,225,255,0.15);background:rgba(89,225,255,0.04); }
-    .aula-row.locked { opacity:.4;cursor:not-allowed; }
-    .aula-status { width:28px;height:28px;flex-shrink:0;border-radius:8px;display:grid;place-items:center;font-size:13px; }
-    .aula-status.pending  { background:rgba(255,255,255,0.05);color:var(--text-faint); }
-    .aula-status.approved { background:var(--success-dim);color:var(--success); }
-    .aula-status.rejected { background:var(--danger-dim);color:var(--danger); }
-    .aula-info { flex:1;min-width:0; }
-    .aula-num { font-size:10px;font-weight:700;color:var(--text-faint);letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px; }
-    .aula-title { font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
-    .aula-nota { font-family:'JetBrains Mono',monospace;font-size:12px;flex-shrink:0;padding:3px 8px;border-radius:6px; }
-    .aula-nota.approved { background:var(--success-dim);color:var(--success); }
-    .aula-nota.rejected { background:var(--danger-dim);color:var(--danger); }
+    .aula-row { display:flex; align-items:center; gap:12px; padding:13px 14px; border-radius:var(--r-md); border:1px solid rgba(255,255,255,0.05); background:rgba(255,255,255,0.02); transition:border-color .18s,background .18s; }
+    .aula-row:not(.locked):hover { border-color:rgba(110,231,255,0.15); background:rgba(110,231,255,0.04); }
+    .aula-row.locked { opacity:.4; cursor:not-allowed; }
+    .aula-status { width:28px; height:28px; flex-shrink:0; border-radius:8px; display:grid; place-items:center; font-size:13px; }
+    .aula-status.pending  { background:rgba(255,255,255,0.05); color:var(--text-faint); }
+    .aula-status.approved { background:var(--success-dim); color:var(--success); }
+    .aula-status.rejected { background:var(--danger-dim); color:var(--danger); }
+    .aula-info { flex:1; min-width:0; }
+    .aula-num { font-size:10px; font-weight:700; color:var(--text-faint); letter-spacing:.1em; text-transform:uppercase; margin-bottom:2px; }
+    .aula-title { font-size:13px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .aula-nota { font-family:'JetBrains Mono',monospace; font-size:12px; flex-shrink:0; padding:3px 8px; border-radius:6px; }
+    .aula-nota.approved { background:var(--success-dim); color:var(--success); }
+    .aula-nota.rejected { background:var(--danger-dim); color:var(--danger); }
     .aula-nota.pending  { color:var(--text-faint); }
-    .btn-praticar { flex-shrink:0;padding:9px 18px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--cyan),#9be9ff);color:#061018;font-family:'Inter',sans-serif;font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;transition:transform .15s,box-shadow .15s;white-space:nowrap;position:relative;overflow:hidden;box-shadow:0 2px 8px rgba(89,225,255,0.2); }
-    .btn-praticar:hover { transform:translateY(-1px);box-shadow:0 6px 14px rgba(89,225,255,0.22); }
-    .btn-praticar::after { content:'';position:absolute;top:50%;left:50%;width:0;height:0;border-radius:50%;background:rgba(255,255,255,0.3);transform:translate(-50%,-50%);transition:width 0.3s,height 0.3s; }
-    .btn-praticar:hover::after { width:100px;height:100px; }
-    .btn-praticar.retry { background:rgba(255,107,136,0.12);color:var(--danger);border:1px solid rgba(255,107,136,0.2);box-shadow:none; }
-    .btn-praticar.retry:hover { background:rgba(255,107,136,0.18);box-shadow:none;transform:translateY(-1px); }
-    .btn-praticar.rever { background:rgba(255,255,255,0.06);color:var(--text-soft);border:1px solid rgba(255,255,255,0.08);box-shadow:none; }
-    .btn-praticar.rever:hover { background:rgba(255,255,255,0.1);box-shadow:none; }
+    .btn-praticar { flex-shrink:0; padding:9px 18px; border:none; border-radius:10px; background:linear-gradient(135deg,var(--cyan),#9be9ff); color:#061018; font-family:'Inter',sans-serif; font-size:12px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; cursor:pointer; transition:all .2s cubic-bezier(.4,0,.2,1); white-space:nowrap; position:relative; overflow:hidden; box-shadow:0 2px 8px rgba(110,231,255,0.2); }
+    .btn-praticar:hover { transform:translateY(-1px); box-shadow:0 6px 14px rgba(110,231,255,0.22); }
+    .btn-praticar:active { transform:scale(0.98); }
+    .btn-praticar::after { content:''; position:absolute; top:50%; left:50%; width:0; height:0; border-radius:50%; background:rgba(255,255,255,0.3); transform:translate(-50%,-50%); transition:width 0.3s,height 0.3s; }
+    .btn-praticar:hover::after { width:100px; height:100px; }
+    .btn-praticar.retry { background:rgba(255,107,136,0.12); color:var(--danger); border:1px solid rgba(255,107,136,0.2); box-shadow:none; }
+    .btn-praticar.retry:hover { background:rgba(255,107,136,0.18); box-shadow:none; transform:translateY(-1px); }
+    .btn-praticar.rever { background:rgba(255,255,255,0.06); color:var(--text-soft); border:1px solid rgba(255,255,255,0.08); box-shadow:none; }
+    .btn-praticar.rever:hover { background:rgba(255,255,255,0.1); box-shadow:none; }
 
-    /* CERT BANNER */
-    .cert-banner { display:none;margin-bottom:22px;padding:24px 28px;border-radius:var(--r-xl);border:1px solid rgba(214,179,106,0.25);background:linear-gradient(135deg,rgba(214,179,106,0.08),rgba(126,240,194,0.05));text-align:center; }
+    /* Certificado */
+    .cert-banner { display:none; margin-bottom:22px; padding:24px 28px; border-radius:var(--r-xl); border:1px solid rgba(224,192,120,0.25); background:linear-gradient(135deg,rgba(224,192,120,0.08),rgba(126,240,194,0.05)); text-align:center; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: var(--shadow-premium); }
     .cert-banner.visible { display:block; }
-    .cert-banner h2 { font-size:20px;font-weight:800;color:var(--gold);margin-bottom:6px; }
-    .cert-banner p  { color:var(--text-soft);font-size:14px;margin-bottom:18px; }
-    .btn-cert { display:inline-block;padding:13px 28px;border-radius:var(--r-md);background:linear-gradient(135deg,var(--gold),#f0d090);color:#1a1000;font-weight:800;font-size:13px;letter-spacing:.07em;text-transform:uppercase;text-decoration:none;cursor:pointer;border:none;font-family:'Inter',sans-serif;transition:transform .18s,box-shadow .18s; }
-    .btn-cert:hover { transform:translateY(-1px);box-shadow:0 8px 20px rgba(214,179,106,0.3); }
+    .cert-banner h2 { font-size:20px; font-weight:800; color:var(--gold); margin-bottom:6px; }
+    .cert-banner p  { color:var(--text-soft); font-size:14px; margin-bottom:18px; }
+    .btn-cert { display:inline-block; padding:13px 28px; border-radius:var(--r-md); background:linear-gradient(135deg,var(--gold),#f0d090); color:#1a1000; font-weight:800; font-size:13px; letter-spacing:.07em; text-transform:uppercase; text-decoration:none; cursor:pointer; border:none; font-family:'Inter',sans-serif; transition:all .2s; }
+    .btn-cert:hover { transform:translateY(-1px); box-shadow:0 8px 20px rgba(224,192,120,0.3); }
+    .btn-cert:active { transform:scale(0.98); }
 
-    /* BANNER WHATSAPP */
-    .wpp-banner { margin-bottom:18px;padding:16px 20px;border-radius:var(--r-lg);border:1px solid rgba(37,211,102,0.2);background:rgba(37,211,102,0.05);display:flex;align-items:center;gap:14px;flex-wrap:wrap; }
-    .wpp-banner-icon { font-size:24px;flex-shrink:0; }
-    .wpp-banner-text { flex:1;min-width:160px; }
-    .wpp-banner-title { font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#25d366;margin-bottom:2px; }
-    .wpp-banner-sub { font-size:12px;color:var(--text-soft); }
-    .btn-wpp { flex-shrink:0;padding:9px 16px;border-radius:10px;background:rgba(37,211,102,0.12);border:1px solid rgba(37,211,102,0.25);color:#25d366;font-family:'Inter',sans-serif;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;transition:background .18s; }
+    /* WhatsApp */
+    .wpp-banner { margin-bottom:18px; padding:16px 20px; border-radius:var(--r-lg); border:1px solid rgba(37,211,102,0.2); background:rgba(37,211,102,0.05); display:flex; align-items:center; gap:14px; flex-wrap:wrap; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    .wpp-banner-icon { font-size:24px; flex-shrink:0; }
+    .wpp-banner-text { flex:1; min-width:160px; }
+    .wpp-banner-title { font-size:12px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:#25d366; margin-bottom:2px; }
+    .wpp-banner-sub { font-size:12px; color:var(--text-soft); }
+    .btn-wpp { flex-shrink:0; padding:9px 16px; border-radius:10px; background:rgba(37,211,102,0.12); border:1px solid rgba(37,211,102,0.25); color:#25d366; font-family:'Inter',sans-serif; font-size:11px; font-weight:800; cursor:pointer; white-space:nowrap; transition:background .18s; }
     .btn-wpp:hover { background:rgba(37,211,102,0.2); }
-    .btn-wpp.ativo { background:rgba(37,211,102,0.06);color:var(--text-faint);border-color:rgba(37,211,102,0.1);cursor:default; }
+    .btn-wpp.ativo { background:rgba(37,211,102,0.06); color:var(--text-faint); border-color:rgba(37,211,102,0.1); cursor:default; }
 
-    /* RELATÓRIO BANNER */
-    .relatorio-banner { padding:20px 22px;border-radius:16px;border:1px solid rgba(214,179,106,0.18);background:linear-gradient(135deg,rgba(214,179,106,0.06),rgba(89,225,255,0.03));margin-bottom:18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap; }
-    .btn-relatorio { flex-shrink:0;padding:11px 20px;border-radius:11px;border:1px solid rgba(214,179,106,0.25);background:rgba(214,179,106,0.1);color:var(--gold);font-family:'Inter',sans-serif;font-size:12px;font-weight:800;cursor:pointer;transition:background .18s,transform .18s; }
-    .btn-relatorio:hover { background:rgba(214,179,106,0.2);transform:translateY(-1px); }
+    /* Relatório */
+    .relatorio-banner { padding:20px 22px; border-radius:16px; border:1px solid rgba(224,192,120,0.18); background:linear-gradient(135deg,rgba(224,192,120,0.06),rgba(110,231,255,0.03)); margin-bottom:18px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    .btn-relatorio { flex-shrink:0; padding:11px 20px; border-radius:11px; border:1px solid rgba(224,192,120,0.25); background:rgba(224,192,120,0.1); color:var(--gold); font-family:'Inter',sans-serif; font-size:12px; font-weight:800; cursor:pointer; transition:background .18s,transform .18s; }
+    .btn-relatorio:hover { background:rgba(224,192,120,0.2); transform:translateY(-1px); }
+    .btn-relatorio:active { transform:scale(0.98); }
 
-    /* LOADING / FOOTER */
-    .loading { min-height:60vh;display:grid;place-items:center;color:var(--text-soft);font-size:14px; }
-    .footer { text-align:center;padding:24px 0 0;color:var(--text-faint);font-size:12px; }
-    .footer a { color:var(--text-faint);text-decoration:none; }
+    /* Footer */
+    .loading { min-height:60vh; display:grid; place-items:center; color:var(--text-soft); font-size:14px; }
+    .footer { text-align:center; padding:24px 0 0; color:var(--text-faint); font-size:12px; }
+    .footer a { color:var(--text-faint); text-decoration:none; transition: color .2s; }
     .footer a:hover { color:var(--text-soft); }
 
-    /* RESPONSIVIDADE */
+    /* Responsividade adicional */
     @media (max-width: 768px) {
-      .shell { padding: 24px 16px 40px; }
-      .hero { padding: 20px 18px; border-radius: 20px; }
-      .hero h1 { font-size: 28px; }
+      .shell { padding:24px 16px 40px; }
+      .hero { padding:20px 18px; border-radius:20px; }
+      .hero h1 { font-size:28px; }
       .hero-right .hero-email { display:none; }
-      .hero-stats { gap: 12px; }
-      .hero-stat-value { font-size: 20px; }
-      .info-row { grid-template-columns: 1fr 1fr; }
-      .premium-grid { grid-template-columns: 1fr; }
-      .premium-card { padding: 14px; }
-      .premium-icon { width: 36px; height: 36px; font-size: 16px; }
-      .module-header { padding: 14px 16px; gap: 10px; }
-      .module-title { font-size: 13px; }
-      .aula-row { gap: 8px; padding: 10px 12px; }
-      .aula-title { font-size: 12px; max-width: 120px; }
-      .aula-num { font-size: 9px; }
-      .btn-praticar { font-size: 10px; padding: 6px 10px; }
-      .aula-nota { font-size: 11px; padding: 2px 6px; }
-      .journey-connector { width: 20px; }
-      .journey-circle { width: 40px; height: 40px; font-size: 12px; }
+      .hero-stats { gap:12px; }
+      .hero-stat-value { font-size:20px; }
+      .info-row { grid-template-columns:1fr 1fr; }
+      .premium-grid { grid-template-columns:1fr; }
+      .premium-card { padding:14px; }
+      .premium-icon { width:36px; height:36px; font-size:16px; }
+      .module-header { padding:14px 16px; gap:10px; }
+      .module-title { font-size:13px; }
+      .aula-row { gap:8px; padding:10px 12px; }
+      .aula-title { font-size:12px; max-width:120px; }
+      .aula-num { font-size:9px; }
+      .btn-praticar { font-size:10px; padding:6px 10px; }
+      .aula-nota { font-size:11px; padding:2px 6px; }
+      .journey-connector { width:20px; }
+      .journey-circle { width:40px; height:40px; font-size:12px; }
     }
     @media (max-width: 480px) {
-      .info-row { grid-template-columns: 1fr; }
-      .hero-stats { flex-direction: column; gap: 8px; }
-      .module-num { width: 30px; height: 30px; font-size: 12px; border-radius: 9px; }
-      .module-badge { font-size: 10px; padding: 3px 7px; }
-      .aula-row { flex-wrap: wrap; }
-      .btn-praticar { width: 100%; margin-top: 8px; }
-      .aula-title { max-width: 100%; }
-      .cert-banner h2 { font-size: 16px; }
-      .cert-banner p { font-size: 13px; }
-      .journey-circle { width: 36px; height: 36px; font-size: 11px; }
-      .journey-connector { width: 16px; }
-      .module-title { font-size: 12px; }
+      .info-row { grid-template-columns:1fr; }
+      .hero-stats { flex-direction:column; gap:8px; }
+      .module-num { width:30px; height:30px; font-size:12px; border-radius:9px; }
+      .module-badge { font-size:10px; padding:3px 7px; }
+      .aula-row { flex-wrap:wrap; }
+      .btn-praticar { width:100%; margin-top:8px; }
+      .aula-title { max-width:100%; }
+      .cert-banner h2 { font-size:16px; }
+      .cert-banner p { font-size:13px; }
+      .journey-circle { width:36px; height:36px; font-size:11px; }
+      .journey-connector { width:16px; }
+      .module-title { font-size:12px; }
     }
     @keyframes toastIn {
-      from { opacity: 0; transform: translateY(12px) scale(0.97); }
-      to   { opacity: 1; transform: translateY(0) scale(1); }
+      from { opacity:0; transform:translateY(12px) scale(0.97); }
+      to   { opacity:1; transform:translateY(0) scale(1); }
     }
   </style>
 </head>
@@ -360,13 +446,44 @@
     </div>
   </div>
 
-  <!-- MODAL WHATSAPP (CallMeBot) -->
+  <!-- MODAL ONBOARDING -->
+  <div class="modal-overlay" id="onboardingModal">
+    <div class="modal-card" style="max-width:500px;">
+      <div class="modal-icon" style="background:rgba(110,231,255,0.1);border-color:rgba(110,231,255,0.2);color:var(--cyan);">👋</div>
+      <h2>Bem-vindo ao SENA!</h2>
+      <div id="onboardingSteps">
+        <div class="onboard-step active">
+          <p style="font-size:15px;">Este é o seu painel de progresso. Aqui você acompanha sua evolução clínica.</p>
+          <div style="text-align:left;background:rgba(110,231,255,0.05);padding:14px;border-radius:12px;margin-bottom:16px;">
+            <div style="font-size:12px;color:var(--cyan);font-weight:700;margin-bottom:6px;">📊 VISÃO GERAL</div>
+            <div style="font-size:13px;color:var(--text-soft);">Veja suas notas, sequência de prática e posição no ranking.</div>
+          </div>
+        </div>
+        <div class="onboard-step">
+          <p style="font-size:15px;">Os módulos são liberados conforme você avança.</p>
+          <div style="text-align:left;background:rgba(126,240,194,0.05);padding:14px;border-radius:12px;margin-bottom:16px;">
+            <div style="font-size:12px;color:var(--success);font-weight:700;margin-bottom:6px;">🔓 LIBERAÇÃO PROGRESSIVA</div>
+            <div style="font-size:13px;color:var(--text-soft);">Complete todas as aulas de um módulo para desbloquear o próximo.</div>
+          </div>
+        </div>
+        <div class="onboard-step">
+          <p style="font-size:15px;">Pratique regularmente para manter sua sequência!</p>
+          <div style="text-align:left;background:rgba(255,107,136,0.05);padding:14px;border-radius:12px;margin-bottom:16px;">
+            <div style="font-size:12px;color:var(--danger);font-weight:700;margin-bottom:6px;">🔥 STREAK</div>
+            <div style="font-size:13px;color:var(--text-soft);">Pratique todos os dias para acumular dias consecutivos e não perder o ritmo.</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="avancarOnboarding()">Próximo</button>
+      <button class="btn-secondary" onclick="pularOnboarding()">Pular tour</button>
+    </div>
+  </div>
+
+  <!-- MODAL WHATSAPP -->
   <div class="modal-overlay" id="modalWpp">
     <div class="modal-card">
       <div class="modal-icon" style="background:rgba(37,211,102,0.1);border-color:rgba(37,211,102,0.25);color:#25d366;">💬</div>
       <h2>Ativar alertas no WhatsApp</h2>
-
-      <!-- Passo 1 -->
       <div class="wpp-step active" id="wppStep1">
         <p>Receba uma mensagem automática se ficar mais de 10 dias sem praticar. É gratuito — basta ativar em 2 passos.</p>
         <p style="color:var(--text-faint);font-size:12px;margin-bottom:16px;">Passo 1 de 2 — Informe seu número</p>
@@ -375,20 +492,14 @@
         <button class="btn-primary" onclick="wppPasso2()">Continuar</button>
         <button class="btn-secondary" onclick="fecharModalWpp()">Agora não</button>
       </div>
-
-      <!-- Passo 2 -->
       <div class="wpp-step" id="wppStep2">
         <p>Passo 2 de 2 — Ative o serviço enviando esta mensagem exata para o número abaixo:</p>
-        <div class="wpp-code" id="wppCodigo">I allow callmebot to send me messages</div>
-        <a id="wppLink" href="#" target="_blank" class="wpp-link">
-          📲 Abrir WhatsApp e enviar
-        </a>
+        <div class="wpp-code">I allow callmebot to send me messages</div>
+        <a id="wppLink" href="#" target="_blank" class="wpp-link">📲 Abrir WhatsApp e enviar</a>
         <p style="color:var(--text-faint);font-size:12px;margin-bottom:16px;">Após enviar a mensagem, clique em "Já ativei"</p>
         <button class="btn-primary" onclick="confirmarWpp()">✓ Já ativei</button>
         <button class="btn-secondary" onclick="fecharModalWpp()">Cancelar</button>
       </div>
-
-      <!-- Passo 3 — confirmação -->
       <div class="wpp-step" id="wppStep3">
         <p style="font-size:32px;margin-bottom:12px;">✅</p>
         <p>Perfeito! Você receberá uma mensagem no WhatsApp se ficar mais de 10 dias sem praticar.</p>
@@ -397,7 +508,11 @@
     </div>
   </div>
 
-  <div class="loading" id="loadingEl">Carregando seu progresso...</div>
+  <div class="loading" id="loadingEl">
+    <div class="skeleton-card" style="width:300px;height:80px;border-radius:12px;"></div>
+    <div class="skeleton-card" style="width:200px;height:40px;border-radius:12px;margin-top:16px;"></div>
+    <div class="skeleton-card" style="width:250px;height:40px;border-radius:12px;margin-top:16px;"></div>
+  </div>
 
   <div class="shell" id="appShell">
 
@@ -408,7 +523,7 @@
     </div>
 
     <!-- HERO -->
-    <div class="hero">
+    <div class="hero" id="hero">
       <div class="hero-top">
         <div class="seal">S</div>
         <div class="hero-copy">
@@ -418,14 +533,14 @@
         </div>
         <div class="hero-right">
           <div class="hero-email" id="emailDisplay"></div>
-          <div class="rank-badge" id="rankBadge">
-            🏆 Ranking <span id="rankPos">—</span>º
+          <div class="rank-badge" id="rankBadge">🏆 Ranking <span id="rankPos">—</span>º</div>
+          <div style="display:flex;gap:8px;margin-top:4px;">
+            <button class="acess-btn" onclick="toggleAltoContraste()" title="Alto contraste">◐</button>
+            <button class="acess-btn" onclick="toggleReduzirMovimento()" title="Reduzir animações">⊘</button>
           </div>
           <button class="hero-sair" onclick="sair()">Trocar e-mail</button>
         </div>
       </div>
-      
-      <!-- HERO STATS -->
       <div class="hero-stats">
         <div class="hero-stat">
           <div class="hero-stat-value" id="heroAprovadas">0</div>
@@ -440,7 +555,6 @@
           <div class="hero-stat-label">Posição ranking</div>
         </div>
       </div>
-      
       <div class="overall-progress">
         <div class="progress-header">
           <span class="progress-label">Progresso geral</span>
@@ -449,6 +563,16 @@
         <div class="progress-track">
           <div class="progress-fill" id="progressFill" style="width:0%"></div>
         </div>
+      </div>
+    </div>
+
+    <!-- CHECKLIST INICIAL -->
+    <div id="checklistInicial" style="display:none;margin-bottom:22px;padding:20px;border-radius:16px;border:1px solid rgba(110,231,255,0.2);background:rgba(110,231,255,0.03);">
+      <div style="font-size:13px;font-weight:700;color:var(--cyan);margin-bottom:12px;">✅ Comece por aqui</div>
+      <div style="display:grid;gap:8px;">
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-soft);"><span style="color:var(--success);">✓</span> Complete a primeira aula para desbloquear o próximo conteúdo</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-soft);"><span style="color:var(--success);">✓</span> Ative os alertas no WhatsApp para não perder o ritmo</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-soft);"><span style="color:var(--success);">✓</span> Explore o ranking e veja sua posição</div>
       </div>
     </div>
 
@@ -478,11 +602,32 @@
       </div>
     </div>
 
+    <!-- META SEMANAL -->
+    <div style="margin-bottom:22px;padding:18px;border-radius:16px;border:1px solid rgba(110,231,255,0.2);background:rgba(110,231,255,0.03);">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:.08em;">Sua meta semanal</div>
+          <div style="font-size:14px;color:var(--text-soft);" id="metaTexto">Defina uma meta de prática</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="meta-btn" data-meta="3" onclick="definirMeta(3)">3x/semana</button>
+          <button class="meta-btn" data-meta="5" onclick="definirMeta(5)">5x/semana</button>
+          <button class="meta-btn" data-meta="7" onclick="definirMeta(7)">Todos os dias</button>
+        </div>
+      </div>
+      <div style="margin-top:12px;height:6px;border-radius:999px;background:rgba(255,255,255,0.06);overflow:hidden;">
+        <div id="metaProgress" style="height:100%;border-radius:999px;background:linear-gradient(90deg,var(--cyan),#9be9ff);width:0%;transition:width .6s;"></div>
+      </div>
+    </div>
+
+    <!-- CONQUISTAS -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;" id="conquistasContainer"></div>
+
     <!-- NAVEGAÇÃO PREMIUM -->
-    <div class="premium-nav">
+    <div class="premium-nav" id="premium-nav">
       <div class="section-title">Explore</div>
       <div class="premium-grid">
-        <a href="/ranking.html" class="premium-card">
+        <a href="/ranking.html" class="premium-card" id="premRanking">
           <div class="premium-icon" style="background: rgba(126,240,194,0.1); border-color: rgba(126,240,194,0.2);">🏆</div>
           <div>
             <div class="premium-title">Ranking</div>
@@ -490,8 +635,7 @@
           </div>
           <span class="premium-arrow">→</span>
         </a>
-        
-        <a href="/desafio.html" class="premium-card">
+        <a href="/desafio.html" class="premium-card" id="premDesafio">
           <div class="premium-icon" style="background: rgba(245,193,99,0.1); border-color: rgba(245,193,99,0.2);">⚡</div>
           <div>
             <div class="premium-title">Desafio Semanal</div>
@@ -499,16 +643,29 @@
           </div>
           <span class="premium-arrow">→</span>
         </a>
-        
-        <a href="/mentor.html" class="premium-card">
-          <div class="premium-icon" style="background: rgba(89,225,255,0.1); border-color: rgba(89,225,255,0.2);">🎓</div>
+        <a href="/mentor.html" class="premium-card" id="premMentor">
+          <div class="premium-icon" style="background: rgba(110,231,255,0.1); border-color: rgba(110,231,255,0.2);">🎓</div>
           <div>
             <div class="premium-title">Mentor IA</div>
             <div class="premium-sub">Feedback personalizado</div>
           </div>
           <span class="premium-arrow">→</span>
         </a>
+        <a href="#" class="premium-card" onclick="modoPlantao()">
+          <div class="premium-icon" style="background: rgba(255,107,136,0.1); border-color: rgba(255,107,136,0.2);">🚨</div>
+          <div>
+            <div class="premium-title">Modo Plantão</div>
+            <div class="premium-sub">Casos urgentes com tempo limitado</div>
+          </div>
+          <span class="premium-arrow">→</span>
+        </a>
       </div>
+    </div>
+
+    <!-- GRÁFICO DE EVOLUÇÃO -->
+    <div style="margin-bottom:22px;padding:20px;border-radius:16px;border:1px solid rgba(110,231,255,0.2);background:rgba(110,231,255,0.03);">
+      <div style="font-size:13px;font-weight:700;color:var(--cyan);margin-bottom:12px;">📈 Evolução das notas</div>
+      <canvas id="graficoEvolucao" height="200" style="width:100%;max-width:100%;"></canvas>
     </div>
 
     <!-- MAPA DE JORNADA -->
@@ -531,7 +688,7 @@
       <button class="btn-wpp" id="btnWpp" onclick="abrirModalWpp()">Ativar grátis</button>
     </div>
 
-    <!-- Banner relatório de evolução -->
+    <!-- RELATÓRIO -->
     <div class="relatorio-banner">
       <div style="flex:1;min-width:200px;">
         <div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;">Relatório de Evolução Clínica</div>
@@ -542,7 +699,7 @@
 
     <!-- Modal relatório -->
     <div id="relatorioOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);backdrop-filter:blur(8px);z-index:9999;place-items:start center;padding:20px;overflow-y:auto;">
-      <div style="width:100%;max-width:680px;background:linear-gradient(180deg,rgba(16,21,29,0.99),rgba(10,14,20,1));border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow);overflow:hidden;">
+      <div style="width:100%;max-width:680px;background:linear-gradient(180deg,rgba(16,21,29,0.99),rgba(10,14,20,1));border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow-premium);overflow:hidden;">
         <div style="padding:22px 24px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between;">
           <div>
             <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;">IBSDH — Relatório Oficial</div>
@@ -559,12 +716,18 @@
     </div>
   </div>
 
+  <!-- MOBILE NAV -->
+  <div class="mobile-nav" id="mobileNav">
+    <a href="#" onclick="scrollPara('hero')" class="mobile-nav-item">🏠<span>Início</span></a>
+    <a href="#" onclick="scrollPara('modulesContainer')" class="mobile-nav-item">📚<span>Aulas</span></a>
+    <a href="#" onclick="scrollPara('premium-nav')" class="mobile-nav-item">🏆<span>Extra</span></a>
+  </div>
+  <button class="btn-flutuante" onclick="praticarProximaAula()" title="Praticar agora">⚡</button>
+
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const CURSO = urlParams.get('curso') || 'Practitioner';
     const APPS_SCRIPT_URL = '/api';
-
-    // CallMeBot — número do bot fixo
     const CALLMEBOT_NUMBER = '34631001117';
 
     let MODULOS = [];
@@ -573,7 +736,199 @@
     let email = '';
     let progresso = {};
 
-    // ── VERIFICAÇÃO DE ACESSO (Alunos_Hotmart) ────────────────────────
+    // Funções de acessibilidade
+    function carregarPreferenciasAcessibilidade() {
+      if (localStorage.getItem('sena_alto_contraste') === 'true') document.body.classList.add('alto-contraste');
+      if (localStorage.getItem('sena_reduzir_movimento') === 'true') document.body.classList.add('reduzir-movimento');
+    }
+    function toggleAltoContraste() {
+      document.body.classList.toggle('alto-contraste');
+      localStorage.setItem('sena_alto_contraste', document.body.classList.contains('alto-contraste'));
+    }
+    function toggleReduzirMovimento() {
+      document.body.classList.toggle('reduzir-movimento');
+      localStorage.setItem('sena_reduzir_movimento', document.body.classList.contains('reduzir-movimento'));
+    }
+    carregarPreferenciasAcessibilidade();
+
+    // Onboarding
+    let onboardingStepAtual = 0;
+    const onboardingSteps = document.querySelectorAll('.onboard-step');
+    function mostrarOnboarding() {
+      const jaViu = localStorage.getItem('sena_onboarding_visto');
+      if (!jaViu) {
+        document.getElementById('onboardingModal').classList.add('visible');
+        atualizarOnboarding();
+      }
+    }
+    function atualizarOnboarding() {
+      onboardingSteps.forEach((step, idx) => {
+        step.style.display = idx === onboardingStepAtual ? 'block' : 'none';
+      });
+      const btn = document.querySelector('#onboardingModal .btn-primary');
+      btn.textContent = onboardingStepAtual === onboardingSteps.length - 1 ? 'Começar' : 'Próximo';
+    }
+    function avancarOnboarding() {
+      if (onboardingStepAtual < onboardingSteps.length - 1) {
+        onboardingStepAtual++;
+        atualizarOnboarding();
+      } else {
+        pularOnboarding();
+      }
+    }
+    function pularOnboarding() {
+      localStorage.setItem('sena_onboarding_visto', 'true');
+      document.getElementById('onboardingModal').classList.remove('visible');
+      document.getElementById('checklistInicial').style.display = 'block';
+    }
+
+    // Metas
+    function definirMeta(dias) {
+      localStorage.setItem('sena_meta_semanal_' + email, dias);
+      document.querySelectorAll('.meta-btn').forEach(btn => {
+        btn.classList.toggle('ativo', parseInt(btn.dataset.meta) === dias);
+      });
+      atualizarMeta();
+    }
+    function atualizarMeta() {
+      const meta = parseInt(localStorage.getItem('sena_meta_semanal_' + email) || '0');
+      const historico = JSON.parse(localStorage.getItem('sena_datas_pratica_' + email) || '[]');
+      const hoje = new Date();
+      const umaSemanaAtras = new Date(hoje.getTime() - 7*86400000);
+      const praticasSemana = historico.filter(data => {
+        const d = new Date(data);
+        return d >= umaSemanaAtras && d <= hoje;
+      }).length;
+      const pct = meta > 0 ? Math.min(100, Math.round((praticasSemana / meta) * 100)) : 0;
+      document.getElementById('metaProgress').style.width = pct + '%';
+      document.getElementById('metaTexto').textContent = meta > 0 ? praticasSemana + ' de ' + meta + ' práticas esta semana' : 'Defina uma meta de prática';
+    }
+
+    // Conquistas
+    function calcularConquistas() {
+      const conquistas = [];
+      const totalAprovadas = Object.values(progresso).filter(p => p.aprovado === 'SIM').length;
+      if (totalAprovadas >= 1) conquistas.push({ icone: '🎯', nome: 'Primeira aprovação', desc: 'Aprovou a primeira aula' });
+      if (totalAprovadas >= 5) conquistas.push({ icone: '📚', nome: 'Estudioso', desc: '5 aulas aprovadas' });
+      if (totalAprovadas >= 10) conquistas.push({ icone: '💪', nome: 'Dedicado', desc: '10 aulas aprovadas' });
+      const streak = calcularStreak();
+      if (streak >= 3) conquistas.push({ icone: '🔥', nome: 'Sequência de 3 dias', desc: '3 dias seguidos praticando' });
+      if (streak >= 7) conquistas.push({ icone: '⚡', nome: 'Imparável', desc: '7 dias seguidos' });
+      return conquistas;
+    }
+    function renderConquistas() {
+      const container = document.getElementById('conquistasContainer');
+      if (!container) return;
+      const conquistas = calcularConquistas();
+      container.innerHTML = conquistas.map(c => 
+        `<div class="conquista-badge">
+          <span style="font-size:16px;">${c.icone}</span>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--text);">${c.nome}</div>
+            <div style="font-size:10px;color:var(--text-faint);">${c.desc}</div>
+          </div>
+        </div>`
+      ).join('');
+    }
+
+    // Gráfico de evolução
+    function desenharGraficoEvolucao() {
+      const canvas = document.getElementById('graficoEvolucao');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.offsetWidth;
+      const notas = [];
+      MODULOS.forEach(mod => {
+        mod.aulas.forEach(a => {
+          const p = progresso[a.aula];
+          if (p && p.melhor_nota) notas.push({ aula: a.aula.replace('Aula_', ''), nota: Number(p.melhor_nota) });
+        });
+      });
+      if (notas.length < 2) {
+        ctx.fillStyle = '#5a6470';
+        ctx.font = '14px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Complete pelo menos 2 aulas para ver a evolução', canvas.width/2, canvas.height/2);
+        return;
+      }
+      const padding = 30;
+      const graphWidth = canvas.width - padding*2;
+      const graphHeight = canvas.height - padding*2;
+      ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+      ctx.beginPath();
+      ctx.moveTo(padding, padding);
+      ctx.lineTo(padding, canvas.height - padding);
+      ctx.lineTo(canvas.width - padding, canvas.height - padding);
+      ctx.stroke();
+      const maxNota = 10, minNota = 0;
+      const pontos = notas.map((n, i) => ({
+        x: padding + (i / (notas.length - 1)) * graphWidth,
+        y: padding + graphHeight - ((n.nota - minNota) / (maxNota - minNota)) * graphHeight
+      }));
+      ctx.strokeStyle = '#6ee7ff';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      pontos.forEach((p, i) => { i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y); });
+      ctx.stroke();
+      pontos.forEach(p => {
+        ctx.fillStyle = '#6ee7ff';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4, 0, Math.PI*2);
+        ctx.fill();
+      });
+    }
+
+    // Mobile
+    function scrollPara(id) { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); }
+    function praticarProximaAula() {
+      for (let mod of MODULOS) {
+        for (let aula of mod.aulas) {
+          const p = progresso[aula.aula];
+          if (!p || p.aprovado !== 'SIM') {
+            abrirSimulador(aula.aula);
+            return;
+          }
+        }
+      }
+      irParaCertificado();
+    }
+
+    // Notificações
+    function solicitarNotificacoes() {
+      if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+    }
+    function enviarNotificacao(titulo, corpo) {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(titulo, { body: corpo, icon: '/favicon.ico' });
+      }
+    }
+
+    // Feedback rápido (não chamado automaticamente, disponível para uso)
+    function mostrarFeedbackRapido() {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:grid;place-items:center;';
+      overlay.innerHTML = `
+        <div style="background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:24px;text-align:center;max-width:400px;">
+          <div style="font-size:24px;margin-bottom:12px;">📝</div>
+          <div style="font-size:16px;font-weight:700;margin-bottom:8px;">Como foi sua experiência?</div>
+          <div style="display:flex;gap:12px;justify-content:center;margin-top:16px;">
+            <button onclick="this.closest('div[style*=position]').remove()" style="font-size:28px;background:none;border:none;cursor:pointer;">😞</button>
+            <button onclick="this.closest('div[style*=position]').remove()" style="font-size:28px;background:none;border:none;cursor:pointer;">😐</button>
+            <button onclick="this.closest('div[style*=position]').remove()" style="font-size:28px;background:none;border:none;cursor:pointer;">😊</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+    }
+
+    // Modo Plantão (placeholder)
+    function modoPlantao() {
+      alert('Modo Plantão em breve! Casos de emergência com tempo limitado.');
+    }
+
+    // As funções existentes (verificarAcesso, init, confirmarEmail, sair, etc.) permanecem as mesmas
+    // ... (incluídas abaixo, como no código anterior)
+
     async function verificarAcesso(emailCheck) {
       const res = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -583,7 +938,6 @@
       return await res.json();
     }
 
-    // ── INIT ──────────────────────────────────────────────────────────
     (async function init() {
       const salvo = localStorage.getItem('sena_email');
       if (salvo && !/\{\{/.test(salvo) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(salvo)) {
@@ -616,14 +970,11 @@
       const val = (document.getElementById('emailInput').value || '').trim().toLowerCase();
       const err = document.getElementById('emailError');
       const btn = document.getElementById('btnConfirmarEmail');
-
       if (!val) { err.textContent = 'Informe seu e-mail.'; return; }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { err.textContent = 'E-mail inválido.'; return; }
-
       err.textContent = '';
       btn.disabled = true;
       btn.textContent = 'Verificando acesso...';
-
       let acesso = null;
       try {
         acesso = await verificarAcesso(val);
@@ -633,15 +984,12 @@
         err.textContent = 'Não foi possível verificar seu acesso. Tente novamente em instantes.';
         return;
       }
-
       btn.disabled = false;
       btn.textContent = 'Acessar meu painel';
-
       if (!acesso || !acesso.liberado) {
         err.textContent = (acesso && acesso.mensagem) || 'Acesso não autorizado para este e-mail.';
         return;
       }
-
       email = val;
       localStorage.setItem('sena_email', email);
       document.getElementById('modalOverlay').classList.remove('visible');
@@ -654,43 +1002,35 @@
       location.reload();
     }
 
-    // ── RELATÓRIO DE EVOLUÇÃO CLÍNICA ─────────────────────────────────
     async function gerarRelatorio() {
       const btn = document.getElementById('btnRelatorio');
       const overlay = document.getElementById('relatorioOverlay');
       const conteudo = document.getElementById('relatorioConteudo');
-
       btn.disabled = true;
       btn.textContent = '⏳ Gerando...';
       overlay.style.display = 'grid';
       conteudo.innerHTML = '<div style="text-align:center;padding:48px;color:var(--text-faint);">A IA está analisando sua evolução clínica...</div>';
-
       try {
         const res = await fetch(APPS_SCRIPT_URL, {
           method: 'POST',
           body: JSON.stringify({ action: 'relatorio_evolucao', email: email, curso: CURSO })
         });
         const data = await res.json();
-
         if (data.insuficiente) {
           conteudo.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-soft);">' + data.mensagem + '</div>';
           return;
         }
         if (data.erro) throw new Error(data.mensagem);
-
         const stats = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">' +
           '<div style="text-align:center;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);"><div style="font-size:24px;font-weight:800;color:var(--success);">' + data.aulas_aprovadas + '</div><div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.08em;">Aprovadas</div></div>' +
           '<div style="text-align:center;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);"><div style="font-size:24px;font-weight:800;color:var(--cyan);">' + data.media_geral + '</div><div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.08em;">Média geral</div></div>' +
           '<div style="text-align:center;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);"><div style="font-size:24px;font-weight:800;color:var(--gold);">' + data.total_aulas + '</div><div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.08em;">Realizadas</div></div>' +
           '</div>';
-
-        const analise = '<div style="padding:18px;border-radius:14px;border:1px solid rgba(214,179,106,0.15);background:rgba(214,179,106,0.04);">' +
+        const analise = '<div style="padding:18px;border-radius:14px;border:1px solid rgba(224,192,120,0.15);background:rgba(224,192,120,0.04);">' +
           '<div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;">Análise da IA — Supervisão Clínica</div>' +
           '<div style="font-size:14px;color:var(--text-soft);line-height:1.8;white-space:pre-line;">' + String(data.analise || '').replace(/</g,'&lt;') + '</div>' +
           '</div>';
-
         const dataGerada = '<div style="text-align:right;font-size:11px;color:var(--text-faint);margin-top:14px;">Gerado em ' + (data.data_geracao || '') + ' · ' + (data.curso || '') + '</div>';
-
         conteudo.innerHTML = stats + analise + dataGerada;
       } catch(e) {
         conteudo.innerHTML = '<div style="padding:24px;text-align:center;color:var(--danger);">Erro ao gerar relatório. Tente novamente.</div>';
@@ -700,25 +1040,20 @@
       }
     }
 
-    // ── STREAK ────────────────────────────────────────────────────────
     function calcularStreak() {
-      const key = 'sena_streak_' + email;
-      const hoje = new Date().toISOString().slice(0,10);
       const historico = JSON.parse(localStorage.getItem('sena_datas_pratica_' + email) || '[]');
-
       if (!historico.length) return 0;
-
       const datas = [...new Set(historico)].sort().reverse();
+      const hoje = new Date().toISOString().slice(0,10);
       const ontem = new Date(Date.now() - 86400000).toISOString().slice(0,10);
-
       if (datas[0] !== hoje && datas[0] !== ontem) return 0;
-
       let streak = 1;
       for (let i = 1; i < datas.length; i++) {
         const prev = new Date(datas[i-1]);
         const curr = new Date(datas[i]);
         const diff = (prev - curr) / 86400000;
-        if (diff === 1) { streak++; } else { break; }
+        if (diff === 1) streak++;
+        else break;
       }
       return streak;
     }
@@ -729,8 +1064,7 @@
       const historico = JSON.parse(localStorage.getItem(key) || '[]');
       if (!historico.includes(hoje)) {
         historico.push(hoje);
-        const recentes = historico.slice(-60);
-        localStorage.setItem(key, JSON.stringify(recentes));
+        localStorage.setItem(key, JSON.stringify(historico.slice(-60)));
       }
     }
 
@@ -739,10 +1073,7 @@
       if (streak < 1) { bar.classList.remove('active'); return; }
       bar.classList.add('active');
       document.getElementById('streakCount').textContent = streak + (streak === 1 ? ' dia' : ' dias');
-
-      // Atualiza também no hero
       document.getElementById('heroSequencia').textContent = streak;
-
       if (streak >= 7) {
         document.getElementById('streakTitle').textContent = '🔥 Sequência incrível!';
         document.getElementById('streakSub').textContent = streak + ' dias seguidos praticando — você está on fire!';
@@ -755,21 +1086,14 @@
       }
     }
 
-    // ── DIAS SEM PRATICAR (para alerta WPP) ──────────────────────────
     function diasSemPraticar() {
-      const key = 'sena_datas_pratica_' + email;
-      const historico = JSON.parse(localStorage.getItem(key) || '[]');
+      const historico = JSON.parse(localStorage.getItem('sena_datas_pratica_' + email) || '[]');
       if (!historico.length) return 999;
       const ultima = historico.sort().slice(-1)[0];
-      const diff = (Date.now() - new Date(ultima)) / 86400000;
-      return Math.floor(diff);
+      return Math.floor((Date.now() - new Date(ultima)) / 86400000);
     }
 
-    // ── WHATSAPP (CallMeBot) ───────────────────────────────────────────
-    function wppSalvo() {
-      return localStorage.getItem('sena_wpp_' + email);
-    }
-
+    function wppSalvo() { return localStorage.getItem('sena_wpp_' + email); }
     function abrirModalWpp() {
       document.querySelectorAll('.wpp-step').forEach(s => s.classList.remove('active'));
       document.getElementById('wppStep1').classList.add('active');
@@ -777,29 +1101,20 @@
       document.getElementById('wppError').textContent = '';
       document.getElementById('modalWpp').classList.add('visible');
     }
-
-    function fecharModalWpp() {
-      document.getElementById('modalWpp').classList.remove('visible');
-    }
-
+    function fecharModalWpp() { document.getElementById('modalWpp').classList.remove('visible'); }
     function wppPasso2() {
       const num = (document.getElementById('wppNumero').value || '').replace(/\s/g,'');
       const err = document.getElementById('wppError');
       if (!num || num.length < 10) { err.textContent = 'Informe um número válido com DDD.'; return; }
       err.textContent = '';
-
       const numLimpo = num.replace(/\D/g,'');
       const numFinal = numLimpo.startsWith('55') ? numLimpo : '55' + numLimpo;
-
       localStorage.setItem('sena_wpp_pendente_' + email, numFinal);
-
       const msg = encodeURIComponent('I allow callmebot to send me messages');
       document.getElementById('wppLink').href = 'https://wa.me/' + CALLMEBOT_NUMBER + '?text=' + msg;
-
       document.querySelectorAll('.wpp-step').forEach(s => s.classList.remove('active'));
       document.getElementById('wppStep2').classList.add('active');
     }
-
     function confirmarWpp() {
       const numFinal = localStorage.getItem('sena_wpp_pendente_' + email);
       if (numFinal) {
@@ -810,7 +1125,6 @@
       document.getElementById('wppStep3').classList.add('active');
       atualizarBannerWpp();
     }
-
     function atualizarBannerWpp() {
       const numSalvo = wppSalvo();
       const btn = document.getElementById('btnWpp');
@@ -823,41 +1137,30 @@
         sub.textContent = 'Alertas ativos para ' + numMask;
       }
     }
-
     async function enviarAlertaWpp(numero, mensagem) {
       try {
         const apikey = localStorage.getItem('sena_wpp_apikey_' + email) || '';
-        const url = 'https://api.callmebot.com/whatsapp.php?phone=' + numero +
-          '&text=' + encodeURIComponent(mensagem) + '&apikey=' + apikey;
+        const url = 'https://api.callmebot.com/whatsapp.php?phone=' + numero + '&text=' + encodeURIComponent(mensagem) + '&apikey=' + apikey;
         await fetch(url, { mode: 'no-cors' });
       } catch(e) {}
     }
-
     function verificarAlertaInatividade() {
       const numSalvo = wppSalvo();
       if (!numSalvo) return;
-
       const dias = diasSemPraticar();
       if (dias < 10) return;
-
       const keyUltimoAlerta = 'sena_wpp_ultimo_alerta_' + email;
       const ultimoAlerta = localStorage.getItem(keyUltimoAlerta);
       const hoje = new Date().toISOString().slice(0,10);
-
       if (ultimoAlerta) {
         const diffDias = (Date.now() - new Date(ultimoAlerta)) / 86400000;
         if (diffDias < 7) return;
       }
-
       localStorage.setItem(keyUltimoAlerta, hoje);
-
-      const msg = '⚠️ Olá! Faz ' + dias + ' dias que você não pratica no SENA. ' +
-        'Que tal retomar hoje? Seu progresso está esperando por você! ' +
-        'Acesse: https://sena-ibsdh.netlify.app/dashboard.html';
+      const msg = '⚠️ Olá! Faz ' + dias + ' dias que você não pratica no SENA. Que tal retomar hoje? Acesse: https://sena-ibsdh.netlify.app/dashboard.html';
       enviarAlertaWpp(numSalvo, msg);
     }
 
-    // ── RANKING ───────────────────────────────────────────────────────
     async function buscarPosicaoRanking() {
       try {
         const res = await fetch(APPS_SCRIPT_URL, {
@@ -866,11 +1169,7 @@
         });
         const data = await res.json();
         if (!data || data.erro || !Array.isArray(data.ranking)) return;
-
-        const pos = data.ranking.findIndex(function(r) {
-          return (r.email || '').toLowerCase() === email.toLowerCase();
-        });
-
+        const pos = data.ranking.findIndex(r => (r.email || '').toLowerCase() === email.toLowerCase());
         if (pos !== -1) {
           document.getElementById('rankPos').textContent = pos + 1;
           document.getElementById('heroPosicao').textContent = pos + 1 + 'º';
@@ -878,116 +1177,98 @@
       } catch(e) {}
     }
 
-    // ── CARREGAR PROGRESSO ────────────────────────────────────────────
     async function carregarProgresso() {
       try {
         const [resEst, resProg] = await Promise.all([
-          fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'estrutura_curso', curso: CURSO })
-          }),
-          fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'progresso', email: email, curso: CURSO })
-          })
+          fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'estrutura_curso', curso: CURSO }) }),
+          fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'progresso', email: email, curso: CURSO }) })
         ]);
-
         const estrutura = await resEst.json();
         if (estrutura && !estrutura.erro && estrutura.modulos) {
           MODULOS = estrutura.modulos;
           TOTAL_AULAS = estrutura.totalAulas;
           TITULOS = {};
-          MODULOS.forEach(function(mod) {
-            mod.aulas.forEach(function(a) { TITULOS[a.aula] = a.titulo; });
-          });
+          MODULOS.forEach(mod => mod.aulas.forEach(a => TITULOS[a.aula] = a.titulo));
         }
-
         progresso = await resProg.json() || {};
         document.getElementById('loadingEl').style.display = 'none';
-
         if (!MODULOS.length) {
           document.getElementById('loadingEl').style.display = 'grid';
-          document.getElementById('loadingEl').textContent =
-            'Nenhuma aula encontrada para o curso "' + CURSO + '". Verifique a Base_Aulas.';
+          document.getElementById('loadingEl').textContent = 'Nenhuma aula encontrada para o curso "' + CURSO + '". Verifique a Base_Aulas.';
           return;
         }
-
         renderDashboard();
         buscarPosicaoRanking();
         verificarAlertaInatividade();
-
+        setupPremiumMouseTracking();
+        setupScrollAnimations();
+        mostrarOnboarding();
+        solicitarNotificacoes();
       } catch(err) {
-        document.getElementById('loadingEl').textContent =
-          'Erro ao carregar progresso. Recarregue a página.';
+        document.getElementById('loadingEl').textContent = 'Erro ao carregar progresso. Recarregue a página.';
       }
     }
 
-    // ── RENDER DASHBOARD ──────────────────────────────────────────────
+    function setupPremiumMouseTracking() {
+      document.querySelectorAll('.premium-card').forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+          const rect = card.getBoundingClientRect();
+          card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+          card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+        });
+      });
+    }
+
+    function setupScrollAnimations() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) entry.target.classList.add('visible');
+        });
+      }, { threshold: 0.1 });
+      document.querySelectorAll('.module-card, .premium-card, .info-card').forEach(card => observer.observe(card));
+    }
+
     function renderDashboard() {
       document.getElementById('appShell').classList.add('visible');
       document.getElementById('heroSub').textContent = CURSO.replace(/_/g, ' ') + ' — IBSDH';
-
       const parts = email.split('@');
-      document.getElementById('emailDisplay').textContent =
-        parts[0].slice(0,2) + '***@' + parts[1];
-
+      document.getElementById('emailDisplay').textContent = parts[0].slice(0,2) + '***@' + parts[1];
       const TOTAL = TOTAL_AULAS;
       let aprovadas = 0, somaNotas = 0, comNota = 0;
-
-      MODULOS.forEach(function(mod) {
-        mod.aulas.forEach(function(a) {
-          const p = progresso[a.aula];
-          if (p && p.aprovado === 'SIM') aprovadas++;
-          if (p && p.melhor_nota) { somaNotas += Number(p.melhor_nota); comNota++; }
-        });
-      });
-
+      MODULOS.forEach(mod => mod.aulas.forEach(a => {
+        const p = progresso[a.aula];
+        if (p && p.aprovado === 'SIM') aprovadas++;
+        if (p && p.melhor_nota) { somaNotas += Number(p.melhor_nota); comNota++; }
+      }));
       const media = comNota > 0 ? (somaNotas / comNota).toFixed(1) : null;
-      const pct   = Math.round((aprovadas / TOTAL) * 100);
-
+      const pct = Math.round((aprovadas / TOTAL) * 100);
       document.getElementById('progressCount').textContent = aprovadas + ' / ' + TOTAL + ' aulas';
-      document.getElementById('progressFill').style.width  = pct + '%';
-      document.getElementById('countAprov').textContent    = aprovadas;
-      document.getElementById('countPend').textContent     = (TOTAL - aprovadas);
-      document.getElementById('mediaGeral').textContent    = media ? media + '/10' : '—';
+      document.getElementById('progressFill').style.width = pct + '%';
+      document.getElementById('countAprov').textContent = aprovadas;
+      document.getElementById('countPend').textContent = TOTAL - aprovadas;
+      document.getElementById('mediaGeral').textContent = media ? media + '/10' : '—';
       document.getElementById('heroAprovadas').textContent = aprovadas;
-
       if (aprovadas >= TOTAL) document.getElementById('certBanner').classList.add('visible');
-
-      // Streak
       const streak = calcularStreak();
       renderStreak(streak);
-
-      // WhatsApp banner
       atualizarBannerWpp();
-
       const bloqueados = calcularBloqueados();
-
-      // Mapa de jornada
       renderJornada(bloqueados);
-
-      // Módulos
       const container = document.getElementById('modulesContainer');
       container.innerHTML = '';
-
-      MODULOS.forEach(function(mod, idx) {
+      MODULOS.forEach((mod, idx) => {
         const bloqueado = bloqueados[idx];
-        const aprovMod  = mod.aulas.filter(a => { const p = progresso[a.aula]; return p && p.aprovado === 'SIM'; }).length;
-        const totalMod  = mod.aulas.length;
-        const completo  = aprovMod === totalMod;
-        const pctMod    = Math.round((aprovMod / totalMod) * 100);
-
+        const aprovMod = mod.aulas.filter(a => { const p = progresso[a.aula]; return p && p.aprovado === 'SIM'; }).length;
+        const totalMod = mod.aulas.length;
+        const completo = aprovMod === totalMod;
+        const pctMod = Math.round((aprovMod / totalMod) * 100);
         let badgeClass, badgeText;
-        if (bloqueado)       { badgeClass = 'locked';  badgeText = '🔒 Bloqueado'; }
-        else if (completo)   { badgeClass = 'done';    badgeText = 'Completo ✓'; }
-        else if (aprovMod>0) { badgeClass = 'partial'; badgeText = aprovMod + '/' + totalMod + ' aprovadas'; }
-        else                 { badgeClass = 'pending'; badgeText = 'Não iniciado'; }
-
+        if (bloqueado) { badgeClass = 'locked'; badgeText = '🔒 Bloqueado'; }
+        else if (completo) { badgeClass = 'done'; badgeText = 'Completo ✓'; }
+        else if (aprovMod > 0) { badgeClass = 'partial'; badgeText = aprovMod + '/' + totalMod + ' aprovadas'; }
+        else { badgeClass = 'pending'; badgeText = 'Não iniciado'; }
         const card = document.createElement('div');
-        card.className = 'module-card' +
-          (bloqueado ? ' locked' : '') +
-          (completo  ? ' complete' : '');
-
+        card.className = 'module-card' + (bloqueado ? ' locked' : '') + (completo ? ' complete' : '');
         card.innerHTML =
           '<div class="module-header" onclick="toggleModulo(this)">' +
             '<div class="module-num">' + (idx + 1) + '</div>' +
@@ -998,65 +1279,43 @@
             '<span class="module-badge ' + badgeClass + '">' + badgeText + '</span>' +
             '<span class="module-chevron">▼</span>' +
           '</div>' +
-          '<div class="module-progress">' +
-            '<div class="mod-track"><div class="mod-fill" style="width:' + pctMod + '%"></div></div>' +
-          '</div>' +
+          '<div class="module-progress"><div class="mod-track"><div class="mod-fill" style="width:' + pctMod + '%"></div></div></div>' +
           '<div class="aulas-list">' + renderAulas(mod.aulas, bloqueado) + '</div>';
-
         container.appendChild(card);
       });
-
-      // Abre automaticamente o primeiro módulo não completo
       const primeiroModuloAberto = MODULOS.findIndex((mod, idx) => {
-        return !bloqueados[idx] && !mod.aulas.every(a => {
-          const p = progresso[a.aula];
-          return p && p.aprovado === 'SIM';
-        });
+        return !bloqueados[idx] && !mod.aulas.every(a => { const p = progresso[a.aula]; return p && p.aprovado === 'SIM'; });
       });
-
       if (primeiroModuloAberto !== -1) {
         setTimeout(() => {
           const cards = document.querySelectorAll('.module-card');
-          if (cards[primeiroModuloAberto]) {
-            cards[primeiroModuloAberto].classList.add('open');
-          }
+          if (cards[primeiroModuloAberto]) cards[primeiroModuloAberto].classList.add('open');
         }, 100);
       }
+      // Novas funções
+      atualizarMeta();
+      renderConquistas();
+      desenharGraficoEvolucao();
+      setupScrollAnimations();
     }
 
-    // ── MAPA DE JORNADA ───────────────────────────────────────────────
     function renderJornada(bloqueados) {
       const track = document.getElementById('journeyTrack');
       track.innerHTML = '';
-
-      // Atualiza label com progresso
       const totalModulos = MODULOS.length;
       const modulosCompletos = MODULOS.filter((mod, idx) => {
-        return !bloqueados[idx] && mod.aulas.every(a => {
-          const p = progresso[a.aula];
-          return p && p.aprovado === 'SIM';
-        });
+        return !bloqueados[idx] && mod.aulas.every(a => { const p = progresso[a.aula]; return p && p.aprovado === 'SIM'; });
       }).length;
-
-      document.querySelector('.journey-label').innerHTML = 
-        'Sua jornada <span style="color:var(--cyan);font-weight:400;">(' + 
-        modulosCompletos + '/' + totalModulos + ' módulos completos)</span>';
-
-      MODULOS.forEach(function(mod, idx) {
+      document.querySelector('.journey-label').innerHTML = 'Sua jornada <span style="color:var(--cyan);font-weight:400;">(' + modulosCompletos + '/' + totalModulos + ' módulos completos)</span>';
+      MODULOS.forEach((mod, idx) => {
         const bloqueado = bloqueados[idx];
-        const aprovMod  = mod.aulas.filter(a => { const p = progresso[a.aula]; return p && p.aprovado === 'SIM'; }).length;
-        const totalMod  = mod.aulas.length;
-        const completo  = aprovMod === totalMod;
-        const emAndamento = !bloqueado && !completo && aprovMod > 0;
-        const proximo   = !bloqueado && !completo && aprovMod === 0 && idx > 0;
-
+        const aprovMod = mod.aulas.filter(a => { const p = progresso[a.aula]; return p && p.aprovado === 'SIM'; }).length;
+        const totalMod = mod.aulas.length;
+        const completo = aprovMod === totalMod;
         let estado = bloqueado ? 'locked' : completo ? 'done' : 'active';
-
         let icone = completo ? '✓' : bloqueado ? '🔒' : (idx + 1);
-
         const nomePartes = mod.nome.split('—');
         const nomeCompleto = nomePartes.length > 1 ? nomePartes[1].trim() : mod.nome;
-
         if (idx > 0) {
           const prevCompleto = MODULOS[idx-1].aulas.every(a => { const p = progresso[a.aula]; return p && p.aprovado === 'SIM'; });
           const connClass = prevCompleto ? 'done' : (bloqueados[idx] ? 'locked' : 'active');
@@ -1064,14 +1323,9 @@
           conn.className = 'journey-connector ' + connClass;
           track.appendChild(conn);
         }
-
         const node = document.createElement('div');
         node.className = 'journey-node ' + estado;
-        node.innerHTML =
-          '<div class="journey-tooltip">' + nomeCompleto + '</div>' +
-          '<div class="journey-circle">' + icone + '</div>' +
-          '<div class="journey-num">M' + (idx+1) + '</div>';
-
+        node.innerHTML = '<div class="journey-tooltip">' + nomeCompleto + '</div><div class="journey-circle">' + icone + '</div><div class="journey-num">M' + (idx+1) + '</div>';
         if (!bloqueado) {
           node.style.cursor = 'pointer';
           node.addEventListener('click', function() {
@@ -1087,7 +1341,6 @@
             }
           });
         }
-
         track.appendChild(node);
       });
     }
@@ -1095,50 +1348,33 @@
     function calcularBloqueados() {
       const b = [false];
       for (let i = 1; i < MODULOS.length; i++) {
-        const anteriorOk = MODULOS[i-1].aulas.every(function(a) {
-          const p = progresso[a.aula];
-          return p && p.aprovado === 'SIM';
-        });
+        const anteriorOk = MODULOS[i-1].aulas.every(a => { const p = progresso[a.aula]; return p && p.aprovado === 'SIM'; });
         b.push(b[i-1] ? true : !anteriorOk);
       }
       return b;
     }
 
     function renderAulas(aulasList, bloqueado) {
-      return aulasList.map(function(a) {
-        const p        = progresso[a.aula];
+      return aulasList.map(a => {
+        const p = progresso[a.aula];
         const aprovado = p && p.aprovado === 'SIM';
-        const reprovado= p && p.melhor_nota && p.aprovado !== 'SIM';
-        const nota     = p && p.melhor_nota ? Number(p.melhor_nota).toFixed(1) : null;
-        const status   = aprovado ? 'approved' : reprovado ? 'rejected' : 'pending';
-        const icon     = aprovado ? '✓' : reprovado ? '✗' : '·';
-        const titulo   = a.titulo || a.aula;
+        const reprovado = p && p.melhor_nota && p.aprovado !== 'SIM';
+        const nota = p && p.melhor_nota ? Number(p.melhor_nota).toFixed(1) : null;
+        const status = aprovado ? 'approved' : reprovado ? 'rejected' : 'pending';
+        const icon = aprovado ? '✓' : reprovado ? '✗' : '·';
+        const titulo = a.titulo || a.aula;
         const numDisplay = a.aula.replace('Aula_', '');
-
         let btnHtml = '';
         if (!bloqueado) {
-          const aulaId = a.aula;
-          if (aprovado) {
-            btnHtml = '<button class="btn-praticar rever" data-aula="' + aulaId + '" onclick="abrirSimulador(this.dataset.aula)">Rever</button>';
-          } else if (reprovado) {
-            btnHtml = '<button class="btn-praticar retry" data-aula="' + aulaId + '" onclick="abrirSimulador(this.dataset.aula)">Tentar novamente</button>';
-          } else {
-            btnHtml = '<button class="btn-praticar" data-aula="' + aulaId + '" onclick="abrirSimulador(this.dataset.aula)">Praticar →</button>';
-          }
+          if (aprovado) btnHtml = '<button class="btn-praticar rever" data-aula="' + a.aula + '" onclick="abrirSimulador(this.dataset.aula)">Rever</button>';
+          else if (reprovado) btnHtml = '<button class="btn-praticar retry" data-aula="' + a.aula + '" onclick="abrirSimulador(this.dataset.aula)">Tentar novamente</button>';
+          else btnHtml = '<button class="btn-praticar" data-aula="' + a.aula + '" onclick="abrirSimulador(this.dataset.aula)">Praticar →</button>';
         }
-
-        const notaHtml = nota
-          ? '<span class="aula-nota ' + status + '">' + nota + '</span>'
-          : '<span class="aula-nota pending">—</span>';
-
+        const notaHtml = nota ? '<span class="aula-nota ' + status + '">' + nota + '</span>' : '<span class="aula-nota pending">—</span>';
         return '<div class="aula-row' + (bloqueado ? ' locked' : '') + '">' +
           '<div class="aula-status ' + status + '">' + icon + '</div>' +
-          '<div class="aula-info">' +
-            '<div class="aula-num">Aula ' + numDisplay + '</div>' +
-            '<div class="aula-title">' + titulo + '</div>' +
-          '</div>' +
-          notaHtml +
-          btnHtml +
+          '<div class="aula-info"><div class="aula-num">Aula ' + numDisplay + '</div><div class="aula-title">' + titulo + '</div></div>' +
+          notaHtml + btnHtml +
         '</div>';
       }).join('');
     }
@@ -1147,15 +1383,13 @@
       const card = header.parentElement;
       if (card.classList.contains('locked')) return;
       const jaAberto = card.classList.contains('open');
-      document.querySelectorAll('.module-card.open').forEach(function(c) { c.classList.remove('open'); });
+      document.querySelectorAll('.module-card.open').forEach(c => c.classList.remove('open'));
       if (!jaAberto) card.classList.add('open');
     }
 
     function abrirSimulador(codigoAula) {
       registrarPraticaHoje();
-      const url = '/index.html?email=' + encodeURIComponent(email) +
-        '&curso=' + encodeURIComponent(CURSO) +
-        '&aula=' + encodeURIComponent(codigoAula);
+      const url = '/index.html?email=' + encodeURIComponent(email) + '&curso=' + encodeURIComponent(CURSO) + '&aula=' + encodeURIComponent(codigoAula);
       window.open(url, '_blank');
     }
 
@@ -1163,7 +1397,7 @@
       window.open('/certificado.html', '_blank');
     }
 
-    // ── ATUALIZAÇÃO AUTOMÁTICA ────────────────────────────────────────
+    // Atualização automática (mantida)
     window.addEventListener('storage', function(e) {
       if (e.key !== 'sena_progresso_atualizado') return;
       if (!e.newValue) return;
@@ -1172,7 +1406,7 @@
         if (sinal.curso !== CURSO) return;
         if (Date.now() - sinal.ts > 30000) return;
         mostrarToastAtualizacao(sinal.aula, sinal.nota, sinal.aprovado);
-        setTimeout(function() { recarregarProgressoSilencioso(); }, 800);
+        setTimeout(recarregarProgressoSilencioso, 800);
       } catch(err) {}
     });
 
@@ -1184,24 +1418,13 @@
       const borda = aprovado ? 'rgba(126,240,194,0.25)' : 'rgba(255,107,136,0.2)';
       const txtCor = aprovado ? '#7ef0c2' : '#ff6b88';
       const icone = aprovado ? '✓' : '✗';
-      const msg = aprovado
-        ? 'Aula ' + numAula + ' aprovada com ' + Number(nota).toFixed(1) + '/10'
-        : 'Aula ' + numAula + ' — ' + Number(nota).toFixed(1) + '/10 (não aprovada)';
+      const msg = aprovado ? 'Aula ' + numAula + ' aprovada com ' + Number(nota).toFixed(1) + '/10' : 'Aula ' + numAula + ' — ' + Number(nota).toFixed(1) + '/10 (não aprovada)';
       const toast = document.createElement('div');
       toast.id = 'toastAtualiz';
-      toast.style.cssText = [
-        'position:fixed','bottom:24px','right:24px','z-index:9999',
-        'background:'+cor,'border:1px solid '+borda,'border-radius:14px',
-        'padding:14px 18px','font-family:Inter,sans-serif','font-size:14px',
-        'font-weight:600','color:'+txtCor,'box-shadow:0 16px 32px rgba(0,0,0,0.35)',
-        'display:flex','align-items:center','gap:10px','animation:toastIn .25s ease','max-width:320px'
-      ].join(';');
+      toast.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;background:'+cor+';border:1px solid '+borda+';border-radius:14px;padding:14px 18px;font-family:Inter,sans-serif;font-size:14px;font-weight:600;color:'+txtCor+';box-shadow:0 16px 32px rgba(0,0,0,0.35);display:flex;align-items:center;gap:10px;animation:toastIn .25s ease;max-width:320px;';
       toast.innerHTML = '<span style="font-size:16px">'+icone+'</span><span>'+msg+' &mdash; Atualizando painel...</span>';
       document.body.appendChild(toast);
-      setTimeout(function() {
-        toast.style.opacity = '0'; toast.style.transition = 'opacity .3s';
-        setTimeout(function() { toast.remove(); }, 300);
-      }, 4000);
+      setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity .3s'; setTimeout(() => toast.remove(), 300); }, 4000);
     }
 
     async function recarregarProgressoSilencioso() {
