@@ -74,6 +74,10 @@
     body.tema-claro .mobile-nav-btn { color: var(--text-soft); }
     body.tema-claro .mobile-nav-btn.active { color: var(--cyan); }
     body.tema-claro .btn-flutuante { background: linear-gradient(135deg,var(--cyan),rgba(8,145,178,0.85)); box-shadow: 0 8px 24px rgba(8,145,178,0.3); }
+    body.tema-claro .mobile-nav-item { color: var(--text-soft); }
+    body.tema-claro .mobile-nav-item:hover { background: rgba(8,145,178,0.08); color: var(--cyan); }
+    body.tema-claro .mobile-nav-item.active { color: var(--cyan); background: rgba(8,145,178,0.12); }
+    body.tema-claro .btn-flutuante { background: linear-gradient(135deg, var(--cyan), rgba(8,145,178,0.85)); }
     html, body { min-height: 100%; }
     body { font-family: 'Inter', sans-serif; background: radial-gradient(circle at top left,rgba(110,231,255,0.07),transparent 28%), radial-gradient(circle at bottom right,rgba(224,192,120,0.05),transparent 22%), linear-gradient(180deg,#05070a 0%,#090c11 100%); color: var(--text); line-height: 1.6; overflow-x: hidden; }
     body.alto-contraste { --bg: #000000; --panel: rgba(0,0,0,0.9); --border: rgba(255,255,255,0.3); --text: #ffffff; --text-soft: #e0e0e0; --text-faint: #a0a0a0; --cyan: #00ffff; --gold: #ffd700; --success: #00ff88; --danger: #ff4466; }
@@ -288,6 +292,78 @@
       .mobile-nav { display: flex; }
       .btn-flutuante { display: grid; place-items: center; }
       body { padding-bottom: 70px; }
+
+      /* Estilos da navegação mobile */
+      .mobile-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 64px;
+        background: rgba(16,21,29,0.98);
+        border-top: 1px solid var(--border);
+        backdrop-filter: blur(12px);
+        display: none;
+        justify-content: space-around;
+        align-items: center;
+        z-index: 1000;
+        padding: 0 8px;
+      }
+      .mobile-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        padding: 8px 12px;
+        color: var(--text-soft);
+        text-decoration: none;
+        font-size: 11px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        border-radius: 12px;
+        min-width: 60px;
+      }
+      .mobile-nav-item:hover {
+        background: rgba(110,231,255,0.08);
+        color: var(--cyan);
+      }
+      .mobile-nav-item.active {
+        color: var(--cyan);
+        background: rgba(110,231,255,0.12);
+      }
+      .mobile-nav-item span {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      /* Botão flutuante */
+      .btn-flutuante {
+        position: fixed;
+        bottom: 78px;
+        right: 20px;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--cyan), #8cecff);
+        border: none;
+        color: #05070a;
+        font-size: 24px;
+        cursor: pointer;
+        box-shadow: 0 8px 24px rgba(110,231,255,0.3);
+        z-index: 999;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        display: none;
+      }
+      .btn-flutuante:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 32px rgba(110,231,255,0.4);
+      }
+      .btn-flutuante:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
     }
 
     /* Mobile médio (480px) */
@@ -3223,6 +3299,49 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
         document.body.classList.add('reduzir-movimento');
       }
     })();
+
+    // ── FUNÇÕES DE NAVEGAÇÃO MOBILE ────────────────────────────────────
+    function scrollParaTopo() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      atualizarNavMobile('inicio');
+    }
+
+    function scrollPara(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (id === 'patientCard') atualizarNavMobile('paciente');
+        else if (id === 'inputModule') atualizarNavMobile('resposta');
+        else if (id === 'resultModule') atualizarNavMobile('resultado');
+      }
+    }
+
+    function atualizarNavMobile(itemAtivo) {
+      document.querySelectorAll('.mobile-nav-item').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('onclick')?.includes(itemAtivo === 'inicio' ? 'scrollParaTopo' : itemAtivo)) {
+          btn.classList.add('active');
+        }
+      });
+    }
+
+    function acaoFlutuante() {
+      // Ação contextual baseada no estado atual
+      if (!activeProfile) {
+        initializeSimulation();
+      } else if (modoAtual === 'texto') {
+        const inputPanel = document.getElementById('inputPanel');
+        if (inputPanel && inputPanel.classList.contains('visible')) {
+          submitAnalysis();
+        } else {
+          scrollPara('inputModule');
+        }
+      } else if (modoAtual === 'conversa') {
+        enviarMensagemChat();
+      } else {
+        scrollPara('inputModule');
+      }
+    }
 
     // ── #3: PRONTUÁRIO CLÍNICO ────────────────────────────────────────
     let prontuarioDados = null;
