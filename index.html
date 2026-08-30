@@ -80,7 +80,121 @@
     body.tema-claro .btn-flutuante { background: linear-gradient(135deg, var(--cyan), rgba(8,145,178,0.85)); }
     html, body { min-height: 100%; }
     body { font-family: 'Inter', sans-serif; background: radial-gradient(circle at top left,rgba(110,231,255,0.07),transparent 28%), radial-gradient(circle at bottom right,rgba(224,192,120,0.05),transparent 22%), linear-gradient(180deg,#05070a 0%,#090c11 100%); color: var(--text); line-height: 1.6; overflow-x: hidden; }
-    body.alto-contraste { --bg: #000000; --panel: rgba(0,0,0,0.9); --border: rgba(255,255,255,0.3); --text: #ffffff; --text-soft: #e0e0e0; --text-faint: #a0a0a0; --cyan: #00ffff; --gold: #ffd700; --success: #00ff88; --danger: #ff4466; }
+    /* Acessibilidade - Alto Contraste aprimorado */
+    body.alto-contraste {
+      --bg: #000000;
+      --panel: rgba(0,0,0,0.95);
+      --border: rgba(255,255,255,0.5);
+      --text: #ffffff;
+      --text-soft: #ffffff;
+      --text-faint: #e0e0e0;
+      --cyan: #00ffff;
+      --cyan-dim: rgba(0,255,255,0.2);
+      --gold: #ffd700;
+      --gold-dim: rgba(255,215,0,0.2);
+      --success: #00ff88;
+      --success-dim: rgba(0,255,136,0.2);
+      --danger: #ff4466;
+      --danger-dim: rgba(255,68,102,0.2);
+    }
+    body.alto-contraste {
+      background: #000000;
+    }
+    body.alto-contraste .hero,
+    body.alto-contraste .card,
+    body.alto-contraste .premium-card,
+    body.alto-contraste .module-card,
+    body.alto-contraste .info-card,
+    body.alto-contraste .patient-shell,
+    body.alto-contraste .input-panel,
+    body.alto-contraste .result-panel,
+    body.alto-contraste .chat-panel,
+    body.alto-contraste .mode-selector,
+    body.alto-contraste .processing,
+    body.alto-contraste .supervisor-card,
+    body.alto-contraste .prontuario-modal,
+    body.alto-contraste .diario-body,
+    body.alto-contraste .historico-toggle,
+    body.alto-contraste .replay-legend {
+      background: rgba(0,0,0,0.95);
+      border: 2px solid rgba(255,255,255,0.5);
+    }
+    body.alto-contraste .btn-primary {
+      background: #00ffff;
+      color: #000000;
+      border: 2px solid #00ffff;
+      font-weight: 800;
+    }
+    body.alto-contraste .btn-secondary,
+    body.alto-contraste .btn-ghost {
+      background: transparent;
+      color: #ffffff;
+      border: 2px solid rgba(255,255,255,0.6);
+      font-weight: 700;
+    }
+    body.alto-contraste .progress-bar {
+      background: rgba(255,255,255,0.25);
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+    body.alto-contraste .progress-fill {
+      background: #00ffff;
+    }
+    body.alto-contraste textarea,
+    body.alto-contraste input,
+    body.alto-contraste select {
+      background: rgba(0,0,0,0.8);
+      border: 2px solid rgba(255,255,255,0.4);
+      color: #ffffff;
+    }
+    body.alto-contraste .chat-bubble.user {
+      background: rgba(0,255,255,0.15);
+      border: 2px solid #00ffff;
+      color: #ffffff;
+    }
+    body.alto-contraste .chat-bubble.paciente {
+      background: rgba(255,255,255,0.1);
+      border: 2px solid rgba(255,255,255,0.4);
+      color: #ffffff;
+    }
+    body.alto-contraste .mobile-nav {
+      background: rgba(0,0,0,0.98);
+      border-top: 2px solid rgba(255,255,255,0.4);
+    }
+    body.alto-contraste .mobile-nav-item {
+      color: #ffffff;
+    }
+    body.alto-contraste .mobile-nav-item.active {
+      background: rgba(0,255,255,0.2);
+      border: 1px solid #00ffff;
+    }
+    body.alto-contraste .btn-flutuante {
+      background: #00ffff;
+      color: #000000;
+      border: 2px solid #00ffff;
+    }
+    body.alto-contraste .estado-paciente {
+      border: 2px solid rgba(255,255,255,0.4);
+    }
+    body.alto-contraste .status-card {
+      border: 2px solid rgba(255,255,255,0.3);
+    }
+    body.alto-contraste .seal {
+      border: 2px solid rgba(0,255,255,0.5);
+    }
+    body.alto-contraste .eyebrow {
+      background: rgba(255,215,0,0.15);
+      border: 2px solid #ffd700;
+      color: #ffd700;
+    }
+    body.alto-contraste .acess-btn {
+      background: rgba(255,255,255,0.1);
+      border: 2px solid rgba(255,255,255,0.5);
+      color: #ffffff;
+    }
+    body.alto-contraste .acess-btn:hover {
+      background: rgba(255,255,255,0.25);
+      border-color: #ffffff;
+    }
     body.reduzir-movimento { * { animation-duration: 0s !important; transition-duration: 0s !important; scroll-behavior: auto !important; } }
     .acess-btns { position: absolute; top: 20px; right: 20px; display: flex; gap: 8px; z-index: 10; }
     .acess-btn { width: 36px; height: 36px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: var(--text); font-size: 16px; cursor: pointer; display: grid; place-items: center; transition: all 0.2s; }
@@ -288,7 +402,7 @@
       .audio-lang { width: 100%; }
       .audio-lang select { width: 100%; }
 
-      /* Mobile Navigation */
+      /* Mobile Navigation - Tablet e Desktop também */
       .mobile-nav { display: flex; }
       .btn-flutuante { display: grid; place-items: center; }
       body { padding-bottom: 70px; }
@@ -303,7 +417,7 @@
         background: rgba(16,21,29,0.98);
         border-top: 1px solid var(--border);
         backdrop-filter: blur(12px);
-        display: none;
+        display: flex;
         justify-content: space-around;
         align-items: center;
         z-index: 1000;
@@ -338,7 +452,7 @@
         letter-spacing: 0.05em;
       }
 
-      /* Botão flutuante */
+      /* Botão flutuante - visível em todos os tamanhos */
       .btn-flutuante {
         position: fixed;
         bottom: 78px;
@@ -354,7 +468,8 @@
         box-shadow: 0 8px 24px rgba(110,231,255,0.3);
         z-index: 999;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
-        display: none;
+        display: grid;
+        place-items: center;
       }
       .btn-flutuante:hover:not(:disabled) {
         transform: translateY(-2px);
@@ -3323,7 +3438,34 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
           btn.classList.add('active');
         }
       });
+      
+      // Atualiza URL hash sem scroll
+      if (itemAtivo === 'inicio') history.pushState(null, '', '#inicio');
+      else if (itemAtivo === 'paciente') history.pushState(null, '', '#paciente');
+      else if (itemAtivo === 'resposta') history.pushState(null, '', '#resposta');
+      else if (itemAtivo === 'resultado') history.pushState(null, '', '#resultado');
     }
+
+    // Observa scroll para atualizar navegação ativa
+    window.addEventListener('scroll', () => {
+      const sections = [
+        { id: 'patientCard', name: 'paciente' },
+        { id: 'inputModule', name: 'resposta' },
+        { id: 'resultModule', name: 'resultado' }
+      ];
+      
+      let current = 'inicio';
+      const scrollPos = window.scrollY + 200;
+      
+      for (const section of sections) {
+        const el = document.getElementById(section.id);
+        if (el && el.offsetTop <= scrollPos) {
+          current = section.name;
+        }
+      }
+      
+      atualizarNavMobile(current);
+    });
 
     function acaoFlutuante() {
       // Ação contextual baseada no estado atual
