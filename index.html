@@ -28,6 +28,13 @@
     }
     html, body { min-height: 100%; }
     body { font-family: 'Inter', sans-serif; background: radial-gradient(circle at top left,rgba(110,231,255,0.07),transparent 28%), radial-gradient(circle at bottom right,rgba(224,192,120,0.05),transparent 22%), linear-gradient(180deg,#05070a 0%,#090c11 100%); color: var(--text); line-height: 1.6; overflow-x: hidden; }
+    body.alto-contraste { --bg: #000000; --panel: rgba(0,0,0,0.9); --border: rgba(255,255,255,0.3); --text: #ffffff; --text-soft: #e0e0e0; --text-faint: #a0a0a0; --cyan: #00ffff; --gold: #ffd700; --success: #00ff88; --danger: #ff4466; }
+    body.reduzir-movimento { * { animation-duration: 0s !important; transition-duration: 0s !important; scroll-behavior: auto !important; } }
+    .acess-btns { position: absolute; top: 20px; right: 20px; display: flex; gap: 8px; z-index: 10; }
+    .acess-btn { width: 36px; height: 36px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: var(--text); font-size: 16px; cursor: pointer; display: grid; place-items: center; transition: all 0.2s; }
+    .acess-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); }
+    .module-card, .premium-card, .info-card, .hero, .card, .status-grid, .patient-shell, .input-panel, .result-panel, .processing, .chat-panel, .mode-selector { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .visible { opacity: 1; transform: translateY(0) !important; }
     .shell { width: 100%; max-width: 1080px; margin: 0 auto; padding: 28px 18px 36px; }
     .hero { position: relative; overflow: hidden; background: linear-gradient(180deg,rgba(17,24,32,0.92) 0%,rgba(11,16,22,0.98) 100%); border: 1px solid var(--border); border-radius: 28px; box-shadow: var(--shadow-premium); padding: 28px; margin-bottom: 18px; }
     .hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg,rgba(110,231,255,0.08),transparent 40%),linear-gradient(225deg,rgba(224,192,120,0.06),transparent 35%); pointer-events: none; }
@@ -1201,8 +1208,8 @@
       width: 100%;
       padding: 14px 18px;
       border-radius: 14px;
-      border: 1px solid rgba(245,193,99,0.25);
-      background: rgba(245,193,99,0.06);
+      border: 1px solid rgba(245,193,99,0.4);
+      background: linear-gradient(135deg, rgba(245,193,99,0.15), rgba(214,179,106,0.1));
       color: #f5c163;
       font-family: 'Inter', sans-serif;
       font-size: 12px;
@@ -1215,9 +1222,10 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
+      box-shadow: 0 8px 20px rgba(214,179,106,0.1);
     }
 
-    .desafio-btn:hover { background: rgba(245,193,99,0.12); transform: translateY(-1px); }
+    .desafio-btn:hover { background: linear-gradient(135deg, rgba(245,193,99,0.2), rgba(214,179,106,0.15)); transform: translateY(-1px); box-shadow: 0 12px 24px rgba(214,179,106,0.15); }
     .desafio-btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
 
     .desafio-nivel-selector {
@@ -1712,6 +1720,10 @@
 
   <div class="shell" id="appShell" style="display:none;">
     <section class="hero">
+      <div class="acess-btns">
+        <button class="acess-btn" onclick="toggleAltoContraste()" title="Alto contraste">◐</button>
+        <button class="acess-btn" onclick="toggleReduzirMovimento()" title="Reduzir movimento">⊘</button>
+      </div>
       <div class="hero-top">
         <div class="seal"></div>
         <div class="hero-copy">
@@ -2127,36 +2139,47 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
       document.getElementById('tutorInput').addEventListener('input', function() {
         document.getElementById('tutorCount').textContent = this.value.length + ' caracteres';
       });
+      
+      setupScrollAnimations();
     }
 
     // ── SIMULAÇÃO ──────────────────────────────────────────────────────
     function initializeSimulation() {
       try {
-        const profiles = Object.keys(PERFIS_CLINICOS);
-        const selectedKey = profiles[Math.floor(Math.random() * profiles.length)];
-        const p = PERFIS_CLINICOS[selectedKey];
-        activeProfile = { name: p.nome, desc: p.descricao, resistances: p.resistencias, approach: p.abordagem_ideal, type: 'PF-0' + (profiles.indexOf(selectedKey)+1) };
+        const card = document.getElementById('patientCard');
+        card.style.opacity = '0.3';
+        card.style.transition = 'opacity 0.2s ease';
+        
+        setTimeout(() => {
+          const profiles = Object.keys(PERFIS_CLINICOS);
+          const selectedKey = profiles[Math.floor(Math.random() * profiles.length)];
+          const p = PERFIS_CLINICOS[selectedKey];
+          activeProfile = { name: p.nome, desc: p.descricao, resistances: p.resistencias, approach: p.abordagem_ideal, type: 'PF-0' + (profiles.indexOf(selectedKey)+1) };
 
-        document.getElementById('statusDot').classList.add('active');
-        document.getElementById('patientId').textContent   = 'Patient ID: ' + activeProfile.type;
-        document.getElementById('patientType').textContent = activeProfile.name.toUpperCase();
-        document.getElementById('patientDesc').textContent = activeProfile.desc;
+          document.getElementById('statusDot').classList.add('active');
+          document.getElementById('patientId').textContent   = 'Patient ID: ' + activeProfile.type;
+          document.getElementById('patientType').textContent = activeProfile.name.toUpperCase();
+          document.getElementById('patientDesc').textContent = activeProfile.desc;
 
-        document.getElementById('patientStats').style.display = 'grid';
-        // Mostrar estado emocional inicial
-        atualizarEstadoPaciente('aguardando início');
-        const list = document.getElementById('resistanceList');
-        list.innerHTML = '';
-        activeProfile.resistances.forEach(function(r) {
-          const li = document.createElement('li'); li.textContent = r; list.appendChild(li);
-        });
-        document.getElementById('approachText').textContent = activeProfile.approach;
-        document.getElementById('initBtn').style.display = 'none';
-        document.getElementById('desafioBtn').style.display = 'none';
-        document.getElementById('desafioNivelSelector').classList.remove('visible');
-        document.getElementById('inputModule').classList.add('visible');
-        document.getElementById('modeSelector').classList.add('visible');
-        setTimeout(() => document.getElementById('inputModule').scrollIntoView({behavior:'smooth',block:'start'}), 100);
+          document.getElementById('patientStats').style.display = 'grid';
+          // Mostrar estado emocional inicial
+          atualizarEstadoPaciente('aguardando início');
+          const list = document.getElementById('resistanceList');
+          list.innerHTML = '';
+          activeProfile.resistances.forEach(function(r) {
+            const li = document.createElement('li'); li.textContent = r; list.appendChild(li);
+          });
+          document.getElementById('approachText').textContent = activeProfile.approach;
+          document.getElementById('initBtn').style.display = 'none';
+          document.getElementById('desafioBtn').style.display = 'none';
+          document.getElementById('desafioNivelSelector').classList.remove('visible');
+          document.getElementById('inputModule').classList.add('visible');
+          document.getElementById('modeSelector').classList.add('visible');
+          
+          card.style.opacity = '1';
+          setTimeout(() => document.getElementById('inputModule').scrollIntoView({behavior:'smooth',block:'start'}), 100);
+          setupScrollAnimations();
+        }, 300);
       } catch(err) {
         showAlert('Erro ao gerar paciente: ' + err.message);
       }
@@ -2696,7 +2719,11 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
         atualizarEstadoPaciente(resposta);
         const trocas = Math.floor(chatHistorico.length / 2);
         document.getElementById('chatTurns').textContent = trocas + ' troca' + (trocas !== 1 ? 's' : '');
-        if (trocas >= 3) document.getElementById('chatEncerrarBtn').disabled = false;
+        if (trocas >= 3) {
+          document.getElementById('chatEncerrarBtn').disabled = false;
+          document.getElementById('chatEncerrarBtn').style.background = 'rgba(126,240,194,0.15)';
+          document.getElementById('chatEncerrarBtn').style.borderColor = 'rgba(126,240,194,0.4)';
+        }
 
       } catch(err) {
         typing.classList.remove('visible');
@@ -3087,6 +3114,42 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
         sumir();
       }
     }
+
+    // ── ANIMAÇÕES DE SCROLL REVEAL ─────────────────────────────────────
+    function setupScrollAnimations() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.1 });
+      
+      document.querySelectorAll('.hero, .card, .status-grid, .patient-shell, .input-panel, .result-panel, .processing, .chat-panel, .mode-selector, .section-block').forEach(el => {
+        observer.observe(el);
+      });
+    }
+
+    // ── ACESSIBILIDADE ─────────────────────────────────────────────────
+    function toggleAltoContraste() {
+      document.body.classList.toggle('alto-contraste');
+      localStorage.setItem('sen-alto-contraste', document.body.classList.contains('alto-contraste'));
+    }
+    
+    function toggleReduzirMovimento() {
+      document.body.classList.toggle('reduzir-movimento');
+      localStorage.setItem('sen-reduzir-movimento', document.body.classList.contains('reduzir-movimento'));
+    }
+
+    // Carregar preferências de acessibilidade salvas
+    (function carregarPreferenciasAcessibilidade() {
+      if (localStorage.getItem('sen-alto-contraste') === 'true') {
+        document.body.classList.add('alto-contraste');
+      }
+      if (localStorage.getItem('sen-reduzir-movimento') === 'true') {
+        document.body.classList.add('reduzir-movimento');
+      }
+    })();
 
     // ── #3: PRONTUÁRIO CLÍNICO ────────────────────────────────────────
     let prontuarioDados = null;
