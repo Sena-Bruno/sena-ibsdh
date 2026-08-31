@@ -321,24 +321,154 @@
     .audio-status.done { color:var(--success); }
     .audio-lang select { background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:var(--text-soft);font-family:'Inter',sans-serif;font-size:12px;padding:5px 8px;outline:none;cursor:pointer; }
 
-
-    /* ── RESPONSIVIDADE ─────────────────────────────── */
-
-    /* Tablet largo (940px) */
-    @media (max-width: 940px) {
-      .layout { grid-template-columns: 1fr; }
-      .status-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .supervisor-card { max-width: 100%; }
-      .prontuario-modal { max-width: 100%; }
+    /* ── RESPONSIVIDADE & MOBILE NAV GLOBAL ─────────────────────────────── */
+    
+    /* Mobile Nav e Botão Flutuante aplicados para todas as telas ou ativados abaixo de 1024px */
+    .mobile-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      background: rgba(16, 21, 29, 0.98);
+      border-top: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 1000;
+      padding: 0 8px;
     }
 
-    /* Tablet / mobile grande (768px) */
+    .mobile-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 6px 12px;
+      color: var(--text-soft);
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      border-radius: 12px;
+      min-width: 60px;
+    }
+
+    .mobile-nav-item:hover {
+      background: var(--cyan-dim);
+      color: var(--cyan);
+    }
+
+    .mobile-nav-item.active {
+      color: var(--cyan);
+      background: var(--cyan-dim);
+    }
+
+    .mobile-nav-item span {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .btn-flutuante {
+      position: fixed;
+      bottom: 78px;
+      right: 20px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--cyan), #8cecff);
+      border: none;
+      color: #05070a;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(110,231,255,0.3);
+      z-index: 999;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: grid;
+      place-items: center;
+    }
+
+    .btn-flutuante:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(110,231,255,0.4);
+    }
+
+    body {
+      padding-bottom: 80px;
+    }
+
+    /* Tablet largo e Médio (até 1024px) */
+    @media (max-width: 1024px) {
+      .layout { grid-template-columns: 1fr; }
+      .status-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .supervisor-card, .prontuario-modal { max-width: 100%; }
+    }
+
+    /* Tablet / mobile (até 768px) */
     @media (max-width: 768px) {
       .shell { padding: 16px 14px 32px; }
       .hero { padding: 20px 18px; border-radius: 20px; }
       .hero h1 { font-size: 34px; }
       .card-body { padding: 16px; }
       .card-header { padding: 14px 16px; }
+
+      .score-number { font-size: 60px; }
+      .compare-row { grid-template-columns: 1fr; gap: 6px; }
+      .compare-row-label { font-size: 12px; }
+
+      .chat-messages { min-height: 260px; max-height: 340px; }
+      .chat-bubble { max-width: 88%; font-size: 13px; }
+      .chat-footer { gap: 8px; }
+      .voz-toggle { display: none; }
+
+      .supervisor-card { margin: 0 8px; border-radius: 20px; }
+      .supervisor-header { padding: 18px 18px 14px; }
+      .supervisor-body { padding: 14px 18px; }
+      .supervisor-footer { padding: 12px 18px 18px; flex-direction: column; }
+      .supervisor-btn-cancel,
+      .supervisor-btn-submit { width: 100%; padding: 13px; }
+
+      .prontuario-modal { margin: 8px; border-radius: 14px; }
+      .prontuario-grid { grid-template-columns: 1fr; gap: 10px; }
+      .prontuario-body { padding: 18px; }
+      .prontuario-footer { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .prontuario-action-btns { width: 100%; }
+      .pron-btn-fechar, .pron-btn-imprimir { flex: 1; text-align: center; }
+
+      .estado-paciente { padding: 10px 12px; }
+      .estado-barra-wrap { width: 60px; }
+      .desafio-nivel-selector { padding: 12px; }
+      .nivel-btns { flex-direction: column; gap: 6px; }
+      .nivel-btn { padding: 10px; text-align: left; }
+
+      .input-footer { flex-direction: column; align-items: stretch; }
+      .input-footer .count { order: 2; text-align: center; }
+      #submitBtn, #tutorBtn { width: 100% !important; min-width: unset !important; }
+
+      .audio-bar { flex-wrap: wrap; gap: 8px; }
+      .audio-lang { width: 100%; }
+      .audio-lang select { width: 100%; }
+    }
+
+    /* Mobile médio e pequeno */
+    @media (max-width: 480px) {
+      .hero { padding: 16px; border-radius: 16px; }
+      .hero h1 { font-size: 28px; }
+      .status-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .patient-name { font-size: 22px; }
+      .patient-grid { grid-template-columns: 1fr; }
+      .score-number { font-size: 52px; }
+    }
+
+    @media (max-width: 360px) {
+      .seal { display: none; }
+      .score-number { font-size: 44px; }
+    }
+
+
 
       /* Layout do resultado */
       .score-number { font-size: 60px; }
