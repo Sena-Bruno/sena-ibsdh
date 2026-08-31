@@ -2493,9 +2493,22 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
         SYSTEM.threshold = Number(data.nota_minima || 7);
         SYSTEM.criteria  = data.criterios_comprovacao || 'Avaliação baseada na base curricular da aula.';
 
-        document.getElementById('gateLoading').style.display = 'none';
-        document.getElementById('appShell').style.display = 'block';
-        setInitialUI();
+        const loading = document.getElementById('gateLoading');
+        loading.style.opacity = '0';
+        loading.style.transition = 'opacity 0.3s ease';
+
+        setTimeout(() => {
+          loading.style.display = 'none';
+          const shell = document.getElementById('appShell');
+          shell.style.display = 'block';
+          setInitialUI();
+          
+          // Anima os primeiros blocos visíveis
+          document.querySelectorAll('.hero, .status-grid, .card').forEach(el => {
+            el.classList.add('visible');
+          });
+        }, 300);
+
       } catch(err) {
         document.getElementById('gateLoading').textContent =
           'Erro ao carregar dados da aula: ' + err.message;
