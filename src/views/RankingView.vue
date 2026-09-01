@@ -94,12 +94,11 @@ onMounted(() => {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
 * { margin:0;padding:0;box-sizing:border-box; }
-:root {
+.shell {
   --text:#edf3f8;--text-soft:#9aa7b5;--text-faint:#5a6470;
   --cyan:#59e1ff;--gold:#d6b36a;--success:#7ef0c2;--danger:#ff6b88;
   --border:rgba(112,141,173,0.15);--shadow:0 20px 48px rgba(0,0,0,0.38);
-}
-.shell { font-family:'Inter',sans-serif;min-height:100vh;background:radial-gradient(ellipse at top left,rgba(89,225,255,0.07),transparent 30%),linear-gradient(180deg,#06080c,#090c11);color:var(--text);line-height:1.6;max-width:760px;margin:0 auto;padding:28px 18px 48px; }
+  font-family:'Inter',sans-serif;min-height:100vh;background:radial-gradient(ellipse at top left,rgba(89,225,255,0.07),transparent 30%),linear-gradient(180deg,#06080c,#090c11);color:var(--text);line-height:1.6;max-width:760px;margin:0 auto;padding:28px 18px 48px; }
 .hero { background:linear-gradient(180deg,rgba(16,21,29,0.92),rgba(10,14,20,0.98));border:1px solid var(--border);border-radius:24px;padding:28px;margin-bottom:22px;box-shadow:var(--shadow); }
 .eyebrow { display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);color:var(--gold);font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:12px; }
 .eyebrow::before { content:'';width:6px;height:6px;border-radius:999px;background:var(--gold);box-shadow:0 0 8px rgba(214,179,106,0.55); }

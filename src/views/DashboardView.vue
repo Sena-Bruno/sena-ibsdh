@@ -1028,7 +1028,7 @@ onUnmounted(() => {
 </script>
 
 <style>
-    .dash-page {
+    body {
       --bg: #05070a;
       --panel: rgba(16,21,29,0.7);
       --border: rgba(112,141,173,0.15);
@@ -1112,7 +1112,7 @@ onUnmounted(() => {
     /* Modais */
     .dash-page .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); z-index:9999; place-items:center; padding:24px; }
     .dash-page .modal-overlay.visible { display:grid; }
-    .dash-page .modal-card { width:100%; max-width:440px; background:linear-gradient(180deg,rgba(16,21,29,0.99) 0%,rgba(10,14,20,1) 100%); border:1px solid var(--border); border-radius:var(--r-xl); box-shadow:var(--shadow-premium); padding:36px 30px 30px; text-align:center; animation:popIn .2s ease; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    .dash-page .modal-card { width:100%; max-width:440px; max-height:90vh; overflow-y:auto; background:linear-gradient(180deg,rgba(16,21,29,0.99) 0%,rgba(10,14,20,1) 100%); border:1px solid var(--border); border-radius:var(--r-xl); box-shadow:var(--shadow-premium); padding:36px 30px 30px; text-align:center; animation:popIn .2s ease; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
     @keyframes popIn { from{opacity:0;transform:scale(.96) translateY(12px)} to{opacity:1;transform:scale(1) translateY(0)} }
     .dash-page .modal-icon { width:52px;height:52px;margin:0 auto 18px;border-radius:16px;display:grid;place-items:center;background:var(--cyan-dim);border:1px solid rgba(110,231,255,0.2);font-size:20px;font-weight:800;color:var(--cyan); }
     .dash-page .modal-card h2 { font-size:20px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px; }
@@ -1125,11 +1125,17 @@ onUnmounted(() => {
     .dash-page .btn-primary:hover { transform:translateY(-1px);box-shadow:0 12px 24px rgba(110,231,255,0.2); }
     .dash-page .btn-primary:active { transform:scale(0.98); }
     .dash-page .btn-primary:disabled { opacity:.55;cursor:not-allowed;transform:none;box-shadow:none; }
+    .dash-page .btn-secondary { width:100%;margin-top:10px;padding:14px 20px;border:1px solid rgba(255,255,255,0.09);border-radius:var(--r-md);background:transparent;color:var(--text-soft);font-family:'Inter',sans-serif;font-size:13px;font-weight:700;letter-spacing:.03em;cursor:pointer;transition:all .18s ease; }
+    .dash-page .btn-secondary:hover { background:rgba(255,255,255,0.05);color:var(--text); }
     .dash-page .modal-note { margin-top:14px;color:var(--text-faint);font-size:11px; }
 
     /* Onboarding */
     .dash-page .onboard-step { display:none; }
     .dash-page .onboard-step.active { display:block; }
+
+    /* Modal WhatsApp (3 passos) */
+    .dash-page .wpp-step { display:none; }
+    .dash-page .wpp-step.active { display:block; }
 
     /* Tema Claro */
     body.tema-claro {

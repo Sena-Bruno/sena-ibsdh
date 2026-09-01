@@ -747,6 +747,7 @@ function hideAlert() { document.getElementById('alertBox').classList.remove('vis
 let recognition = null
 let gravando = false
 let transcricaoAcumulada = ''
+let restartTimeoutId = null
 
 function initSpeech() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition
@@ -798,7 +799,16 @@ function initSpeech() {
   }
 
   recognition.onend = function () {
-    if (gravando) { try { recognition.start() } catch (e) { pararGravacao() } }
+    if (!gravando) return
+    // Pequeno atraso antes de reiniciar: o Chrome encerra a sessão de voz
+    // periodicamente mesmo com continuous=true, e reiniciar imediatamente
+    // faz o serviço reprocessar a cauda do áudio anterior, duplicando o
+    // último trecho já transcrito. O atraso evita essa sobreposição.
+    clearTimeout(restartTimeoutId)
+    restartTimeoutId = setTimeout(() => {
+      if (!gravando) return
+      try { recognition.start() } catch (e) { pararGravacao() }
+    }, 250)
   }
 }
 
@@ -818,6 +828,7 @@ function iniciarGravacao() {
 function pararGravacao() {
   if (!recognition) return
   gravando = false
+  clearTimeout(restartTimeoutId)
   try { recognition.stop() } catch (e) {}
   const btn = document.getElementById('micBtn')
   btn.classList.remove('recording'); btn.textContent = '🎙️'
@@ -1609,7 +1620,7 @@ onUnmounted(() => {
 </script>
 
 <style>
-    .sim-page {
+    body {
       --bg: #05070a;
       --panel: rgba(16,21,29,0.85);
       --border: rgba(112,141,173,0.25);
