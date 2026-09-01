@@ -10,22 +10,29 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
       --bg: #05070a;
-      --panel: rgba(16,21,29,0.7);
-      --border: rgba(112,141,173,0.15);
+      --panel: rgba(16,21,29,0.85);
+      --border: rgba(112,141,173,0.25);
       --text: #edf3f8;
-      --text-soft: #9aa7b5;
-      --text-faint: #5a6470;
-      --cyan: #6ee7ff;
-      --cyan-dim: rgba(110,231,255,0.12);
-      --gold: #e0c078;
-      --gold-dim: rgba(224,192,120,0.12);
-      --success: #7ef0c2;
-      --success-dim: rgba(126,240,194,0.1);
-      --danger: #ff6b88;
-      --danger-dim: rgba(255,107,136,0.1);
-      --shadow-premium: 0 4px 6px rgba(0,0,0,0.1), 0 12px 24px rgba(0,0,0,0.3), 0 24px 48px rgba(0,0,0,0.2);
+      --text-soft: #a0aec0;
+      --text-faint: #64748b;
+      --cyan: #38bdf8;
+      --cyan-dim: rgba(56,189,248,0.12);
+      --gold: #fbbf24;
+      --gold-dim: rgba(251,191,36,0.12);
+      --success: #34d399;
+      --success-dim: rgba(52,211,153,0.1);
+      --danger: #fb7185;
+      --danger-dim: rgba(251,113,133,0.1);
+      --shadow-premium: 0 4px 6px rgba(0,0,0,0.2), 0 12px 24px rgba(0,0,0,0.4);
       --radius-xl: 24px; --radius-lg: 18px; --radius-md: 14px; --radius-sm: 10px;
     }
+    
+    body {
+      background: radial-gradient(circle at top left, rgba(56,189,248,0.06), transparent 28%), 
+                  radial-gradient(circle at bottom right, rgba(251,191,36,0.04), transparent 22%), 
+                  linear-gradient(180deg, #05070a 0%, #090c11 100%);
+    }
+
     /* Tema Claro */
     body.tema-claro {
       --bg: #f8fafc;
@@ -79,88 +86,105 @@
     html, body { min-height: 100%; }
     body { font-family: 'Inter', sans-serif; background: radial-gradient(circle at top left,rgba(110,231,255,0.07),transparent 28%), radial-gradient(circle at bottom right,rgba(224,192,120,0.05),transparent 22%), linear-gradient(180deg,#05070a 0%,#090c11 100%); color: var(--text); line-height: 1.6; overflow-x: hidden; }
     /* Acessibilidade - Alto Contraste aprimorado */
+    body.tema-claro .btn-flutuante { background: linear-gradient(135deg, var(--cyan), rgba(8,145,178,0.85)); }
+
+    /* Alto Contraste Aprimorado */
     body.alto-contraste {
       --bg: #000000;
-      --panel: rgba(0,0,0,0.95);
-      --border: rgba(255,255,255,0.5);
+      --panel: #000000;
+      --border: #ffffff;
       --text: #ffffff;
       --text-soft: #ffffff;
-      --text-faint: #e0e0e0;
+      --text-faint: #dddddd;
       --cyan: #00ffff;
-      --cyan-dim: rgba(0,255,255,0.2);
-      --gold: #ffd700;
-      --gold-dim: rgba(255,215,0,0.2);
-      --success: #00ff88;
-      --success-dim: rgba(0,255,136,0.2);
-      --danger: #ff4466;
-      --danger-dim: rgba(255,68,102,0.2);
+      --cyan-dim: #000000;
+      --gold: #ffff00;
+      --gold-dim: #000000;
+      --success: #00ff00;
+      --success-dim: #000000;
+      --danger: #ff0000;
+      --danger-dim: #000000;
     }
-    body.alto-contraste {
-      background: #000000;
+
+    body.alto-contraste, 
+    body.alto-contraste .hero {
+      background: #000000 !important;
     }
+
+    body.alto-contraste * {
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      text-shadow: none !important;
+    }
+
     body.alto-contraste .hero,
     body.alto-contraste .card,
-    body.alto-contraste .premium-card,
-    body.alto-contraste .module-card,
-    body.alto-contraste .info-card,
-    body.alto-contraste .patient-shell,
     body.alto-contraste .input-panel,
     body.alto-contraste .result-panel,
     body.alto-contraste .chat-panel,
-    body.alto-contraste .mode-selector,
-    body.alto-contraste .processing,
     body.alto-contraste .supervisor-card,
-    body.alto-contraste .prontuario-modal,
-    body.alto-contraste .diario-body,
-    body.alto-contraste .historico-toggle,
-    body.alto-contraste .replay-legend {
-      background: rgba(0,0,0,0.95);
-      border: 2px solid rgba(255,255,255,0.5);
+    body.alto-contraste .prontuario-modal {
+      background: #000000;
+      border: 2px solid #ffffff;
     }
-    body.alto-contraste .btn-primary {
+
+    body.alto-contraste .btn-primary,
+    body.alto-contraste .primary-btn,
+    body.alto-contraste .chat-send-btn,
+    body.alto-contraste .btn-flutuante {
       background: #00ffff;
       color: #000000;
       border: 2px solid #00ffff;
-      font-weight: 800;
+      font-weight: 900;
     }
+
+    body.alto-contraste .btn-primary:hover,
+    body.alto-contraste .primary-btn:hover,
+    body.alto-contraste .btn-flutuante:hover {
+      background: #ffffff;
+      border-color: #ffffff;
+    }
+
     body.alto-contraste .btn-secondary,
-    body.alto-contraste .btn-ghost {
+    body.alto-contraste .ghost-btn,
+    body.alto-contraste .historico-toggle,
+    body.alto-contraste .mode-btn {
       background: transparent;
       color: #ffffff;
-      border: 2px solid rgba(255,255,255,0.6);
+      border: 2px solid #ffffff;
       font-weight: 700;
     }
-    body.alto-contraste .progress-bar {
-      background: rgba(255,255,255,0.25);
-      border: 1px solid rgba(255,255,255,0.4);
-    }
-    body.alto-contraste .progress-fill {
-      background: #00ffff;
-    }
+
     body.alto-contraste textarea,
     body.alto-contraste input,
     body.alto-contraste select {
-      background: rgba(0,0,0,0.8);
-      border: 2px solid rgba(255,255,255,0.4);
+      background: #000000;
+      border: 2px solid #ffffff;
       color: #ffffff;
     }
-    body.alto-contraste .chat-bubble.user {
-      background: rgba(0,255,255,0.15);
-      border: 2px solid #00ffff;
-      color: #ffffff;
+
+    body.alto-contraste textarea:focus,
+    body.alto-contraste input:focus {
+      border-color: #00ffff;
+      outline: 2px solid #00ffff;
     }
+
     body.alto-contraste .chat-bubble.paciente {
-      background: rgba(255,255,255,0.1);
-      border: 2px solid rgba(255,255,255,0.4);
+      border: 2px solid #ffffff;
+      background: #000000;
+    }
+
+    body.alto-contraste .chat-bubble {
+      border: 2px solid #00ffff;
+      background: #000000;
       color: #ffffff;
     }
+
     body.alto-contraste .mobile-nav {
-      background: rgba(0,0,0,0.98);
-      border-top: 2px solid rgba(255,255,255,0.4);
+      background: #000000;
+      border-top: 3px solid #ffffff;
     }
-    body.alto-contraste .mobile-nav-item {
-      color: #ffffff;
-    }
+
     body.alto-contraste .mobile-nav-item.active {
       background: rgba(0,255,255,0.2);
       border: 1px solid #00ffff;
@@ -187,6 +211,9 @@
     body.alto-contraste .acess-btn:hover {
       background: rgba(255,255,255,0.25);
       border-color: #ffffff;
+      background: transparent;
+      border: 2px solid #00ffff;
+      color: #00ffff;
     }
     body.reduzir-movimento { * { animation-duration: 0s !important; transition-duration: 0s !important; scroll-behavior: auto !important; } }
     .acess-btns { position: absolute; top: 20px; right: 20px; display: flex; gap: 8px; z-index: 10; }
@@ -2035,9 +2062,9 @@
   <div class="shell" id="appShell" style="display:none;">
     <section class="hero">
       <div class="acess-btns">
-        <button class="acess-btn" onclick="toggleTema()" title="Alternar tema claro/escuro">☀️</button>
-        <button class="acess-btn" onclick="toggleAltoContraste()" title="Alto contraste">◐</button>
-        <button class="acess-btn" onclick="toggleReduzirMovimento()" title="Reduzir movimento">⊘</button>
+        <button class="acess-btn" onclick="toggleTema()" title="Alternar tema claro/escuro" aria-label="Alternar tema claro ou escuro">☀️</button>
+        <button class="acess-btn" onclick="toggleAltoContraste()" title="Alto contraste" aria-label="Ativar alto contraste">◐</button>
+        <button class="acess-btn" onclick="toggleReduzirMovimento()" title="Reduzir movimento" aria-label="Reduzir animações da interface">⊘</button>
       </div>
       <div class="hero-top">
         <div class="seal"></div>
@@ -2134,7 +2161,7 @@
 
             <!-- Barra de áudio -->
             <div class="audio-bar">
-              <button class="mic-btn" id="micBtn" onclick="toggleGravacao()" title="Gravar resposta por voz">🎙️</button>
+              <button class="mic-btn" id="micBtn" onclick="toggleGravacao()" title="Gravar resposta por voz" aria-label="Gravar resposta por voz">🎙️</button>
               <div class="audio-info">
                 <div class="audio-label">Resposta por voz</div>
                 <div class="audio-status" id="audioStatus">Clique no microfone para falar sua resposta</div>
@@ -2202,7 +2229,7 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
             </div>
             <div class="chat-input-row">
               <textarea class="chat-input" id="chatInput" placeholder="Digite sua fala como terapeuta..." rows="1"></textarea>
-              <button class="chat-send-btn" id="chatSendBtn" onclick="enviarMensagemChat()" title="Enviar">➤</button>
+              <button class="chat-send-btn" id="chatSendBtn" onclick="enviarMensagemChat()" title="Enviar mensagem" aria-label="Enviar mensagem">➤</button>
             </div>
             <div class="chat-footer">
               <span class="chat-turns" id="chatTurns">0 trocas</span>
@@ -2307,6 +2334,7 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
   </nav>
   
 
+  <button class="btn-flutuante" onclick="acaoFlutuante()" title="Ação rápida" aria-label="Ação contextual rápida">⚡</button>
 
   <script>
     // ── CONFIGURAÇÃO ────────────────────────────────────────────────────
@@ -2780,14 +2808,18 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
       const btn = document.getElementById('micBtn');
       const statusEl = document.getElementById('audioStatus');
 
-      if (!SR) {
+      // Verifica se é iOS (onde a API é muito problemática ou inexistente)
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+      if (!SR || isIOS) {
         btn.classList.add('unsupported');
-        btn.title = 'Reconhecimento de voz não suportado. Use Chrome.';
-        statusEl.textContent = 'Use o Chrome para ativar resposta por voz';
+        btn.title = 'Reconhecimento de voz não suportado ou instável neste navegador.';
+        statusEl.textContent = isIOS ? 'Voz instável no iOS. Recomendado digitar ou usar Android/PC.' : 'Use o Chrome para ativar resposta por voz';
         return;
       }
 
       recognition = new SR();
+      // ... (mantenha o resto da função initSpeech igual daqui para baixo)
       recognition.continuous = true;
       recognition.interimResults = true;
 
@@ -3465,12 +3497,13 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
       }
     }
 
-    // ── ANIMAÇÕES DE SCROLL REVEAL ─────────────────────────────────────
+   // ── ANIMAÇÕES DE SCROLL REVEAL ─────────────────────────────────────
     function setupScrollAnimations() {
-      const observer = new IntersectionObserver((entries) => {
+      const observer = new IntersectionObserver((entries, obs) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             entry.target.classList.add('visible');
+            obs.unobserve(entry.target); // Melhora a performance parando de observar
           }
         });
       }, { threshold: 0.1 });
