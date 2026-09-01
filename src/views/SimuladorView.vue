@@ -748,6 +748,7 @@ let recognition = null
 let gravando = false
 let transcricaoAcumulada = ''
 let restartTimeoutId = null
+let ultimoIndiceFinal = -1
 
 function initSpeech() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition
@@ -778,7 +779,18 @@ function initSpeech() {
     let interim = '', final = ''
     for (let i = event.resultIndex; i < event.results.length; i++) {
       const t = event.results[i][0].transcript
-      if (event.results[i].isFinal) final += t + ' '; else interim += t
+      if (event.results[i].isFinal) {
+        // O Chrome, ocasionalmente, reemite como "final" um resultado que já
+        // tinha sido reportado antes (mesmo índice) — sem essa checagem, a
+        // frase inteira já transcrita é concatenada de novo, duplicando o
+        // texto em cascata.
+        if (i > ultimoIndiceFinal) {
+          final += t + ' '
+          ultimoIndiceFinal = i
+        }
+      } else {
+        interim += t
+      }
     }
     if (final) transcricaoAcumulada += final
     const ta = document.getElementById('clinicalInput')
@@ -807,6 +819,7 @@ function initSpeech() {
     clearTimeout(restartTimeoutId)
     restartTimeoutId = setTimeout(() => {
       if (!gravando) return
+      ultimoIndiceFinal = -1
       try { recognition.start() } catch (e) { pararGravacao() }
     }, 250)
   }
@@ -822,6 +835,7 @@ function iniciarGravacao() {
   if (!recognition) return
   recognition.lang = document.getElementById('audioLang').value
   transcricaoAcumulada = ''
+  ultimoIndiceFinal = -1
   try { recognition.start() } catch (e) {}
 }
 
