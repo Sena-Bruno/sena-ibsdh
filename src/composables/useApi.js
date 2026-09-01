@@ -4,6 +4,7 @@
 // Agora todas usam esta única função.
 
 const APPS_SCRIPT_URL = '/api'
+const TIMEOUT_MS = 20000
 
 /**
  * Chama o backend (Apps Script via proxy /api) com uma action e payload.
@@ -11,14 +12,26 @@ const APPS_SCRIPT_URL = '/api'
  * @returns {Promise<any>} resposta já parseada como JSON
  */
 export async function callApi(payload) {
-  const res = await fetch(APPS_SCRIPT_URL, {
-    method: 'POST',
-    body: JSON.stringify(payload)
-  })
-  if (!res.ok) {
-    throw new Error('Servidor respondeu com erro ' + res.status)
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS)
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      signal: controller.signal
+    })
+    if (!res.ok) {
+      throw new Error('Servidor respondeu com erro ' + res.status)
+    }
+    return await res.json()
+  } catch (e) {
+    if (e.name === 'AbortError') {
+      throw new Error('O servidor demorou demais para responder. Tente novamente.')
+    }
+    throw e
+  } finally {
+    clearTimeout(timeoutId)
   }
-  return res.json()
 }
 
 export function useApi() {
