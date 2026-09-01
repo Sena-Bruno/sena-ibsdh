@@ -1,3 +1,8 @@
+# Build
+[build]
+  command = "npm run build"
+  publish = "dist"
+
 # Headers de segurança para todas as páginas
 [[headers]]
   for = "/*"
@@ -16,13 +21,12 @@
   [redirects.headers]
     X-Forwarded-For = ""
 
-# SPA fallback
+# Fallback de SPA: qualquer rota que não seja um arquivo real (imagens, JS,
+# CSS, o próprio index.html) cai no shell da aplicação Vue, que então usa o
+# Vue Router para decidir qual tela mostrar com base no caminho da URL.
+# Isso cobre /dashboard.html, /mentor.html, /ranking.html, /desafio.html,
+# /certificado.html e os aliases mais amigáveis (/dashboard, /mentor, etc).
 [[redirects]]
-  from = "/dashboard"
-  to = "/dashboard.html"
-  status = 200
-
-[[redirects]]
-  from = "/simulador"
+  from = "/*"
   to = "/index.html"
   status = 200
