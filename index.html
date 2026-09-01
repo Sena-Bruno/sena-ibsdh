@@ -2230,6 +2230,12 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
     let activeProfile = null;
     let processing = false;
 
+    // Utilitário de Segurança (Proteção XSS)
+    function sanitize(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
     // ── EMAIL / ACESSO ──────────────────────────────────────────────────
     (function init() {
       if (!SYSTEM.protocol || !SYSTEM.module) {
@@ -2848,19 +2854,25 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
       const messages = document.getElementById('chatMessages');
       const empty = messages.querySelector('.chat-empty');
       if (empty) empty.remove();
+      
       const div = document.createElement('div');
-      // Mensagem de sistema (erro/aviso) — exibe centralizado
+      
       if (role === 'sistema') {
         div.style.cssText = 'text-align:center;font-size:12px;color:var(--danger);padding:8px;opacity:.8;';
-        div.textContent = texto;
+        div.textContent = texto; // textContent já é seguro por padrão
         messages.appendChild(div);
         messages.scrollTop = messages.scrollHeight;
         return;
       }
+      
       div.className = 'chat-msg ' + role;
-      const textoEsc = String(texto).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/[\r\n]+/g,'<br>');
+      
+      // Aplicando a função centralizada sanitize e mantendo as quebras de linha
+      const textoEsc = sanitize(texto).replace(/[\r\n]+/g,'<br>');
+      
       div.innerHTML = '<div class="chat-avatar">' + (role === 'terapeuta' ? 'T' : 'P') + '</div>' +
         '<div class="chat-bubble">' + textoEsc + '</div>';
+        
       messages.appendChild(div);
       messages.scrollTop = messages.scrollHeight;
     }
