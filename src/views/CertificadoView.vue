@@ -183,7 +183,7 @@ onMounted(() => {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 * { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
+.wrap {
   --bg: #07090d;
   --panel: rgba(16, 21, 29, 0.96);
   --panel-soft: rgba(255,255,255,0.03);
@@ -194,8 +194,6 @@ onMounted(() => {
   --cyan: #59e1ff;
   --success: #7ef0c2;
   --danger: #ff6b88;
-}
-.wrap {
   font-family: 'Inter', sans-serif;
   min-height: 100vh;
   background:
