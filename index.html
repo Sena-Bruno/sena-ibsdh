@@ -73,11 +73,9 @@
     body.tema-claro .mobile-nav { background: rgba(255,255,255,0.95); border-top-color: rgba(112,141,173,0.2); }
     body.tema-claro .mobile-nav-btn { color: var(--text-soft); }
     body.tema-claro .mobile-nav-btn.active { color: var(--cyan); }
-    body.tema-claro .btn-flutuante { background: linear-gradient(135deg,var(--cyan),rgba(8,145,178,0.85)); box-shadow: 0 8px 24px rgba(8,145,178,0.3); }
     body.tema-claro .mobile-nav-item { color: var(--text-soft); }
     body.tema-claro .mobile-nav-item:hover { background: rgba(8,145,178,0.08); color: var(--cyan); }
     body.tema-claro .mobile-nav-item.active { color: var(--cyan); background: rgba(8,145,178,0.12); }
-    body.tema-claro .btn-flutuante { background: linear-gradient(135deg, var(--cyan), rgba(8,145,178,0.85)); }
     html, body { min-height: 100%; }
     body { font-family: 'Inter', sans-serif; background: radial-gradient(circle at top left,rgba(110,231,255,0.07),transparent 28%), radial-gradient(circle at bottom right,rgba(224,192,120,0.05),transparent 22%), linear-gradient(180deg,#05070a 0%,#090c11 100%); color: var(--text); line-height: 1.6; overflow-x: hidden; }
     /* Acessibilidade - Alto Contraste aprimorado */
@@ -166,11 +164,6 @@
     body.alto-contraste .mobile-nav-item.active {
       background: rgba(0,255,255,0.2);
       border: 1px solid #00ffff;
-    }
-    body.alto-contraste .btn-flutuante {
-      background: #00ffff;
-      color: #000000;
-      border: 2px solid #00ffff;
     }
     body.alto-contraste .estado-paciente {
       border: 2px solid rgba(255,255,255,0.4);
@@ -372,30 +365,6 @@
       letter-spacing: 0.05em;
     }
 
-    .btn-flutuante {
-      position: fixed;
-      bottom: 78px;
-      right: 20px;
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--cyan), #8cecff);
-      border: none;
-      color: #05070a;
-      font-size: 24px;
-      cursor: pointer;
-      box-shadow: 0 8px 24px rgba(110,231,255,0.3);
-      z-index: 999;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      display: grid;
-      place-items: center;
-    }
-
-    .btn-flutuante:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 32px rgba(110,231,255,0.4);
-    }
-
     body {
       padding-bottom: 80px;
     }
@@ -534,7 +503,6 @@
 
       /* Mobile Navigation - Tablet e Desktop também */
       .mobile-nav { display: flex; }
-      .btn-flutuante { display: grid; place-items: center; }
       body { padding-bottom: 70px; }
 
       /* Estilos da navegação mobile */
@@ -580,34 +548,6 @@
         font-size: 10px;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-      }
-
-      /* Botão flutuante - visível em todos os tamanhos */
-      .btn-flutuante {
-        position: fixed;
-        bottom: 78px;
-        right: 20px;
-        width: 56px;
-        height: 56px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, var(--cyan), #8cecff);
-        border: none;
-        color: #05070a;
-        font-size: 24px;
-        cursor: pointer;
-        box-shadow: 0 8px 24px rgba(110,231,255,0.3);
-        z-index: 999;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        display: grid;
-        place-items: center;
-      }
-      .btn-flutuante:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 32px rgba(110,231,255,0.4);
-      }
-      .btn-flutuante:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
       }
     }
 
@@ -2366,7 +2306,7 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
     <a href="#resultado" onclick="scrollPara('resultModule'); return false;" class="mobile-nav-item" data-nav="resultado">📊<span>Resultado</span></a>
   </nav>
   
-  <button class="btn-flutuante" onclick="acaoFlutuante()" title="Ação rápida">⚡</button>
+
 
   <script>
     // ── CONFIGURAÇÃO ────────────────────────────────────────────────────
@@ -3621,24 +3561,6 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
       
       atualizarNavMobile(current);
     });
-
-    function acaoFlutuante() {
-      // Ação contextual baseada no estado atual
-      if (!activeProfile) {
-        initializeSimulation();
-      } else if (modoAtual === 'texto') {
-        const inputPanel = document.getElementById('inputPanel');
-        if (inputPanel && inputPanel.classList.contains('visible')) {
-          submitAnalysis();
-        } else {
-          scrollPara('inputModule');
-        }
-      } else if (modoAtual === 'conversa') {
-        enviarMensagemChat();
-      } else {
-        scrollPara('inputModule');
-      }
-    }
 
     // ── #3: PRONTUÁRIO CLÍNICO ────────────────────────────────────────
     let prontuarioDados = null;
