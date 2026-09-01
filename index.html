@@ -1663,7 +1663,7 @@
     }
 
     .desafio-resistencia::before {
-      content: '⚡';
+      content: '';
       position: absolute;
       left: 0;
       font-size: 10px;
@@ -2111,7 +2111,7 @@
               </div>
             </div>
             <button class="primary-btn" onclick="initializeSimulation()" id="initBtn">Gerar paciente virtual</button>
-            <button class="desafio-btn" onclick="mostrarSeletorNivel()" id="desafioBtn">⚡ Modo Desafio — paciente composto</button>
+            <button class="desafio-btn" onclick="mostrarSeletorNivel()" id="desafioBtn">Modo Desafio — paciente composto</button>
 
             <div class="desafio-nivel-selector" id="desafioNivelSelector">
               <div class="desafio-nivel-title">Escolha o nível de dificuldade</div>
@@ -3317,7 +3317,7 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
     async function gerarDesafio(nivel) {
       document.getElementById('desafioNivelSelector').classList.remove('visible');
       document.getElementById('desafioBtn').disabled = true;
-      document.getElementById('desafioBtn').textContent = '⚡ Gerando...';
+      document.getElementById('desafioBtn').textContent = 'Gerando...';
       try {
         const res = await fetch(APPS_SCRIPT_URL, {
           method: 'POST',
@@ -3332,7 +3332,7 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
           approach: data.abordagem_ideal, type: 'DESAFIO'
         };
         document.getElementById('statusDot').classList.add('active');
-        document.getElementById('patientId').textContent = '⚡ ' + data.nivel;
+        document.getElementById('patientId').textContent = data.nivel;
         document.getElementById('patientType').textContent = data.nome.toUpperCase();
         document.getElementById('patientDesc').textContent = data.descricao;
         document.getElementById('patientStats').style.display = 'grid';
@@ -3341,7 +3341,7 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
         (data.resistencias||[]).forEach(function(r){const li=document.createElement('li');li.textContent=r;list.appendChild(li);});
         document.getElementById('approachText').textContent = data.abordagem_ideal;
         document.getElementById('desafioCard').style.display = 'block';
-        document.getElementById('desafioCard').innerHTML = '<div class="desafio-card"><div class="desafio-card-badge">⚡ ' + data.nivel + '</div><div class="desafio-card-nome">' + data.nome + '</div><div class="desafio-nota-min">Nota mínima para o selo: ' + notaMinimaDesafio + '/10</div></div>';
+        document.getElementById('desafioCard').innerHTML = '<div class="desafio-card"><div class="desafio-card-badge">' + data.nivel + '</div><div class="desafio-card-nome">' + data.nome + '</div><div class="desafio-nota-min">Nota mínima para o selo: ' + notaMinimaDesafio + '/10</div></div>';
         document.getElementById('thresholdValue').textContent = notaMinimaDesafio + '/10';
         document.getElementById('thresholdDisplay').textContent = notaMinimaDesafio;
         document.getElementById('initBtn').style.display = 'none';
@@ -3350,7 +3350,7 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
         document.getElementById('modeSelector').classList.add('visible');
         setTimeout(()=>document.getElementById('inputModule').scrollIntoView({behavior:'smooth',block:'start'}),100);
       } catch(err) { showAlert('Erro ao gerar desafio.'); }
-      finally { document.getElementById('desafioBtn').disabled=false; document.getElementById('desafioBtn').textContent='⚡ Modo Desafio — paciente composto'; }
+      finally { document.getElementById('desafioBtn').disabled=false; document.getElementById('desafioBtn').textContent='Modo Desafio — paciente composto'; }
     }
 
     function verificarSeloDesafio(nota, aprovado) {
