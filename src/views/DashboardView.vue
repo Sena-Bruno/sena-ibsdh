@@ -1062,6 +1062,11 @@ onUnmounted(() => {
 
     .dash-page {
       font-family: 'Inter', sans-serif;
+      /* No HTML original o fundo ficava no body, que por padrão propaga a
+         pintura para a tela inteira. Numa div comum isso não acontece, então
+         precisa do min-height para cobrir a viewport quando o conteúdo é
+         curto (tela de e-mail, loader) e não sobrar área sem fundo. */
+      min-height: 100vh;
       background-color: var(--bg);
       background-image: 
         radial-gradient(ellipse at top left, rgba(110,231,255,0.07), transparent 30%),

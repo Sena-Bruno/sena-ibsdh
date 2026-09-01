@@ -166,9 +166,12 @@ onMounted(async () => {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
 * { margin:0;padding:0;box-sizing:border-box; }
+/* O fundo fica no wrapper full-width (.page) e a largura máxima no .shell —
+   mesma divisão do mentor.html original. Se o fundo ficar no .shell, que é
+   limitado a 720px, sobra o branco do body nas laterais da tela. */
 .page { --text:#edf3f8;--text-soft:#9aa7b5;--text-faint:#5a6470;--cyan:#59e1ff;--gold:#d6b36a;--success:#7ef0c2;--danger:#ff6b88;--border:rgba(112,141,173,0.15);--shadow:0 20px 48px rgba(0,0,0,0.38);
-  font-family:'Inter',sans-serif; }
-.shell { min-height:100vh;background:radial-gradient(ellipse at bottom right,rgba(126,240,194,0.06),transparent 30%),linear-gradient(180deg,#06080c,#090c11);color:var(--text);line-height:1.6;max-width:720px;margin:0 auto;padding:28px 18px 48px; }
+  font-family:'Inter',sans-serif;min-height:100vh;background:radial-gradient(ellipse at bottom right,rgba(126,240,194,0.06),transparent 30%),linear-gradient(180deg,#06080c,#090c11);color:var(--text);line-height:1.6; }
+.shell { max-width:720px;margin:0 auto;padding:28px 18px 48px; }
 .btn-voltar { display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:var(--text-soft);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;margin-bottom:16px;transition:background .18s; }
 .btn-voltar:hover { background:rgba(255,255,255,0.06); }
 .hero { background:linear-gradient(180deg,rgba(16,21,29,0.92),rgba(10,14,20,0.98));border:1px solid var(--border);border-radius:24px;padding:28px;margin-bottom:22px;box-shadow:var(--shadow); }
