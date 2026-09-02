@@ -18,6 +18,13 @@ incompleta do arquivo original virar a fonte da verdade.
   do `doPost`; as linhas prontas estão no fim do arquivo.
 - `teste-equivalencia.mjs` — testes das funções corrigidas.
 
+> O `plantao.gs` traz uma função `testarPlantao()`. Rode-a no editor (seletor
+> de função → **Executar**) e leia o **Registro de execução**: ela dispara as
+> três ações pelo `doPost` real, então mostra tanto erros internos quanto
+> `Ação desconhecida` — que é o sinal de que os casos não foram adicionados ao
+> `switch`. Ela grava uma linha de teste em `Plantao_Historico` com o e-mail
+> `teste@ibsdh.com.br`, que pode ser apagada depois.
+
 > O projeto no Apps Script tem mais de um arquivo: `Codigo.gs` (o grande, com
 > `doGet`/`doPost` e a lógica), `Setup.gs` (utilitários que criam e formatam as
 > abas) e os templates HTML `Index`, `Dashboard`, `Certificado` e `Validar`.
