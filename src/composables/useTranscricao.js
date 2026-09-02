@@ -40,18 +40,22 @@ export function juntarSemDuplicar(base, novo) {
   const nLower = n.toLowerCase()
 
   // Trecho cumulativo: o novo já contém tudo o que tínhamos e cresceu.
-  // Exige ser estritamente maior para não engolir uma repetição legítima
-  // de mesmo tamanho (ex: "sim" seguido de "sim").
   if (nLower.startsWith(bLower) && n.length > b.length) return n
 
-  // Reemissão do mesmo trecho que já está no fim do texto acumulado.
-  // Só vale a partir de 2 palavras, senão uma repetição real e curta
-  // ("sim sim", "não não") seria descartada por engano.
+  // Reemissão: o trecho novo INTEIRO já está no fim do texto acumulado.
+  // Vale para qualquer tamanho, inclusive uma palavra só. Uma repetição
+  // realmente falada ("sim sim") volta do motor de voz como um único
+  // transcript "sim sim", não como dois trechos separados — então dois
+  // trechos idênticos chegando em sequência são artefato do motor, que
+  // reemite a mesma palavra a cada reinício de sessão.
   const pn = palavras(n)
-  if (pn.length >= MIN_PALAVRAS_SOBREPOSICAO && bLower.endsWith(nLower)) return b
+  if (bLower.endsWith(nLower)) return b
 
-  // Sobreposição na fronteira: o fim do acumulado é igual ao começo do novo
-  // (típico quando a sessão reinicia e a cauda do áudio é reprocessada).
+  // Sobreposição PARCIAL na fronteira: o fim do acumulado é igual ao começo
+  // do novo, mas o novo continua com conteúdo inédito (típico quando a
+  // sessão reinicia e a cauda do áudio é reprocessada). Aqui sim exigimos
+  // 2+ palavras: descartar uma palavra só poderia inverter o sentido de um
+  // texto clínico ("ele disse não" + "não posso continuar").
   const pb = palavras(b)
   const maxSobreposicao = Math.min(pb.length, pn.length)
   for (let k = maxSobreposicao; k >= MIN_PALAVRAS_SOBREPOSICAO; k--) {
