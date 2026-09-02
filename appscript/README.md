@@ -9,6 +9,19 @@ O código completo do backend vive no editor do Apps Script
 apenas as funções alteradas, para não haver risco de uma cópia manual
 incompleta do arquivo original virar a fonte da verdade.
 
+## Arquivos
+
+- `funcoes-corrigidas.gs` — correções de funções que já existiam no `Codigo.gs`
+  (ver "O que foi corrigido" abaixo).
+- `plantao.gs` — **arquivo novo**, do Modo Plantão. Cole como um arquivo
+  separado no editor (Arquivo → + → Script) e adicione os 3 casos no `switch`
+  do `doPost`; as linhas prontas estão no fim do arquivo.
+- `teste-equivalencia.mjs` — testes das funções corrigidas.
+
+> O projeto no Apps Script tem mais de um arquivo: `Codigo.gs` (o grande, com
+> `doGet`/`doPost` e a lógica), `Setup.gs` (utilitários que criam e formatam as
+> abas) e os templates HTML `Index`, `Dashboard`, `Certificado` e `Validar`.
+
 ## Como aplicar
 
 Abra o projeto no editor do Apps Script e:
