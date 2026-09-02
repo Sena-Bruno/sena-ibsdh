@@ -15,4 +15,10 @@ html, body {
 
 body {
   font-family: 'Inter', sans-serif;
+  /* Rede de segurança: cada view pinta o próprio fundo, mas se sobrar
+     qualquer área descoberta (overscroll no mobile, por exemplo) ela fica
+     escura em vez do branco padrão do navegador. O tema claro do Dashboard
+     e do Simulador (body.tema-claro) tem especificidade maior e continua
+     sobrescrevendo isso normalmente. */
+  background-color: #06080c;
 }
