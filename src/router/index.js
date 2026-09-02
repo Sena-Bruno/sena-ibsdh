@@ -46,6 +46,12 @@ const routes = [
     alias: '/certificado',
     name: 'certificado',
     component: () => import('../views/CertificadoView.vue')
+  },
+  {
+    path: '/plantao.html',
+    alias: '/plantao',
+    name: 'plantao',
+    component: () => import('../views/PlantaoView.vue')
   }
 ]
 

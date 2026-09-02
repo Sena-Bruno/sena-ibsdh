@@ -219,14 +219,14 @@
           </div>
           <span class="premium-arrow">→</span>
         </router-link>
-        <a href="#" class="premium-card" @click.prevent="modoPlantao">
+        <router-link :to="{ path: '/plantao.html', query: { curso: CURSO } }" class="premium-card">
           <div class="premium-icon" style="background: rgba(255,107,136,0.1); border-color: rgba(255,107,136,0.2);">🚨</div>
           <div>
             <div class="premium-title">Modo Plantão</div>
-            <div class="premium-sub">Casos urgentes com tempo limitado</div>
+            <div class="premium-sub">3 casos em sequência, com tempo</div>
           </div>
           <span class="premium-arrow">→</span>
-        </a>
+        </router-link>
       </div>
     </div>
 
@@ -442,10 +442,6 @@ function praticarProximaAula() {
 
 function solicitarNotificacoes() {
   if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission()
-}
-
-function modoPlantao() {
-  alert('Modo Plantão em breve! Casos de emergência com tempo limitado.')
 }
 
 async function verificarAcesso(emailCheck) {
