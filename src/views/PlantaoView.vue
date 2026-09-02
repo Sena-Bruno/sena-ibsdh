@@ -43,7 +43,10 @@
           </ul>
         </div>
 
-        <div v-if="erro" class="aviso-erro">{{ erro }}</div>
+        <div v-if="erro" class="aviso-erro">
+          {{ erro }}
+          <div v-if="erroDetalhe" class="detalhe-erro">{{ erroDetalhe }}</div>
+        </div>
 
         <button class="btn-principal" :disabled="carregando" @click="iniciarPlantao">
           {{ carregando ? 'Preparando plantão...' : 'Iniciar plantão →' }}
@@ -145,6 +148,7 @@
 
           <template v-else>
             <div class="nao-concluido">{{ ultimo.mensagem }}</div>
+            <div v-if="ultimo.detalhe" class="detalhe-erro">{{ ultimo.detalhe }}</div>
           </template>
         </div>
 
@@ -200,6 +204,8 @@ const etapa = ref('intro')          // intro | caso | resultado | resumo
 const carregando = ref(false)
 const avaliando = ref(false)
 const erro = ref('')
+const erroDetalhe = ref('')
+const inicioPendente = ref(false)
 
 const email = ref('')
 const emailInput = ref('')
@@ -307,6 +313,12 @@ async function confirmarEmail() {
   localStorage.setItem('sena_email', val)
   mostrarModalEmail.value = false
   carregarHistorico()
+  // O modal interrompeu um "Iniciar plantão": retoma de onde parou, em vez de
+  // devolver o aluno à tela inicial para clicar de novo.
+  if (inicioPendente.value) {
+    inicioPendente.value = false
+    iniciarPlantao()
+  }
 }
 
 function garantirEmail() {
@@ -332,7 +344,11 @@ async function carregarHistorico() {
 
 async function iniciarPlantao() {
   erro.value = ''
-  if (!garantirEmail()) return
+  erroDetalhe.value = ''
+  if (!garantirEmail()) {
+    inicioPendente.value = true
+    return
+  }
   carregando.value = true
   try {
     const data = await callApi({ action: 'plantao_gerar', curso: cursoAtual() })
@@ -348,7 +364,9 @@ async function iniciarPlantao() {
     iniciarCronometro(data.segundos_por_caso || SEGUNDOS)
     nextTick(() => respostaRef.value && respostaRef.value.focus())
   } catch (e) {
+    // A causa real vem do backend; escondê-la só dificulta o diagnóstico.
     erro.value = 'Não foi possível iniciar o plantão. Tente novamente.'
+    erroDetalhe.value = e && e.message ? String(e.message) : ''
   } finally {
     carregando.value = false
   }
@@ -381,10 +399,12 @@ async function enviarCaso(expirou) {
     ultimo.value = data
   } catch (e) {
     // Sem avaliação, o caso não some do turno: entra como não concluído.
+    // O detalhe é o texto que o backend mandou — é ele que diz o que quebrou.
     ultimo.value = {
       respondido: false,
       perfil: caso.value.perfil,
-      mensagem: 'Não foi possível avaliar este caso agora. Ele fica registrado como não concluído.'
+      mensagem: 'Não foi possível avaliar este caso agora. Ele fica registrado como não concluído.',
+      detalhe: e && e.message ? String(e.message) : ''
     }
   } finally {
     resultados.value.push({ ...ultimo.value, perfil: caso.value.perfil })
@@ -474,6 +494,14 @@ h1 { font-size:clamp(24px,5vw,34px);font-weight:800;letter-spacing:-.03em;margin
 .aviso-erro {
   padding:12px 14px;border-radius:12px;border:1px solid rgba(255,107,136,0.25);
   background:rgba(255,107,136,0.06);color:#ff8fa3;font-size:13px;margin-bottom:12px;
+}
+
+/* Mensagem técnica que veio do backend: discreta, mas visível — é ela que
+   diz o que quebrou quando a avaliação falha. */
+.detalhe-erro {
+  margin-top:8px;font-size:11.5px;line-height:1.45;color:var(--text-faint);
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  word-break:break-word;text-align:left;
 }
 
 .btn-principal {

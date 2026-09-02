@@ -294,6 +294,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useAccessibility } from '../composables/useAccessibility'
+import { callApi } from '../composables/useApi'
 import GraficoEvolucao from '../components/GraficoEvolucao.vue'
 
 // ── ACESSIBILIDADE (composable compartilhado) ──────────────────────
@@ -661,20 +662,29 @@ function verificarAlertaInatividade() {
   enviarAlertaWpp(numSalvo, msg)
 }
 
+// O backend devolve só { posicao, total } — nunca a lista de alunos. A versão
+// anterior pedia o ranking inteiro e procurava a própria posição aqui, o que
+// entregaria o e-mail de toda a turma ao navegador de qualquer aluno.
 async function buscarPosicaoRanking() {
+  const badge = document.getElementById('rankBadge')
   try {
-    const res = await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'ranking', curso: CURSO })
-    })
-    const data = await res.json()
-    if (!data || data.erro || !Array.isArray(data.ranking)) return
-    const pos = data.ranking.findIndex(r => (r.email || '').toLowerCase() === email.toLowerCase())
-    if (pos !== -1) {
-      document.getElementById('rankPos').textContent = pos + 1
-      document.getElementById('heroPosicao').textContent = pos + 1 + 'º'
+    const data = await callApi({ action: 'posicao_ranking', email: email, curso: CURSO })
+    if (!montado) return
+    if (!data || data.erro || !data.posicao) {
+      // Sem posição (aluno ainda sem registro no curso): o badge não faz
+      // sentido e some, em vez de ficar num "—" permanente.
+      if (badge) badge.style.display = 'none'
+      return
     }
-  } catch (e) {}
+    document.getElementById('rankPos').textContent = data.posicao
+    document.getElementById('heroPosicao').textContent = data.posicao + 'º'
+    // "3º de 42" diz muito mais que "3º" — a mesma posição significa coisas
+    // diferentes numa turma de 5 e numa de 500.
+    if (badge && data.total) badge.innerHTML = '🏆 Ranking ' + data.posicao + 'º de ' + data.total
+  } catch (e) {
+    if (badge) badge.style.display = 'none'
+    console.warn('[SENA] posição no ranking indisponível:', e.message)
+  }
 }
 
 async function carregarProgresso() {

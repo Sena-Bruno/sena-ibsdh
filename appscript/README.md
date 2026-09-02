@@ -16,7 +16,19 @@ incompleta do arquivo original virar a fonte da verdade.
 - `plantao.gs` — **arquivo novo**, do Modo Plantão. Cole como um arquivo
   separado no editor (Arquivo → + → Script) e adicione os 3 casos no `switch`
   do `doPost`; as linhas prontas estão no fim do arquivo.
+- `posicao-ranking.gs` — **arquivo novo**. Implementa a posição do aluno no
+  ranking, que o dashboard chamava (`action: 'ranking'`) sem nunca ter existido
+  no backend. Cole como arquivo separado e adicione o caso no `switch`.
 - `teste-equivalencia.mjs` — testes das funções corrigidas.
+- `teste-posicao-ranking.mjs` — testes da posição no ranking
+  (`node appscript/teste-posicao-ranking.mjs`).
+
+> O `plantao.gs` traz uma função `testarPlantao()`. Rode-a no editor (seletor
+> de função → **Executar**) e leia o **Registro de execução**: ela dispara as
+> três ações pelo `doPost` real, então mostra tanto erros internos quanto
+> `Ação desconhecida` — que é o sinal de que os casos não foram adicionados ao
+> `switch`. Ela grava uma linha de teste em `Plantao_Historico` com o e-mail
+> `teste@ibsdh.com.br`, que pode ser apagada depois.
 
 > O projeto no Apps Script tem mais de um arquivo: `Codigo.gs` (o grande, com
 > `doGet`/`doPost` e a lógica), `Setup.gs` (utilitários que criam e formatam as

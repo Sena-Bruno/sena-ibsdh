@@ -297,6 +297,65 @@ function buscarHistoricoPlantao(email, curso) {
 
 
 // =============================================================================
+// DIAGNÓSTICO — rode esta função no editor (seletor de função → Executar) e
+// leia o Registro de execução. Não depende do site nem de nova implantação.
+//
+// Ela chama o doPost de verdade, então testa também o roteamento: se os 3
+// casos não estiverem ativos no switch, a resposta vem "Ação desconhecida".
+// =============================================================================
+
+function testarPlantao() {
+  const chamar = function (payload) {
+    // jsonResponse devolve um TextOutput; getContent() dá o JSON como texto.
+    return doPost({ postData: { contents: JSON.stringify(payload) } }).getContent();
+  };
+
+  const EMAIL_TESTE = 'teste@ibsdh.com.br';
+  const CURSO_TESTE = 'Practitioner';
+
+  Logger.log('1) gerar ------------------------------------------------');
+  const bruto = chamar({ action: 'plantao_gerar', curso: CURSO_TESTE });
+  Logger.log(bruto);
+
+  // Usa o perfil que o próprio gerar devolveu, para o teste refletir o fluxo
+  // real em vez de um perfil inventado.
+  let perfilTeste = 'Ansioso';
+  let queixaTeste = 'Chega dizendo que não está aguentando mais.';
+  try {
+    const turno = JSON.parse(bruto);
+    if (turno.casos && turno.casos.length) {
+      perfilTeste = turno.casos[0].perfil;
+      queixaTeste = turno.casos[0].queixa;
+    }
+  } catch (e) {
+    Logger.log('(não deu para ler o turno gerado: ' + e.message + ')');
+  }
+
+  Logger.log('2) avaliar ----------------------------------------------');
+  Logger.log(chamar({
+    action: 'plantao_avaliar',
+    dados: {
+      email: EMAIL_TESTE,
+      curso: CURSO_TESTE,
+      id_plantao: 'teste-' + new Date().getTime(),
+      numero: 1,
+      perfil: perfilTeste,
+      queixa: queixaTeste,
+      // precisa passar de PLANTAO.MIN_CHARS para chegar de fato à IA
+      resposta: 'Primeiro acolho a respiração e reduzo o ritmo da conversa antes de qualquer '
+        + 'intervenção. Valido o que ele traz, checo sinais de risco e só então proponho um '
+        + 'exercício curto de ancoragem, combinando o próximo passo antes de encerrar.',
+      tempo_seg: 120,
+      expirou: false
+    }
+  }));
+
+  Logger.log('3) histórico --------------------------------------------');
+  Logger.log(chamar({ action: 'plantao_historico', email: EMAIL_TESTE, curso: CURSO_TESTE }));
+}
+
+
+// =============================================================================
 // PASSO FINAL — adicione estes 3 casos no switch do doPost, no Codigo.gs,
 // logo antes de `default:`
 // =============================================================================
