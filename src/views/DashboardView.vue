@@ -231,10 +231,7 @@
     </div>
 
     <!-- GRÁFICO DE EVOLUÇÃO -->
-    <div style="margin-bottom:22px;padding:20px;border-radius:16px;border:1px solid rgba(110,231,255,0.2);background:rgba(110,231,255,0.03);">
-      <div style="font-size:13px;font-weight:700;color:var(--cyan);margin-bottom:12px;">📈 Evolução das notas</div>
-      <canvas id="graficoEvolucao" height="200" style="width:100%;max-width:100%;"></canvas>
-    </div>
+    <GraficoEvolucao :pontos="dadosGrafico" />
 
     <!-- MAPA DE JORNADA -->
     <div class="journey-section">
@@ -295,8 +292,9 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useAccessibility } from '../composables/useAccessibility'
+import GraficoEvolucao from '../components/GraficoEvolucao.vue'
 
 // ── ACESSIBILIDADE (composable compartilhado) ──────────────────────
 // Usa as mesmas chaves de localStorage que o dashboard.html original já usava.
@@ -403,51 +401,28 @@ function renderConquistas() {
   ).join('')
 }
 
-// Gráfico de evolução
-function desenharGraficoEvolucao() {
-  const canvas = document.getElementById('graficoEvolucao')
-  if (!canvas) return
-  const ctx = canvas.getContext('2d')
-  canvas.width = canvas.offsetWidth
-  const notas = []
+// Gráfico de evolução — os dados vão para o componente GraficoEvolucao.vue,
+// que desenha em SVG (nítido em qualquer tela, acompanha o tema e tem tooltip).
+const dadosGrafico = ref([])
+
+function montarDadosGrafico() {
+  const pontos = []
   MODULOS.forEach(mod => {
     mod.aulas.forEach(a => {
       const p = progresso[a.aula]
-      if (p && p.melhor_nota) notas.push({ aula: a.aula.replace('Aula_', ''), nota: Number(p.melhor_nota) })
+      if (p && p.melhor_nota) {
+        pontos.push({
+          aula: a.aula,
+          rotulo: a.aula.replace('Aula_', 'Aula '),
+          titulo: a.titulo || '',
+          nota: Number(p.melhor_nota),
+          notaMinima: Number(a.nota_minima || 7),
+          tentativas: Number(p.tentativas || 0)
+        })
+      }
     })
   })
-  if (notas.length < 2) {
-    ctx.fillStyle = '#5a6470'
-    ctx.font = '14px Inter, sans-serif'
-    ctx.textAlign = 'center'
-    ctx.fillText('Complete pelo menos 2 aulas para ver a evolução', canvas.width / 2, canvas.height / 2)
-    return
-  }
-  const padding = 30
-  const graphWidth = canvas.width - padding * 2
-  const graphHeight = canvas.height - padding * 2
-  ctx.strokeStyle = 'rgba(255,255,255,0.1)'
-  ctx.beginPath()
-  ctx.moveTo(padding, padding)
-  ctx.lineTo(padding, canvas.height - padding)
-  ctx.lineTo(canvas.width - padding, canvas.height - padding)
-  ctx.stroke()
-  const maxNota = 10, minNota = 0
-  const pontos = notas.map((n, i) => ({
-    x: padding + (i / (notas.length - 1)) * graphWidth,
-    y: padding + graphHeight - ((n.nota - minNota) / (maxNota - minNota)) * graphHeight
-  }))
-  ctx.strokeStyle = '#6ee7ff'
-  ctx.lineWidth = 2
-  ctx.beginPath()
-  pontos.forEach((p, i) => { i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y) })
-  ctx.stroke()
-  pontos.forEach(p => {
-    ctx.fillStyle = '#6ee7ff'
-    ctx.beginPath()
-    ctx.arc(p.x, p.y, 4, 0, Math.PI * 2)
-    ctx.fill()
-  })
+  dadosGrafico.value = pontos
 }
 
 // Mobile
@@ -830,7 +805,7 @@ function renderDashboard() {
 
   atualizarMeta()
   renderConquistas()
-  desenharGraficoEvolucao()
+  montarDadosGrafico()
   setupScrollAnimations()
 }
 
