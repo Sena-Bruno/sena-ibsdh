@@ -183,10 +183,25 @@ resposta do aluno. Para esse tipo de coisa é preciso ler a saída: em
 `diagnosticarIA()`, o caso do `replay` manda uma frase conhecida justamente
 para dar para conferir se ela aparece no retorno.
 
-### Recurso pronto e invisível
+### O que o inventário encontrou (03/09/2026)
 
-`titulos` existe no `doPost` e **nenhuma tela do site chama** (confirmado por
-busca em todo o `src/`).
+Rodado com o e-mail de exemplo, então as respostas `VAZIO` não valem como
+diagnóstico. O que vale:
+
+- **Nenhum `FALTA NO SWITCH`** — todas as actions estão roteadas.
+- **Nenhum `LENTO`.** `buscar_mentor` respondeu em **485ms** e
+  `ranking_perfis` em **333ms**. O Mentor antes não respondia nem em 15s: é a
+  confirmação, em produção, de que as correções de leitura acima estão
+  aplicadas.
+
+**`titulos` NÃO é funcionalidade escondida.** Ele devolve um mapa
+aula → título (`{"Aula_1":"O CÓDIGO DA EXCELÊNCIA...","Aula_2":...}`), e o
+`estrutura_curso` já entrega o mesmo título dentro de cada aula — o
+`DashboardView.vue:723` monta exatamente esse mapa a partir dele. A action é
+**redundante**; nenhuma tela chama porque nenhuma precisa.
+
+Registrado aqui porque eu havia afirmado o contrário, inferindo pelo nome sem
+olhar o retorno. O inventário **não** encontrou recurso pronto e invisível.
 
 ## Se quiser versionar o backend inteiro no futuro
 
