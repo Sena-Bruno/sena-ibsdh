@@ -168,6 +168,89 @@ function diagnosticarNotas() {
 }
 
 
+/**
+ * Abre as linhas com nota zero: o que o aluno escreveu e o que a IA respondeu.
+ *
+ * Por que: a primeira hipótese (zeros seriam resquício do apagão da Groq) foi
+ * REFUTADA pelos dados — as duas zeradas mais recentes usaram o modelo novo,
+ * funcionando. Média não distingue "aluno mandou lixo e tirou zero de
+ * verdade" de "a nota não foi extraída da resposta da IA". Só o conteúdo
+ * distingue, e são coisas opostas: a primeira é o sistema funcionando, a
+ * segunda é bug que apaga o trabalho do aluno.
+ *
+ * Também confere a coerência entre nota e aprovado — há pelo menos uma linha
+ * com nota 10 marcada como NÃO aprovada.
+ *
+ * Não altera nada: só lê e imprime.
+ */
+function diagnosticarZeros() {
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+  const sheetA = ss.getSheetByName(CONFIG.SHEETS.AVALIACOES);
+  const sheetR = ss.getSheetByName(CONFIG.SHEETS.RESPOSTAS);
+  if (!sheetA || sheetA.getLastRow() < 2) { Logger.log('Aba de avaliações vazia.'); return; }
+
+  const dadosA = sheetA.getDataRange().getValues();
+  const h = dadosA[0];
+  const idx = {};
+  ['timestamp','id_resposta','email','curso','aula','perfil','nota_total','nota_minima',
+   'aprovado','justificativa','atencao','modelo_ia'].forEach(function (c) { idx[c] = h.indexOf(c); });
+
+  // Índice id_resposta → texto, para mostrar o que o aluno realmente escreveu.
+  const textos = {};
+  if (sheetR && sheetR.getLastRow() > 1) {
+    const hR = sheetR.getRange(1, 1, 1, sheetR.getLastColumn()).getValues()[0];
+    const iIdR = hR.indexOf('id_resposta'), iTxt = hR.indexOf('resposta_texto');
+    if (iIdR >= 0 && iTxt >= 0) {
+      const dR = sheetR.getRange(2, 1, sheetR.getLastRow() - 1, sheetR.getLastColumn()).getValues();
+      for (let i = 0; i < dR.length; i++) textos[String(dR[i][iIdR])] = String(dR[i][iTxt] || '');
+    }
+  }
+
+  const emailNorm = String(DIAG.EMAIL).toLowerCase().trim();
+  Logger.log('=== LINHAS COM NOTA ZERO — ' + DIAG.EMAIL + ' ===');
+  Logger.log('');
+
+  let n = 0, incoerentes = 0;
+  for (let i = 1; i < dadosA.length; i++) {
+    const r = dadosA[i];
+    if (String(r[idx.email]).toLowerCase().trim() !== emailNorm) continue;
+    if (String(r[idx.curso]).trim() !== DIAG.CURSO) continue;
+
+    const nota = Number(r[idx.nota_total] || 0);
+    const minima = Number(r[idx.nota_minima] || 7);
+    const aprov = String(r[idx.aprovado] || '').trim().toUpperCase() === 'SIM';
+
+    // Incoerência: a nota bate a mínima e mesmo assim está reprovada (ou o
+    // contrário). Isso não depende de ser zero — checa todas as linhas.
+    if ((nota >= minima) !== aprov) {
+      incoerentes++;
+      Logger.log('!! INCOERENTE — ' + String(r[idx.timestamp]).substring(0, 10) + ' ' + r[idx.aula]
+        + ': nota ' + nota + ', mínima ' + minima + ', aprovado ' + r[idx.aprovado]);
+    }
+
+    if (nota !== 0) continue;
+    n++;
+    const texto = textos[String(r[idx.id_resposta])] || '(resposta não encontrada)';
+    Logger.log('--- zero #' + n + ' | ' + String(r[idx.timestamp]).substring(0, 16)
+      + ' | ' + r[idx.aula] + ' | ' + r[idx.perfil] + ' | ' + (r[idx.modelo_ia] || '—'));
+    Logger.log('    aluno escreveu (' + texto.length + ' chars): ' + texto.substring(0, 160));
+    if (idx.atencao >= 0)       Logger.log('    atencao      : ' + String(r[idx.atencao] || '').substring(0, 160));
+    if (idx.justificativa >= 0) Logger.log('    justificativa: ' + String(r[idx.justificativa] || '').substring(0, 160));
+    Logger.log('');
+  }
+
+  Logger.log('=== RESUMO ===');
+  Logger.log('linhas com nota zero: ' + n);
+  Logger.log('linhas incoerentes (nota x aprovado): ' + incoerentes);
+  Logger.log('');
+  Logger.log('Como ler:');
+  Logger.log(' - resposta curta/sem sentido + justificativa coerente = sistema OK,');
+  Logger.log('   zero merecido (provavelmente teste seu).');
+  Logger.log(' - resposta longa e séria + justificativa vazia ou genérica = BUG:');
+  Logger.log('   a nota não veio da IA, e o trabalho do aluno foi descartado.');
+}
+
+
 // ── Motor ────────────────────────────────────────────────────────────────────
 
 function executarDiagnostico(titulo, casos) {
