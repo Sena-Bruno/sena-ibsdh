@@ -138,7 +138,8 @@ curtas, abas vazias e parâmetros indefinidos, além de medir a redução no
 volume de dados.
 
 ```bash
-node appscript/teste-equivalencia.mjs
+npm test                # tudo: frontend + appscript
+npm run test:appscript  # só os harnesses desta pasta
 ```
 
 Não requer dependências. As implementações originais estão embutidas no
