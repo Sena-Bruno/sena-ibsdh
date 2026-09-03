@@ -29,13 +29,26 @@ const GROQ = {
 };
 
 /**
- * Chama a Groq tentando os modelos em ordem até um responder.
+ * NÚCLEO: tenta os modelos em ordem até um responder.
  *
- * @param {string} prompt
- * @returns {string} o conteúdo da resposta (mesmo retorno da versão antiga)
+ * Toda chamada à Groq deveria passar por aqui. O projeto tinha SETE caminhos
+ * independentes para a mesma API, cada um com sua cópia do fetch — então a
+ * primeira versão desta blindagem protegia só um deles. Parametrizar o núcleo
+ * é o que permite os outros usarem a mesma lógica em vez de recriá-la.
+ *
+ * @param {Array} mensagens - no formato da API ([{role, content}, ...])
+ * @param {object} [opcoes] - { json, maxTokens, temperature }
+ * @returns {string} o conteúdo da resposta
  * @throws {Error} se nenhum modelo responder, ou se a chave for inválida
  */
-function chamarGroqAPI(prompt) {
+function chamarGroqCore(mensagens, opcoes) {
+  const op = opcoes || {};
+  const config = {
+    json: op.json !== false,                                   // JSON é o padrão
+    maxTokens: op.maxTokens || GROQ.MAX_TOKENS,
+    temperature: op.temperature === undefined ? GROQ.TEMPERATURA : op.temperature
+  };
+
   const modelos = (GROQ.MODELOS && GROQ.MODELOS.length)
     ? GROQ.MODELOS
     : [CONFIG.MODEL_NAME];
@@ -46,7 +59,7 @@ function chamarGroqAPI(prompt) {
     const modelo = modelos[m];
 
     for (let tentativa = 1; tentativa <= GROQ.TENTATIVAS_POR_MODELO; tentativa++) {
-      const r = tentarModeloGroq(modelo, prompt);
+      const r = tentarModeloGroq(modelo, mensagens, config);
 
       if (r.ok) {
         // Só é fallback se não foi o primeiro modelo da lista.
@@ -79,13 +92,55 @@ function chamarGroqAPI(prompt) {
 }
 
 /**
+ * Avaliação clínica em JSON. Mesma assinatura e mesmo retorno de sempre —
+ * nenhum chamador precisa mudar.
+ */
+function chamarGroqAPI(prompt) {
+  return chamarGroqCore([
+    { role: 'system', content: 'Você é o SENA, avaliador clínico rigoroso. Responda apenas em JSON válido.' },
+    { role: 'user', content: prompt }
+  ], { json: true });
+}
+
+/**
+ * Resposta em texto corrido (tutor, relatórios, diário). Substitui a
+ * chamarGroqTexto do Codigo.gs, que tinha sua própria cópia do fetch e
+ * portanto nenhuma proteção: sem fallback de modelo, sem retry em 429 e sem
+ * detecção de conteúdo vazio.
+ *
+ * O maxTokens é generoso de propósito. Modelos de raciocínio gastam parte do
+ * orçamento pensando antes de escrever, e um teto apertado devolve `content`
+ * vazio — foi exatamente o que quebrou a mensagem de boas-vindas, que usava
+ * max_tokens 120.
+ */
+function chamarGroqTexto(prompt, opcoes) {
+  const op = opcoes || {};
+  return chamarGroqCore([
+    { role: 'system', content: op.sistema
+        || 'Você é um tutor didático e claro. Responda em texto normal, sem JSON.' },
+    { role: 'user', content: prompt }
+  ], { json: false, maxTokens: op.maxTokens || 900, temperature: op.temperature === undefined ? 0.3 : op.temperature });
+}
+
+/**
  * Uma chamada a um modelo. Não lança: classifica e devolve o que aconteceu,
  * porque é a classificação que decide entre repetir, pular ou abortar.
  *
  * @returns {{ok: boolean, conteudo?: string, classe?: string, motivo?: string}}
  *          classe: AUTH | MODELO | LIMITE | SERVIDOR | VAZIO | REDE
  */
-function tentarModeloGroq(modelo, prompt) {
+function tentarModeloGroq(modelo, mensagens, config) {
+  const corpo = {
+    model: modelo,
+    messages: mensagens,
+    temperature: config.temperature,
+    max_tokens: config.maxTokens
+  };
+  // response_format só faz sentido quando esperamos JSON. Impor isso a uma
+  // resposta em prosa (tutor, paciente) faria o modelo devolver JSON onde a
+  // tela espera texto.
+  if (config.json) corpo.response_format = { type: 'json_object' };
+
   const options = {
     method: 'post',
     contentType: 'application/json',
@@ -93,16 +148,7 @@ function tentarModeloGroq(modelo, prompt) {
       'Authorization': 'Bearer ' + getGroqApiKey(),
       'Content-Type': 'application/json'
     },
-    payload: JSON.stringify({
-      model: modelo,
-      messages: [
-        { role: 'system', content: 'Você é o SENA, avaliador clínico rigoroso. Responda apenas em JSON válido.' },
-        { role: 'user', content: prompt }
-      ],
-      temperature: GROQ.TEMPERATURA,
-      max_tokens: GROQ.MAX_TOKENS,
-      response_format: { type: 'json_object' }
-    }),
+    payload: JSON.stringify(corpo),
     muteHttpExceptions: true
   };
 

@@ -183,5 +183,81 @@ function checar(nome, ok, detalhe) {
   checar('falha ao gravar log não impede a resposta', r === '{"nota": 8}')
 }
 
+// ── modo texto (chamarGroqTexto) ────────────────────────────────────────────
+//
+// O tutor, o paciente e os relatórios devolvem PROSA. Impor response_format
+// json_object a eles faria o modelo responder JSON onde a tela espera texto —
+// por isso o núcleo é parametrizado em vez de assumir JSON sempre.
+{
+  let corpoEnviado = null
+  const t = montar(() => sucesso)
+  const fetchOriginal = t.sandbox.UrlFetchApp.fetch
+  t.sandbox.UrlFetchApp.fetch = (url, options) => {
+    corpoEnviado = JSON.parse(options.payload)
+    return fetchOriginal(url, options)
+  }
+
+  const r = t.sandbox.chamarGroqTexto('explique rapport')
+  checar('chamarGroqTexto devolve o conteúdo', r === '{"nota": 8}')
+  checar('modo texto NÃO manda response_format json_object',
+    corpoEnviado.response_format === undefined, JSON.stringify(corpoEnviado.response_format))
+  checar('modo texto usa max_tokens 900 por padrão', corpoEnviado.max_tokens === 900,
+    'max_tokens: ' + corpoEnviado.max_tokens)
+  checar('modo texto usa temperatura 0.3 por padrão', corpoEnviado.temperature === 0.3)
+  checar('system prompt do tutor, não o do avaliador',
+    /tutor did[aá]tico/i.test(corpoEnviado.messages[0].content), corpoEnviado.messages[0].content)
+}
+
+// ── JSON continua sendo o padrão do chamarGroqAPI ───────────────────────────
+{
+  let corpoEnviado = null
+  const t = montar(() => sucesso)
+  const fetchOriginal = t.sandbox.UrlFetchApp.fetch
+  t.sandbox.UrlFetchApp.fetch = (url, options) => {
+    corpoEnviado = JSON.parse(options.payload)
+    return fetchOriginal(url, options)
+  }
+
+  t.sandbox.chamarGroqAPI('avalie isto')
+  checar('chamarGroqAPI continua exigindo JSON',
+    corpoEnviado.response_format && corpoEnviado.response_format.type === 'json_object')
+  checar('e mantém o system prompt de avaliador',
+    /avaliador cl[ií]nico/i.test(corpoEnviado.messages[0].content))
+}
+
+// ── parâmetros personalizados ───────────────────────────────────────────────
+//
+// É o que permite consertar a mensagem de boas-vindas: ela quebrou com
+// max_tokens 120, apertado demais para sobrar content depois do raciocínio.
+{
+  let corpoEnviado = null
+  const t = montar(() => sucesso)
+  const fetchOriginal = t.sandbox.UrlFetchApp.fetch
+  t.sandbox.UrlFetchApp.fetch = (url, options) => {
+    corpoEnviado = JSON.parse(options.payload)
+    return fetchOriginal(url, options)
+  }
+
+  t.sandbox.chamarGroqTexto('oi', { maxTokens: 600, temperature: 0.8, sistema: 'Você é acolhedor.' })
+  checar('maxTokens personalizado chega na requisição', corpoEnviado.max_tokens === 600)
+  checar('temperature personalizada chega na requisição', corpoEnviado.temperature === 0.8)
+  checar('system prompt personalizado chega na requisição',
+    corpoEnviado.messages[0].content === 'Você é acolhedor.')
+}
+
+// ── o modo texto herda a resiliência, não uma cópia dela ────────────────────
+{
+  const t = montar((modelo) => modelo === 'openai/gpt-oss-120b'
+    ? { code: 404, body: 'model_not_found' } : sucesso)
+  const r = t.sandbox.chamarGroqTexto('oi')
+  checar('modo texto também troca de modelo quando o primeiro morre',
+    r === '{"nota": 8}' && t.logs.some(l => l.tipo === 'GROQ_FALLBACK'))
+
+  const vazioT = montar((modelo) => modelo === 'openai/gpt-oss-120b'
+    ? { code: 200, body: JSON.stringify({ choices: [{ message: { content: '' } }] }) } : sucesso)
+  checar('modo texto também trata conteúdo vazio como falha',
+    vazioT.sandbox.chamarGroqTexto('oi') === '{"nota": 8}')
+}
+
 console.log(falhas === 0 ? '\nTodos os testes passaram.' : `\n${falhas} falha(s).`)
 process.exit(falhas === 0 ? 0 : 1)

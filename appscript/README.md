@@ -135,6 +135,22 @@ Para provar que funciona, rode `testarFallbackGroq()` no editor: ela põe um
 modelo inexistente na frente da lista, confirma que a avaliação sai mesmo
 assim, e restaura a lista no fim.
 
+**A primeira versão desta blindagem cobria 1 de 7 caminhos.** O projeto tem
+sete lugares que chamam a Groq, cada um com sua cópia do `UrlFetchApp`, e só
+`processarAvaliacaoComBaseCurricular` passava pelo `chamarGroqAPI`. Por isso o
+núcleo virou `chamarGroqCore(mensagens, opcoes)`: `chamarGroqAPI` (JSON) e
+`chamarGroqTexto` (prosa) delegam a ele, e as demais funções podem migrar sem
+recriar a lógica. Faltam migrar `gerarBoasVindas`, `gerarRelatorioEvolucao`,
+`analisarDiarioSemanal`, `gerarReplayAnotado` e `responderComoPaciente`.
+
+### 6. `gerarBoasVindas` — mensagem de boas-vindas vazia
+
+`max_tokens: 120`. Com um modelo de raciocínio, o raciocínio consome o
+orçamento e o `content` volta vazio: a chamada gasta ~1,9s e devolve
+`{"mensagem":""}`. O frontend testa `data.mensagem.length > 10` e cai no texto
+padrão — ou seja, todo aluno via o texto genérico, e nada indicava falha.
+Achado pelo `diagnosticarIA()`.
+
 ## Testes
 
 `teste-equivalencia.mjs` simula a API do Sheets em Node e **prova que as
