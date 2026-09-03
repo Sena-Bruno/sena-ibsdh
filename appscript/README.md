@@ -29,7 +29,10 @@ incompleta do arquivo original virar a fonte da verdade.
 - `tentativa-anterior.gs` — **arquivo novo**. Devolve a tentativa anterior do
   aluno numa aula, com o texto da resposta, para a tela montar o contraste.
   Cole como arquivo separado e adicione o caso no `switch`.
+- `diagnostico.gs` — **arquivo novo**. Chama todas as actions pelo `doPost` e
+  imprime uma tabela com tempo e status. Não altera nada; só diagnostica.
 - `teste-equivalencia.mjs` — testes das funções corrigidas.
+- `teste-diagnostico.mjs` — testes do motor de classificação do diagnóstico.
 - `teste-tentativa-anterior.mjs` — testes da tentativa anterior.
 - `teste-evolucao-perfis.mjs` — testes do desempenho por perfil
   (`node appscript/teste-evolucao-perfis.mjs`).
@@ -148,6 +151,42 @@ npm run test:appscript  # só os harnesses desta pasta
 
 Não requer dependências. As implementações originais estão embutidas no
 arquivo de teste como referência de comparação.
+
+## Está tudo funcionando? — como descobrir
+
+Comparar nomes de action entre frontend e backend só prova que o código
+existe. Foi assim que o `ranking` passou meses "construído" e quebrado: o
+frontend chamava, o backend não tinha o caso, e um `catch` vazio engolia.
+
+`diagnostico.gs` responde com evidência. Cole no editor e rode:
+
+| função | o que faz | cuidado |
+|---|---|---|
+| `diagnosticarTudo()` | as actions de leitura | seguro, pode repetir |
+| `diagnosticarIA()` | as que chamam a Groq | **consome cota** |
+| `diagnosticarEscrita()` | as que gravam | **escreve na planilha** |
+
+Troque `DIAG.EMAIL` por um aluno real antes — com e-mail inexistente quase
+tudo responde vazio, que é correto e não prova nada.
+
+O status separa quatro coisas que um relatório ingênuo confundiria:
+**FALTA NO SWITCH** (o caso não foi colado no `doPost`), **ERRO** (a função
+rodou e falhou), **VAZIO** (respondeu certo, sem dados) e **LENTO** (acima de
+15s — o travamento do Mentor aparecia assim, não como erro).
+
+### O que o diagnóstico não alcança
+
+Ele prova que a action responde, não que a resposta faz sentido. O bug do
+`gerarReplayAnotado` — `+ resposta +` como texto literal em vez de
+interpolação — devolvia HTTP 200 com texto plausível e sem relação com a
+resposta do aluno. Para esse tipo de coisa é preciso ler a saída: em
+`diagnosticarIA()`, o caso do `replay` manda uma frase conhecida justamente
+para dar para conferir se ela aparece no retorno.
+
+### Recurso pronto e invisível
+
+`titulos` existe no `doPost` e **nenhuma tela do site chama** (confirmado por
+busca em todo o `src/`).
 
 ## Se quiser versionar o backend inteiro no futuro
 
