@@ -99,6 +99,75 @@ function diagnosticarEscrita() {
   ]);
 }
 
+/**
+ * Lista as avaliações do aluno na Avaliacoes_SENA, linha a linha.
+ *
+ * Existe por uma contradição encontrada no diagnóstico: o `Progresso_Aluno`
+ * mostrava nota 8 numa aula enquanto o `Avaliacoes_SENA` devolvia média perto
+ * de zero para os mesmos perfis. Médias não explicam a causa — só as linhas
+ * explicam.
+ *
+ * A suspeita a confirmar: sessões gravadas com nota 0 quando a avaliação por
+ * IA falhou (o período em que o modelo da Groq foi descontinuado). Elas não
+ * afetam o Progresso_Aluno, que guarda a melhor nota, mas envenenam qualquer
+ * média — inclusive a do card de desempenho por perfil.
+ *
+ * Não altera nada: só lê e imprime.
+ */
+function diagnosticarNotas() {
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+  const sheet = ss.getSheetByName(CONFIG.SHEETS.AVALIACOES);
+  if (!sheet || sheet.getLastRow() < 2) { Logger.log('Aba vazia.'); return; }
+
+  const dados = sheet.getDataRange().getValues();
+  const h = dados[0];
+  const iTs = h.indexOf('timestamp'), iEmail = h.indexOf('email');
+  const iCurso = h.indexOf('curso'), iAula = h.indexOf('aula');
+  const iPerfil = h.indexOf('perfil'), iNota = h.indexOf('nota_total');
+  const iAprov = h.indexOf('aprovado'), iModelo = h.indexOf('modelo_ia');
+
+  const emailNorm = String(DIAG.EMAIL).toLowerCase().trim();
+  Logger.log('=== AVALIAÇÕES DE ' + DIAG.EMAIL + ' ===');
+  Logger.log(alinhar('data', 12) + '| ' + alinhar('aula', 9) + '| ' + alinhar('perfil', 18)
+    + '| ' + alinhar('nota', 6) + '| ' + alinhar('aprov', 6) + '| modelo');
+  Logger.log('------------|----------|-------------------|-------|-------|--------');
+
+  let total = 0, zeradas = 0, soma = 0;
+  const zeradasPorAula = {};
+
+  for (let i = 1; i < dados.length; i++) {
+    const r = dados[i];
+    if (String(r[iEmail]).toLowerCase().trim() !== emailNorm) continue;
+    if (String(r[iCurso]).trim() !== DIAG.CURSO) continue;
+
+    const nota = Number(r[iNota] || 0);
+    const aula = String(r[iAula] || '');
+    total++; soma += nota;
+    if (nota === 0) {
+      zeradas++;
+      zeradasPorAula[aula] = (zeradasPorAula[aula] || 0) + 1;
+    }
+
+    Logger.log(alinhar(String(r[iTs]).substring(0, 10), 12) + '| ' + alinhar(aula, 9) + '| '
+      + alinhar(String(r[iPerfil] || ''), 18) + '| ' + alinhar(nota.toFixed(1), 6) + '| '
+      + alinhar(String(r[iAprov] || ''), 6) + '| '
+      + (iModelo >= 0 ? String(r[iModelo] || '') : '—'));
+  }
+
+  Logger.log('');
+  Logger.log('total de avaliações: ' + total);
+  Logger.log('com nota ZERO: ' + zeradas + (total ? ' (' + Math.round(zeradas / total * 100) + '%)' : ''));
+  Logger.log('média com as zeradas   : ' + (total ? (soma / total).toFixed(2) : '—'));
+  Logger.log('média SEM as zeradas   : ' + ((total - zeradas) ? (soma / (total - zeradas)).toFixed(2) : '—'));
+  if (zeradas > 0) {
+    Logger.log('');
+    Logger.log('Zeradas por aula: ' + JSON.stringify(zeradasPorAula));
+    Logger.log('Se a diferença entre as duas médias for grande, as zeradas estão');
+    Logger.log('distorcendo o card de desempenho por perfil e o ranking.');
+  }
+}
+
+
 // ── Motor ────────────────────────────────────────────────────────────────────
 
 function executarDiagnostico(titulo, casos) {
