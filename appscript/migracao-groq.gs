@@ -327,3 +327,131 @@ ${texto}`;
     return { analise: 'Não foi possível gerar a análise agora. Suas entradas continuam salvas — tente de novo em alguns minutos.' };
   }
 }
+
+
+// ── 5/5 · gerarRelatorioEvolucao ─────────────────────────────────────────────
+//
+// O relatório de competência clínica: estatísticas do curso inteiro mais uma
+// leitura da IA sobre a assinatura clínica do aluno. É a última função que
+// ainda fazia sua própria chamada ao UrlFetchApp.
+//
+// A falha silenciosa aqui é a mais visível de todas. A versão antiga faz:
+//
+//     const analise = data2.choices && data2.choices[0] ? ... : '';
+//
+// Se a Groq falhar, `analise` vira string vazia e a função devolve sucesso. A
+// tela (`DashboardView.vue`) então desenha a caixa dourada "Análise da IA —
+// Supervisão Clínica" COMPLETAMENTE EM BRANCO, com as estatísticas corretas ao
+// lado. O aluno clica em "Gerar relatório", espera, e recebe um quadro vazio
+// sem nenhuma explicação.
+//
+// Agora, quando a IA não responde, as estatísticas continuam saindo (são
+// calculadas aqui, não pela IA — não faz sentido perdê-las) e o lugar da
+// análise recebe uma frase honesta.
+//
+// Outros problemas da versão antiga:
+//   - max_tokens 600 para um relatório de 350 palavras em 4 seções: apertado
+//     para modelo de raciocínio, que gasta parte do orçamento pensando.
+//   - `.message.content.trim()` estoura se content vier null.
+//   - `Object.keys(aulaMap).sort()` é ordenação alfabética: com dez aulas ou
+//     mais, "Aula_10" vem antes de "Aula_2" e a evolução sai fora de ordem.
+
+function gerarRelatorioEvolucao(email, curso) {
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+  const sheetAval = ss.getSheetByName('Avaliacoes_SENA');
+  if (!sheetAval) return { erro: true, mensagem: 'Sem dados de avaliação.' };
+
+  const dados = sheetAval.getDataRange().getValues();
+  const headers = dados[0];
+  const iEmail  = headers.indexOf('email');
+  const iCurso  = headers.indexOf('curso');
+  const iAula   = headers.indexOf('aula');
+  const iNota   = headers.indexOf('nota_total');
+  const iAprov  = headers.indexOf('aprovado');
+  const iFortes = headers.indexOf('fortes');
+  const iAtenc  = headers.indexOf('atencao');
+
+  const avaliacoes = [];
+  for (let i = 1; i < dados.length; i++) {
+    const row = dados[i];
+    if (String(row[iEmail]).toLowerCase().trim() !== String(email).toLowerCase().trim()) continue;
+    if (String(row[iCurso]).trim() !== String(curso).trim()) continue;
+    avaliacoes.push({
+      aula: String(row[iAula] || ''),
+      nota: Number(row[iNota] || 0),
+      aprovado: String(row[iAprov] || '').trim().toUpperCase() === 'SIM',
+      fortes: String(row[iFortes] || ''),
+      atencao: String(row[iAtenc] || '')
+    });
+  }
+
+  if (avaliacoes.length < 3) {
+    return { erro: false, insuficiente: true, mensagem: 'Complete pelo menos 3 aulas para gerar o relatório de evolução.' };
+  }
+
+  const aulaMap = {};
+  avaliacoes.forEach(function (a) {
+    if (!aulaMap[a.aula]) aulaMap[a.aula] = [];
+    aulaMap[a.aula].push(a.nota);
+  });
+
+  const pontos = Object.keys(aulaMap).sort(compararNomesDeAula).map(function (aula) {
+    const notas = aulaMap[aula];
+    return { aula: aula, melhor: Math.max.apply(null, notas), tentativas: notas.length };
+  });
+
+  const mediaGeral = (pontos.reduce(function (s, p) { return s + p.melhor; }, 0) / pontos.length).toFixed(1);
+  const aprovadas = avaliacoes.filter(function (a) { return a.aprovado; }).length;
+  const todosFortesAtencao = avaliacoes.slice(0, 15).map(function (a) { return a.fortes + ' ' + a.atencao; }).join(' ');
+
+  const prompt = `Você é um supervisor clínico sênior. Com base na evolução deste aluno no curso de ${curso}, gere um relatório de competência clínica com 4 seções:
+
+1. ASSINATURA CLÍNICA (1 parágrafo): o estilo único deste aluno como profissional, baseado nos padrões de força identificados.
+2. PONTOS DE FORÇA CONSOLIDADOS (3 itens): competências claramente desenvolvidas ao longo do curso.
+3. ZONAS DE DESENVOLVIMENTO (2 itens): padrões que ainda precisam de atenção.
+4. RECOMENDAÇÃO PARA PRÁTICA (1 parágrafo): próximos passos concretos para o desenvolvimento contínuo.
+
+Dados do aluno:
+- Aulas realizadas: ${pontos.length}
+- Aulas aprovadas: ${aprovadas}
+- Média geral: ${mediaGeral}/10
+- Feedbacks acumulados: ${todosFortesAtencao.substring(0, 800)}
+
+Seja específico, clínico e personalizado. Máximo 350 palavras no total.`;
+
+  let analise = '';
+  try {
+    analise = String(chamarGroqTexto(prompt, {
+      // 600 para 350 palavras em 4 seções era apertado: o raciocínio do modelo
+      // come parte do orçamento antes de escrever a primeira linha.
+      maxTokens: 1500,
+      temperature: 0.5
+    })).trim();
+    if (!analise) throw new Error('A IA respondeu sem conteúdo.');
+  } catch (e) {
+    try { registrarLog('RELATORIO_ERROR', email, curso, '', e.message, ''); } catch (e2) {}
+    // As estatísticas são calculadas aqui, não pela IA. Perder o relatório
+    // inteiro porque a Groq caiu seria jogar fora o que já está pronto.
+    analise = 'A análise da IA não pôde ser gerada agora. Os números acima são seus resultados reais — gere o relatório de novo em alguns minutos para receber a leitura clínica.';
+  }
+
+  return {
+    email: email, curso: curso,
+    data_geracao: new Date().toLocaleDateString('pt-BR'),
+    total_aulas: pontos.length,
+    aulas_aprovadas: aprovadas,
+    media_geral: mediaGeral,
+    evolucao: pontos,
+    analise: analise
+  };
+}
+
+// "Aula_10" tem que vir depois de "Aula_2", não antes. O sort() puro é
+// alfabético e inverte os dois assim que o curso passa de nove aulas.
+function compararNomesDeAula(a, b) {
+  const na = parseInt(String(a).replace(/\D/g, ''), 10);
+  const nb = parseInt(String(b).replace(/\D/g, ''), 10);
+  if (isNaN(na) || isNaN(nb)) return String(a).localeCompare(String(b));
+  if (na !== nb) return na - nb;
+  return String(a).localeCompare(String(b));
+}

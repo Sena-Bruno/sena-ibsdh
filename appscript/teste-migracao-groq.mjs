@@ -40,6 +40,15 @@ function carregar(opcoes = {}) {
         resistencias: ['Interrompe com "e se"', 'Antecipa problemas']
       }
     },
+    SpreadsheetApp: {
+      openById: () => ({
+        getSheetByName: (nome) => {
+          if (opcoes.semAba) return null
+          return { getDataRange: () => ({ getValues: () => opcoes.planilha || [] }) }
+        }
+      })
+    },
+    CONFIG: { SHEET_ID: 'x' },
     buscarEntradasDiario: () => {
       if (opcoes.diarioFalha) throw new Error('Aba do diário não encontrada')
       return { entradas: opcoes.entradas === undefined ? [] : opcoes.entradas }
@@ -454,6 +463,121 @@ function entradas(n, tamanho) {
   const r2 = vazia.sandbox.analisarDiarioSemanal('ana@t.com', 'Practitioner')
   checar('resposta vazia vira aviso, não parágrafo em branco',
     /tente de novo/.test(r2.analise), JSON.stringify(r2))
+}
+
+console.log('\n=== gerarRelatorioEvolucao ===')
+
+const CAB = ['email', 'curso', 'aula', 'nota_total', 'aprovado', 'fortes', 'atencao', 'timestamp', 'justificativa']
+
+function linha(aula, nota, aprovado, fortes, atencao, email) {
+  return [email || 'ana@t.com', 'Practitioner', aula, nota, aprovado ? 'SIM' : 'NAO',
+    fortes || 'ancorou bem', atencao || 'fechou cedo', '2026-01-01', 'texto longo ignorado']
+}
+
+function planilha(linhas) { return [CAB].concat(linhas) }
+
+// ── o corte das 3 aulas ─────────────────────────────────────────────────────
+{
+  const semAba = carregar({ semAba: true })
+  const r0 = semAba.sandbox.gerarRelatorioEvolucao('ana@t.com', 'Practitioner')
+  checar('sem a aba, devolve erro sem chamar a IA',
+    r0.erro === true && semAba.chamadas.length === 0, JSON.stringify(r0))
+
+  const poucas = carregar({ planilha: planilha([linha('Aula_1', 8), linha('Aula_2', 9)]) })
+  const r1 = poucas.sandbox.gerarRelatorioEvolucao('ana@t.com', 'Practitioner')
+  checar('menos de 3 avaliações: insuficiente, sem gastar cota',
+    r1.insuficiente === true && r1.erro === false && poucas.chamadas.length === 0, JSON.stringify(r1))
+}
+
+// ── filtro e estatísticas ───────────────────────────────────────────────────
+{
+  const t = carregar({ planilha: planilha([
+    linha('Aula_1', 7, true),
+    linha('Aula_1', 9, true),          // segunda tentativa: só a melhor conta
+    linha('Aula_2', 6, false),
+    linha('Aula_3', 8, true),
+    linha('Aula_9', 5, false, '', '', 'outro@t.com')   // outro aluno
+  ]) })
+  const r = t.sandbox.gerarRelatorioEvolucao('ana@t.com', 'Practitioner')
+
+  checar('conta aulas distintas, não tentativas', r.total_aulas === 3, 'veio ' + r.total_aulas)
+  checar('registra as tentativas por aula',
+    r.evolucao[0].tentativas === 2 && r.evolucao[0].melhor === 9, JSON.stringify(r.evolucao[0]))
+  checar('média usa a melhor nota de cada aula ((9+6+8)/3)',
+    r.media_geral === '7.7', 'veio ' + r.media_geral)
+  checar('aprovadas conta tentativas aprovadas', r.aulas_aprovadas === 3, 'veio ' + r.aulas_aprovadas)
+  checar('não vaza avaliação de outro aluno',
+    !r.evolucao.some(p => p.aula === 'Aula_9'), JSON.stringify(r.evolucao.map(p => p.aula)))
+  checar('devolve todas as chaves que a tela usa',
+    ['total_aulas', 'aulas_aprovadas', 'media_geral', 'evolucao', 'analise', 'data_geracao', 'curso']
+      .every(k => k in r), Object.keys(r).join(','))
+}
+
+// ── ordem das aulas ─────────────────────────────────────────────────────────
+//
+// `Object.keys().sort()` é alfabético: "Aula_10" vinha antes de "Aula_2".
+// Passa despercebido até o curso ter dez aulas.
+{
+  const t = carregar({ planilha: planilha([
+    linha('Aula_10', 8, true), linha('Aula_2', 7, true), linha('Aula_1', 6, true)
+  ]) })
+  const r = t.sandbox.gerarRelatorioEvolucao('ana@t.com', 'Practitioner')
+  checar('Aula_10 vem DEPOIS de Aula_2, não antes',
+    r.evolucao.map(p => p.aula).join(',') === 'Aula_1,Aula_2,Aula_10',
+    r.evolucao.map(p => p.aula).join(','))
+}
+
+// ── prompt e parâmetros ─────────────────────────────────────────────────────
+{
+  const t = carregar({ planilha: planilha([
+    linha('Aula_1', 7, true), linha('Aula_2', 8, true), linha('Aula_3', 9, true)
+  ]) })
+  t.sandbox.gerarRelatorioEvolucao('ana@t.com', 'Practitioner')
+  const prompt = t.chamadas[0].prompt
+  const op = t.chamadas[0].op
+
+  checar('os feedbacks acumulados chegam ao prompt',
+    /ancorou bem/.test(prompt) && /fechou cedo/.test(prompt))
+  checar('os números calculados aqui chegam ao prompt',
+    /Aulas realizadas: 3/.test(prompt) && /Média geral: 8\.0\/10/.test(prompt))
+  checar('pede 1500 tokens, não 600 — são 350 palavras em 4 seções',
+    op.maxTokens === 1500, 'maxTokens: ' + op.maxTokens)
+  checar('mantém a temperatura 0.5 da versão antiga', op.temperature === 0.5)
+
+  const muitas = []
+  for (let i = 1; i <= 30; i++) muitas.push(linha('Aula_' + i, 8, true, 'f'.repeat(200), 'a'.repeat(200)))
+  const g = carregar({ planilha: planilha(muitas) })
+  g.sandbox.gerarRelatorioEvolucao('ana@t.com', 'Practitioner')
+  checar('o bloco de feedbacks respeita o teto de 800 caracteres',
+    g.chamadas[0].prompt.length < 2000, 'tamanho: ' + g.chamadas[0].prompt.length)
+}
+
+// ── a falha silenciosa que a tela desenhava em branco ───────────────────────
+//
+// A versão antiga devolvia analise:'' e a tela pintava a caixa dourada
+// "Análise da IA — Supervisão Clínica" vazia, com as estatísticas certas ao
+// lado. O aluno esperava, e recebia um quadro em branco sem explicação.
+{
+  const base = [linha('Aula_1', 7, true), linha('Aula_2', 8, true), linha('Aula_3', 9, true)]
+
+  for (const [nome, op] of [
+    ['a Groq cai', { iaFalha: 'Nenhum modelo da Groq respondeu.' }],
+    ['a IA responde vazio', { respostaIA: '   ' }]
+  ]) {
+    const t = carregar(Object.assign({ planilha: planilha(base) }, op))
+    let estourou = false, r
+    try { r = t.sandbox.gerarRelatorioEvolucao('ana@t.com', 'Practitioner') } catch (e) { estourou = true }
+
+    checar(`${nome}: não propaga a exceção`, estourou === false)
+    checar(`${nome}: a caixa da análise não fica em branco`,
+      r && r.analise.length > 0 && /não pôde ser gerada/.test(r.analise), JSON.stringify(r && r.analise))
+    checar(`${nome}: as estatísticas continuam saindo`,
+      r && r.total_aulas === 3 && r.media_geral === '8.0' && r.evolucao.length === 3)
+    checar(`${nome}: a análise diz que os números são reais`,
+      r && /seus resultados reais/.test(r.analise))
+    checar(`${nome}: fica registrado`,
+      t.logs.some(l => l.tipo === 'RELATORIO_ERROR'), JSON.stringify(t.logs))
+  }
 }
 
 console.log(falhas === 0 ? '\nTodos os testes passaram.' : `\n${falhas} falha(s).`)
