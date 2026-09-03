@@ -31,7 +31,11 @@ incompleta do arquivo original virar a fonte da verdade.
   Cole como arquivo separado e adicione o caso no `switch`.
 - `diagnostico.gs` — **arquivo novo**. Chama todas as actions pelo `doPost` e
   imprime uma tabela com tempo e status. Não altera nada; só diagnostica.
+- `migracao-groq.gs` — funções do `Codigo.gs` reescritas para usar o núcleo
+  em vez da própria chamada ao `UrlFetchApp`. **Cole uma por vez**, apagando a
+  antiga, e rode `diagnosticarIA()` antes de migrar a seguinte.
 - `teste-equivalencia.mjs` — testes das funções corrigidas.
+- `teste-migracao-groq.mjs` — testes das funções migradas.
 - `teste-diagnostico.mjs` — testes do motor de classificação do diagnóstico.
 - `teste-tentativa-anterior.mjs` — testes da tentativa anterior.
 - `teste-evolucao-perfis.mjs` — testes do desempenho por perfil
