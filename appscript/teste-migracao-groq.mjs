@@ -40,8 +40,17 @@ function carregar(opcoes = {}) {
         resistencias: ['Interrompe com "e se"', 'Antecipa problemas']
       }
     },
+    extrairJSONRobusto: (bruto) => {
+      // Réplica do comportamento do `Codigo.gs`: acha o primeiro objeto JSON
+      // dentro do texto, mesmo cercado de markdown ou de prosa.
+      const s = String(bruto)
+      const i = s.indexOf('{')
+      const f = s.lastIndexOf('}')
+      if (i === -1 || f <= i) throw new Error('JSON não encontrado na resposta')
+      return JSON.parse(s.slice(i, f + 1))
+    },
     registrarLog: (tipo, email, curso, aula, mensagem) => logs.push({ tipo, mensagem }),
-    Object, String, Number, JSON, Date, Math,
+    Object, String, Number, JSON, Date, Math, Array,
   }
   vm.createContext(sandbox)
   vm.runInContext(fs.readFileSync(ARQ, 'utf8'), sandbox)
@@ -210,6 +219,140 @@ console.log('\n=== responderComoPaciente ===')
   const semTema = carregar({ baseAulaFalha: true })
   const r = semTema.sandbox.responderComoPaciente('Ansioso', [], 'Practitioner', 'Aula_1', 'oi')
   checar('aula sem tema não impede a conversa', r.resposta.length > 0)
+}
+
+console.log('\n=== gerarReplayAnotado ===')
+
+const RESPOSTA = 'Acolhi a respiração do paciente e devolvi o ritmo mais lento.'
+
+function replayIA(obj) {
+  return JSON.stringify(obj)
+}
+
+// ── o bug que não pode voltar ───────────────────────────────────────────────
+//
+// A versão original tinha ` + resposta + ` como TEXTO LITERAL dentro da crase:
+// a IA recebia a string " + resposta + " e anotava o nada. O recurso ficou
+// quebrado em silêncio até alguém ler o prompt. Este é o teste que impede a
+// regressão — e foi por causa dele que pedi o Codigo.gs atualizado antes de
+// migrar, em vez de partir da minha cópia velha.
+{
+  const t = carregar({ respostaIA: replayIA({ segmentos: [{ texto: RESPOSTA, tipo: 'forte', nota: 'bom rapport' }], ausencias: [] }) })
+  t.sandbox.gerarReplayAnotado(RESPOSTA, 'fortes', 'atencao', 'prescricao', 'Ansioso', 'Practitioner', 'Aula_1')
+  const user = t.chamadas[0].mensagens[1].content
+
+  checar('a resposta do aluno chega interpolada no prompt',
+    user.includes(RESPOSTA), user.slice(0, 200))
+  checar('não sobrou o "+ resposta +" literal da versão antiga',
+    !/\+\s*resposta\s*\+/.test(user))
+}
+
+// ── o rótulo que vazava como segmento ───────────────────────────────────────
+{
+  const t = carregar({ respostaIA: replayIA({ segmentos: [], ausencias: [] }) })
+  t.sandbox.gerarReplayAnotado(RESPOSTA, '', '', '', '', 'Practitioner', 'Aula_1')
+  const msgs = t.chamadas[0].mensagens
+  const user = msgs[1].content
+
+  checar('a resposta vai entre delimitadores, não colada num rótulo',
+    user.indexOf('###RESPOSTA_INICIO###') < user.indexOf(RESPOSTA) &&
+    user.indexOf(RESPOSTA) < user.indexOf('###RESPOSTA_FIM###'))
+  checar('o prompt não começa mais com "Resposta do aluno:"',
+    !/^Resposta do aluno:/.test(user), user.slice(0, 60))
+  checar('o system manda segmentar só o que está entre as marcas',
+    /APENAS o texto entre essas marcas/.test(msgs[0].content))
+  checar('o feedback já gerado é marcado como contexto, não como fala do aluno',
+    /NÃO faz parte da resposta do aluno/.test(user))
+}
+
+// ── parâmetros ──────────────────────────────────────────────────────────────
+{
+  const t = carregar({ respostaIA: replayIA({ segmentos: [], ausencias: [] }) })
+  t.sandbox.gerarReplayAnotado(RESPOSTA, '', '', '', '', 'Practitioner', 'Aula_1')
+  const op = t.chamadas[0].op
+  checar('pede JSON', op.json === true)
+  checar('mantém os 2000 tokens — o replay devolve o texto inteiro fatiado',
+    op.maxTokens === 2000, 'maxTokens: ' + op.maxTokens)
+  checar('mantém a temperatura 0.3 da versão antiga', op.temperature === 0.3)
+}
+
+// ── contrato de retorno ─────────────────────────────────────────────────────
+{
+  const t = carregar({ respostaIA: replayIA({
+    segmentos: [
+      { texto: 'Acolhi a respiração', tipo: 'forte', nota: 'rapport' },
+      { texto: ' do paciente.', tipo: 'neutro', nota: '' }
+    ],
+    ausencias: ['Não checou o objetivo da sessão']
+  }) })
+  const r = t.sandbox.gerarReplayAnotado(RESPOSTA, '', '', '', '', 'Practitioner', 'Aula_1')
+
+  checar('devolve segmentos e ausencias, sem erro',
+    Array.isArray(r.segmentos) && Array.isArray(r.ausencias) && !r.erro, JSON.stringify(r))
+  checar('preserva o texto e o tipo de cada segmento',
+    r.segmentos[0].texto === 'Acolhi a respiração' && r.segmentos[0].tipo === 'forte')
+  checar('preserva as ausências', r.ausencias[0] === 'Não checou o objetivo da sessão')
+}
+
+// ── o parser robusto entra no lugar do replace à mão ────────────────────────
+//
+// O `replace(/```json|```/g, '')` antigo só tirava as crases; texto antes ou
+// depois do JSON derrubava o JSON.parse e o aluno via "não foi possível".
+{
+  const t = carregar({ respostaIA: 'Claro! Aqui está a anotação:\n```json\n' +
+    replayIA({ segmentos: [{ texto: RESPOSTA, tipo: 'forte', nota: 'ok' }], ausencias: [] }) +
+    '\n```\nEspero ter ajudado.' })
+  const r = t.sandbox.gerarReplayAnotado(RESPOSTA, '', '', '', '', 'Practitioner', 'Aula_1')
+  checar('JSON cercado de markdown e de prosa ainda é lido',
+    !r.erro && r.segmentos.length === 1, JSON.stringify(r))
+}
+
+// ── higiene dos segmentos ───────────────────────────────────────────────────
+//
+// `seg.tipo` vira classe CSS direto na tela. Um tipo inventado pela IA daria
+// uma classe inexistente e o trecho apareceria sem marcação, sem explicação.
+{
+  const t = carregar({ respostaIA: replayIA({
+    segmentos: [
+      { texto: 'a', tipo: 'excelente', nota: 'x' },
+      { texto: '', tipo: 'forte', nota: 'y' },
+      { tipo: 'forte' },
+      'lixo',
+      { texto: 'b', tipo: 'atencao' }
+    ],
+    ausencias: ['um', '  ', 'dois', 'tres', 'quatro']
+  }) })
+  const r = t.sandbox.gerarReplayAnotado(RESPOSTA, '', '', '', '', 'Practitioner', 'Aula_1')
+
+  checar('tipo fora da lista vira neutro', r.segmentos[0].tipo === 'neutro')
+  checar('segmento sem texto é descartado', r.segmentos.length === 2, JSON.stringify(r.segmentos))
+  checar('nota ausente vira string vazia, não undefined', r.segmentos[1].nota === '')
+  checar('ausências vazias somem e o teto de 3 é respeitado',
+    r.ausencias.length === 3 && r.ausencias[1] === 'dois', JSON.stringify(r.ausencias))
+}
+
+// ── falhas ──────────────────────────────────────────────────────────────────
+{
+  const semTexto = carregar()
+  const r0 = semTexto.sandbox.gerarReplayAnotado('   ', '', '', '', '', 'Practitioner', 'Aula_1')
+  checar('resposta vazia nem chega a gastar chamada de IA',
+    r0.erro === true && semTexto.chamadas.length === 0, JSON.stringify(r0))
+
+  const quebrado = carregar({ respostaIA: 'não consegui gerar a anotação' })
+  const r1 = quebrado.sandbox.gerarReplayAnotado(RESPOSTA, '', '', '', '', 'Practitioner', 'Aula_1')
+  checar('JSON quebrado devolve { erro: true }, não estoura',
+    r1.erro === true && /Não foi possível gerar o replay/.test(r1.mensagem), JSON.stringify(r1))
+
+  // O replay é um extra dentro do resultado da aula: se ele estourar, leva
+  // junto a nota e o feedback que o aluno já tinha na tela.
+  const caiu = carregar({ iaFalha: 'Nenhum modelo da Groq respondeu.' })
+  let estourou = false, r2
+  try { r2 = caiu.sandbox.gerarReplayAnotado(RESPOSTA, '', '', '', '', 'Practitioner', 'Aula_1') }
+  catch (e) { estourou = true }
+  checar('falha da IA não propaga — o resultado da aula continua de pé', estourou === false)
+  checar('vira { erro: true } que a tela já sabe mostrar', r2 && r2.erro === true)
+  checar('e fica registrada, ao contrário da versão antiga',
+    caiu.logs.some(l => l.tipo === 'REPLAY_ERROR'), JSON.stringify(caiu.logs))
 }
 
 console.log(falhas === 0 ? '\nTodos os testes passaram.' : `\n${falhas} falha(s).`)

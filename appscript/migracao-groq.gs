@@ -134,3 +134,123 @@ REGRAS ABSOLUTAS:
 
   return { resposta: String(resposta).trim() };
 }
+
+
+// ── 3/5 · gerarReplayAnotado ─────────────────────────────────────────────────
+//
+// O replay marca a resposta do aluno trecho a trecho: verde no que funcionou,
+// amarelo no que precisa de atenção, vermelho no que ficou inconsistente.
+//
+// ATENÇÃO ao migrar: a versão antiga tinha ` + resposta + ` como TEXTO LITERAL
+// dentro da crase, e a IA nunca recebia a resposta do aluno. Isso já foi
+// corrigido em produção (PR #18) e aqui está `${resposta}`. Existe um teste em
+// `teste-migracao-groq.mjs` que cai se alguém desfizer isso.
+//
+// O que muda além da resiliência:
+//
+//   1. O rótulo "Resposta do aluno:" vazava como segmento. Ele abria o prompt
+//      colado no texto, a IA o tratava como parte da resposta e devolvia
+//      { "texto": "Resposta do aluno:", "tipo": "neutro" } como primeiro
+//      segmento — o aluno via um rótulo do sistema marcado como se fosse
+//      condução dele. Agora a resposta vai entre delimitadores, com instrução
+//      explícita de que os segmentos reconstituem SOMENTE o texto do aluno.
+//
+//   2. `extrairJSONRobusto` no lugar do `replace(/```json|```/g, '')` feito à
+//      mão. É a mesma função que a avaliação das aulas e o plantão já usam:
+//      lida com markdown, com texto em volta e com chaves aninhadas. Manter
+//      duas implementações, sendo uma pior, é o que faz elas divergirem.
+//
+//   3. Os segmentos são higienizados antes de sair: item sem `texto` some,
+//      `tipo` fora da lista vira "neutro" (a tela usa esse valor como classe
+//      CSS), e as ausências ficam no máximo 3, como o prompt já pedia.
+//
+// O retorno em caso de falha continua sendo `{ erro: true, mensagem }` — a tela
+// do replay (`SimuladorView.vue`) já sabe lidar com isso e mostra o aviso sem
+// derrubar o resto do resultado da aula.
+
+var REPLAY_TIPOS_VALIDOS = ['forte', 'atencao', 'ausente_contexto', 'neutro'];
+
+function gerarReplayAnotado(resposta, fortes, atencao, prescricao, perfil, curso, aula) {
+  const texto = String(resposta || '').trim();
+  if (!texto) return { erro: true, mensagem: 'Não há resposta para anotar.' };
+
+  const systemPrompt = `Você é um supervisor clínico analisando a resposta de um aluno.
+Sua tarefa: anotar a resposta do aluno identificando trechos positivos, imprecisos e ausentes.
+
+Retorne SOMENTE um JSON válido, sem markdown, sem backticks, com esta estrutura:
+{
+  "segmentos": [
+    { "texto": "trecho exato da resposta", "tipo": "forte", "nota": "explicação curta" },
+    { "texto": "trecho exato", "tipo": "atencao", "nota": "o que poderia melhorar" },
+    { "texto": "trecho exato", "tipo": "neutro", "nota": "" }
+  ],
+  "ausencias": ["elemento importante que não apareceu na resposta"]
+}
+
+Tipos possíveis: "forte" (verde), "atencao" (amarelo), "ausente_contexto" (vermelho), "neutro" (sem marcação).
+A resposta do aluno vem entre as marcas ###RESPOSTA_INICIO### e ###RESPOSTA_FIM###.
+Segmente APENAS o texto entre essas marcas. Não inclua as marcas, nem rótulos,
+nem o feedback do supervisor nos segmentos.
+Cubra 100% do texto do aluno: a concatenação de todos os "texto" deve reconstituir
+exatamente a resposta dele, nada a mais.
+Máximo 3 ausências.`;
+
+  const userPrompt = `###RESPOSTA_INICIO###
+${texto}
+###RESPOSTA_FIM###
+
+Feedback da IA já gerado (contexto para você, NÃO faz parte da resposta do aluno):
+- Pontos fortes: ${fortes || ''}
+- Pontos de atenção: ${atencao || ''}
+- Prescrição: ${prescricao || ''}
+- Perfil do paciente: ${perfil || ''}
+
+Anote a resposta conforme instruído.`;
+
+  try {
+    const bruto = chamarGroqCore([
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt }
+    ], {
+      json: true,
+      maxTokens: 2000,   // o replay devolve o texto inteiro fatiado: precisa de espaço
+      temperature: 0.3   // marcação é análise, não criação — mesma da versão antiga
+    });
+
+    const dados = extrairJSONRobusto(bruto);
+    if (!dados || typeof dados !== 'object') throw new Error('A IA não devolveu JSON utilizável.');
+
+    return { segmentos: limparSegmentosReplay(dados.segmentos), ausencias: limparAusenciasReplay(dados.ausencias) };
+  } catch (e) {
+    try { registrarLog('REPLAY_ERROR', '', curso || '', aula || '', e.message, ''); } catch (e2) {}
+    return { erro: true, mensagem: 'Não foi possível gerar o replay: ' + e.message };
+  }
+}
+
+// A tela usa `seg.tipo` direto como classe CSS e `seg.nota` direto no atributo
+// title. Um tipo inventado pela IA viraria uma classe que não existe e o trecho
+// apareceria sem marcação nenhuma, sem ninguém saber por quê.
+function limparSegmentosReplay(lista) {
+  if (!Array.isArray(lista)) return [];
+  const limpos = [];
+  lista.forEach(function (seg) {
+    if (!seg || typeof seg !== 'object') return;
+    const t = String(seg.texto == null ? '' : seg.texto);
+    if (!t) return;
+    const tipo = String(seg.tipo || 'neutro');
+    limpos.push({
+      texto: t,
+      tipo: REPLAY_TIPOS_VALIDOS.indexOf(tipo) === -1 ? 'neutro' : tipo,
+      nota: String(seg.nota == null ? '' : seg.nota)
+    });
+  });
+  return limpos;
+}
+
+function limparAusenciasReplay(lista) {
+  if (!Array.isArray(lista)) return [];
+  return lista
+    .map(function (a) { return String(a == null ? '' : a).trim(); })
+    .filter(function (a) { return a.length > 0; })
+    .slice(0, 3);
+}
