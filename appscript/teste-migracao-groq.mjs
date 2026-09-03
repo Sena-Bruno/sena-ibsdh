@@ -26,6 +26,20 @@ function carregar(opcoes = {}) {
         ? '  Você já dominou o rapport; agora observe o que o silêncio revela.  '
         : opcoes.respostaIA
     },
+    chamarGroqCore: (mensagens, op) => {
+      chamadas.push({ mensagens, op })
+      if (opcoes.iaFalha) throw new Error(opcoes.iaFalha)
+      return opcoes.respostaIA === undefined
+        ? '  E se eu não conseguir? Fico pensando nisso o tempo todo.  '
+        : opcoes.respostaIA
+    },
+    PERFIS_CLINICOS: {
+      Ansioso: {
+        nome: 'Ansioso',
+        descricao: 'Paciente agitado, fala acelerada',
+        resistencias: ['Interrompe com "e se"', 'Antecipa problemas']
+      }
+    },
     registrarLog: (tipo, email, curso, aula, mensagem) => logs.push({ tipo, mensagem }),
     Object, String, Number, JSON, Date, Math,
   }
@@ -118,6 +132,84 @@ console.log('=== gerarBoasVindas ===')
   const vazia = carregar({ progresso: {}, respostaIA: '   ' })
   const r2 = vazia.sandbox.gerarBoasVindas('ana@t.com', 'Practitioner', 'Aula_1', 'Ana')
   checar('resposta só com espaços vira string vazia, não quebra', r2.mensagem === '')
+}
+
+console.log('\n=== responderComoPaciente ===')
+
+// ── a conversa inteira chega ao núcleo ──────────────────────────────────────
+//
+// É o que diferencia esta função das outras: ela manda system + histórico +
+// fala nova, não um prompt único. Se o histórico se perder, o paciente
+// "esquece" o que foi dito e a sessão clínica deixa de fazer sentido.
+{
+  const t = carregar()
+  const historico = [
+    { role: 'terapeuta', texto: 'Bom dia, como você está?' },
+    { role: 'paciente', texto: 'Não muito bem...' },
+    { role: 'terapeuta', texto: 'O que te trouxe aqui?' }
+  ]
+  const r = t.sandbox.responderComoPaciente('Ansioso', historico, 'Practitioner', 'Aula_1', 'Respire comigo.')
+  const msgs = t.chamadas[0].mensagens
+
+  checar('devolve { resposta } como antes',
+    JSON.stringify(Object.keys(r)) === '["resposta"]' &&
+    r.resposta === 'E se eu não conseguir? Fico pensando nisso o tempo todo.',
+    JSON.stringify(r))
+  checar('primeira mensagem é o system com o perfil',
+    msgs[0].role === 'system' && /Paciente agitado/.test(msgs[0].content))
+  checar('o histórico inteiro é enviado, na ordem',
+    msgs.length === 5, 'mensagens: ' + msgs.length)
+  checar('terapeuta vira user e paciente vira assistant',
+    msgs[1].role === 'user' && msgs[2].role === 'assistant' && msgs[3].role === 'user',
+    msgs.map(m => m.role).join(','))
+  checar('a fala nova entra por último',
+    msgs[4].role === 'user' && msgs[4].content === 'Respire comigo.')
+  checar('as resistências do perfil entram no system',
+    /Antecipa problemas/.test(msgs[0].content))
+}
+
+// ── parâmetros ──────────────────────────────────────────────────────────────
+{
+  const t = carregar()
+  t.sandbox.responderComoPaciente('Ansioso', [], 'Practitioner', 'Aula_1', 'oi')
+  const op = t.chamadas[0].op
+  checar('pede prosa, não JSON', op.json === false)
+  checar('800 tokens, não 300 — o raciocínio come o orçamento', op.maxTokens === 800,
+    'maxTokens: ' + op.maxTokens)
+  checar('mantém a temperatura 0.85 que faz o paciente soar vivo', op.temperature === 0.85)
+}
+
+// ── primeira fala da sessão ─────────────────────────────────────────────────
+{
+  const t = carregar()
+  t.sandbox.responderComoPaciente('Ansioso', [], 'Practitioner', 'Aula_1', 'Bom dia.')
+  checar('sessão sem histórico manda só system + a fala', t.chamadas[0].mensagens.length === 2)
+
+  const semArray = carregar()
+  semArray.sandbox.responderComoPaciente('Ansioso', null, 'Practitioner', 'Aula_1', 'Bom dia.')
+  checar('histórico null não quebra', semArray.chamadas[0].mensagens.length === 2)
+}
+
+// ── falhas ──────────────────────────────────────────────────────────────────
+{
+  const t = carregar()
+  let msg = ''
+  try { t.sandbox.responderComoPaciente('Inexistente', [], 'Practitioner', 'Aula_1', 'oi') }
+  catch (e) { msg = e.message }
+  checar('perfil inválido falha antes de gastar chamada de IA',
+    /Perfil inválido/.test(msg) && t.chamadas.length === 0, msg)
+
+  // Diferente das boas-vindas: aqui a resposta É a funcionalidade. Engolir a
+  // falha deixaria o aluno falando sozinho com uma tela muda.
+  const caiu = carregar({ iaFalha: 'Nenhum modelo da Groq respondeu.' })
+  let estourou = false
+  try { caiu.sandbox.responderComoPaciente('Ansioso', [], 'Practitioner', 'Aula_1', 'oi') }
+  catch (e) { estourou = true }
+  checar('falha da IA propaga — o aluno precisa saber', estourou === true)
+
+  const semTema = carregar({ baseAulaFalha: true })
+  const r = semTema.sandbox.responderComoPaciente('Ansioso', [], 'Practitioner', 'Aula_1', 'oi')
+  checar('aula sem tema não impede a conversa', r.resposta.length > 0)
 }
 
 console.log(falhas === 0 ? '\nTodos os testes passaram.' : `\n${falhas} falha(s).`)

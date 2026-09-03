@@ -66,3 +66,71 @@ A mensagem deve ser direta, clínica, motivadora e única — sem ser genérica.
   // Mesmo formato de retorno da versão antiga: nenhum chamador precisa mudar.
   return { mensagem: msg, primeiro_acesso: primeiroAcesso, aulas_aprovadas: aprovadas };
 }
+
+
+// ── 2/5 · responderComoPaciente ──────────────────────────────────────────────
+//
+// A conversa com o paciente virtual — o recurso que o aluno mais usa.
+//
+// Esta é a única que NÃO usa chamarGroqTexto: ela precisa mandar a conversa
+// inteira (system + histórico + fala nova), não um prompt único. Por isso
+// chama o núcleo direto, que aceita o array de mensagens.
+//
+// Problemas da versão antiga:
+//   - dois Logger.log despejavam a resposta CRUA da Groq no registro de
+//     execução a cada chamada, incluindo 500 caracteres do que o paciente
+//     "disse". Ruído em produção e log desnecessário de conteúdo de sessão.
+//   - max_tokens 300 é apertado para modelo de raciocínio: o raciocínio come
+//     o orçamento antes do texto. Funcionou nos testes, mas uma conversa mais
+//     longa esvazia o content — e aí o aluno recebe erro no meio da sessão.
+//   - `.content.trim()` estoura se content vier null.
+//   - sem fallback de modelo e sem retry em 429.
+//
+// Ao contrário das boas-vindas, aqui a exceção NÃO é engolida: a resposta do
+// paciente é a funcionalidade em si. Se a IA não responder, o aluno precisa
+// saber, não continuar falando sozinho com uma tela muda.
+
+function responderComoPaciente(nomePerfil, historico, curso, aula, mensagem) {
+  const perfil = PERFIS_CLINICOS[nomePerfil];
+  if (!perfil) throw new Error('Perfil inválido: ' + nomePerfil);
+
+  let contextoAula = '';
+  try {
+    const base = buscarBaseAula(curso, aula);
+    contextoAula = base.titulo ? 'Tema da sessão: ' + base.titulo + '.' : '';
+  } catch (e) { /* sem o tema o paciente responde igual, só menos situado */ }
+
+  const systemPrompt = `Você é um paciente virtual em uma sessão de ${curso}. 
+Seu perfil psicológico: ${perfil.descricao}
+Suas resistências típicas: ${perfil.resistencias.join(', ')}.
+${contextoAula}
+
+REGRAS ABSOLUTAS:
+- Responda SEMPRE como o paciente, nunca como terapeuta ou avaliador.
+- Mantenha o perfil psicológico consistente ao longo de toda a sessão.
+- Respostas curtas e realistas (2-5 frases), como um paciente real responderia.
+- Demonstre as resistências do seu perfil de forma natural, não exagerada.
+- Nunca quebre o personagem, nunca explique que é uma IA.
+- Se o terapeuta usar uma técnica bem aplicada, responda de forma levemente mais aberta.
+- Se a abordagem for inadequada para o seu perfil, mantenha a resistência.
+- Reaja ao que foi dito, não apenas responda perguntas.`;
+
+  const mensagens = [{ role: 'system', content: systemPrompt }];
+  if (Array.isArray(historico)) {
+    historico.forEach(function (m) {
+      mensagens.push({
+        role: m.role === 'terapeuta' ? 'user' : 'assistant',
+        content: m.texto
+      });
+    });
+  }
+  mensagens.push({ role: 'user', content: mensagem });
+
+  const resposta = chamarGroqCore(mensagens, {
+    json: false,        // o paciente fala em prosa, não em JSON
+    maxTokens: 800,     // 300 era apertado: o raciocínio do modelo come o orçamento
+    temperature: 0.85   // mesma da versão antiga — variação faz o paciente soar vivo
+  });
+
+  return { resposta: String(resposta).trim() };
+}
