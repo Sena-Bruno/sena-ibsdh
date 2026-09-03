@@ -26,7 +26,11 @@ incompleta do arquivo original virar a fonte da verdade.
 - `evolucao-perfis.gs` — **arquivo novo**. Desempenho do aluno por perfil
   clínico, para o card do dashboard. Cole como arquivo separado e adicione o
   caso no `switch`.
+- `tentativa-anterior.gs` — **arquivo novo**. Devolve a tentativa anterior do
+  aluno numa aula, com o texto da resposta, para a tela montar o contraste.
+  Cole como arquivo separado e adicione o caso no `switch`.
 - `teste-equivalencia.mjs` — testes das funções corrigidas.
+- `teste-tentativa-anterior.mjs` — testes da tentativa anterior.
 - `teste-evolucao-perfis.mjs` — testes do desempenho por perfil
   (`node appscript/teste-evolucao-perfis.mjs`).
 - `teste-groq-resiliente.mjs` — testes da chamada à Groq
@@ -138,7 +142,8 @@ curtas, abas vazias e parâmetros indefinidos, além de medir a redução no
 volume de dados.
 
 ```bash
-node appscript/teste-equivalencia.mjs
+npm test                # tudo: frontend + appscript
+npm run test:appscript  # só os harnesses desta pasta
 ```
 
 Não requer dependências. As implementações originais estão embutidas no
