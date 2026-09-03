@@ -19,7 +19,13 @@ incompleta do arquivo original virar a fonte da verdade.
 - `posicao-ranking.gs` — **arquivo novo**. Implementa a posição do aluno no
   ranking, que o dashboard chamava (`action: 'ranking'`) sem nunca ter existido
   no backend. Cole como arquivo separado e adicione o caso no `switch`.
+- `groq-resiliente.gs` — **arquivo novo**. Substitui a `chamarGroqAPI` do
+  `Codigo.gs` por uma versão que tenta vários modelos e repete em falha
+  transitória. **Apague a `chamarGroqAPI` antiga ao colar**, senão ficam duas
+  funções com o mesmo nome.
 - `teste-equivalencia.mjs` — testes das funções corrigidas.
+- `teste-groq-resiliente.mjs` — testes da chamada à Groq
+  (`node appscript/teste-groq-resiliente.mjs`).
 - `teste-posicao-ranking.mjs` — testes da posição no ranking
   (`node appscript/teste-posicao-ranking.mjs`).
 
@@ -92,6 +98,30 @@ Todas as validações da função usam `throw`, menos a do e-mail, que fazia
 retorno e seguia com `curso`/`aula` indefinidos, fazendo o aluno ver
 *"Aula não encontrada na Base_Aulas: undefined / undefined"* em vez da
 mensagem amigável que o código tentava dar.
+
+### 5. `chamarGroqAPI` — um modelo descontinuado derrubava tudo
+
+`CONFIG.MODEL_NAME` era uma string única. Quando a Groq aposentou o
+`llama-3.3-70b-versatile`, **toda a avaliação por IA parou de uma vez** —
+simulador, tutor, replay, desafio — e o problema só apareceu quando um aluno
+tentou usar. A Groq roda modelos abertos de terceiros e aposenta versões com
+frequência, então isso se repete.
+
+`groq-resiliente.gs` tenta os modelos em ordem de preferência e classifica cada
+falha para decidir o que fazer: modelo inexistente é pulado na hora (insistir
+só atrasa o aluno), `429` e `5xx` são repetidos, `200` com conteúdo vazio conta
+como falha (modelo de raciocínio pode gastar todo o `max_tokens` pensando), e
+chave inválida aborta tudo imediatamente — mascarar isso como "modelos fora do
+ar" mandaria você procurar o problema no lugar errado.
+
+Quando um modelo cai, sai uma linha `GROQ_FALLBACK` na aba de Logs e, se a
+propriedade de script `EMAIL_ADMIN` estiver definida, um e-mail — no máximo um
+por dia por modelo, para não virar spam num dia de instabilidade. O aluno não
+vê nada: recebe a avaliação normalmente.
+
+Para provar que funciona, rode `testarFallbackGroq()` no editor: ela põe um
+modelo inexistente na frente da lista, confirma que a avaliação sai mesmo
+assim, e restaura a lista no fim.
 
 ## Testes
 
