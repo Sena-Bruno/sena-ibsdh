@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "test": "npm run test:frontend && npm run test:appscript",
     "test:frontend": "node --test \"src/**/*.test.js\"",
-    "test:appscript": "node appscript/teste-equivalencia.mjs && node appscript/teste-posicao-ranking.mjs && node appscript/teste-groq-resiliente.mjs && node appscript/teste-evolucao-perfis.mjs"
+    "test:appscript": "node appscript/teste-equivalencia.mjs && node appscript/teste-posicao-ranking.mjs && node appscript/teste-groq-resiliente.mjs && node appscript/teste-evolucao-perfis.mjs && node appscript/teste-tentativa-anterior.mjs"
   },
   "dependencies": {
     "vue": "^3.5.41",

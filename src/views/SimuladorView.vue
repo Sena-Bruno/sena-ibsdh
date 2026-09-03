@@ -252,6 +252,15 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
             <button class="prontuario-btn" id="prontuarioBtn" @click="abrirProntuario">📋 Ver prontuário desta sessão</button>
             <button class="ghost-btn" id="backBtn" @click="voltarAoPainel" style="display:none;margin-top:8px;border-color:rgba(110,231,255,0.15);color:var(--cyan);">← Voltar ao painel</button>
 
+            <!-- Contraste com a tentativa anterior -->
+            <div class="contraste-section" id="contrasteSection">
+              <div class="contraste-header" @click="toggleContraste">
+                <span class="contraste-title">🔁 O que mudou desde a tentativa anterior</span>
+                <span class="contraste-chevron">▼</span>
+              </div>
+              <div class="contraste-body" id="contrasteBody"></div>
+            </div>
+
             <!-- Replay com marcações -->
             <div class="replay-section" id="replaySection">
               <div class="replay-header" @click="toggleReplay">
@@ -576,6 +585,13 @@ function handleResult(data, autoavaliacao) {
     ? 'Você atingiu a nota mínima. Seu resultado foi registrado. Siga para a próxima etapa.'
     : 'Você ainda não atingiu a nota mínima. Revise os pontos de atenção e tente novamente.'
 
+  ultimoResultado = data
+  contrasteCarregado = false
+  document.getElementById('contrasteSection').classList.remove('open')
+  document.getElementById('contrasteSection').classList.add('visible')
+  document.getElementById('contrasteBody').innerHTML =
+    '<div class="contraste-aviso">Clique para comparar com o que você escreveu da última vez.</div>'
+
   replayGerado = false
   comparacaoGerada = false
   document.getElementById('replaySection').classList.remove('open')
@@ -595,7 +611,12 @@ function handleResult(data, autoavaliacao) {
     const inferido = inferirCriteriosIA(data)
     renderComparacao(autoavaliacao, inferido)
   }
-  document.getElementById('retryBtn').style.display = approved ? 'none' : 'block'
+  // Sempre disponível, mesmo aprovado: quem passou raspando também deveria
+  // poder treinar de novo, e o progresso guarda a MELHOR nota — refazer nunca
+  // prejudica o aluno.
+  document.getElementById('retryBtn').style.display = 'block'
+  document.getElementById('retryBtn').textContent = approved
+    ? 'Treinar este caso de novo' : 'Fazer nova tentativa'
   document.getElementById('backBtn').style.display = 'block'
   carregarHistorico()
 
@@ -723,6 +744,101 @@ async function carregarHistorico() {
   } catch (err) {
     // Silencioso — histórico é opcional
   }
+}
+
+// ── CONTRASTE COM A TENTATIVA ANTERIOR ───────────────────────────
+// O histórico acima mostra nota e feedback das tentativas passadas, mas não
+// o texto que o aluno escreveu — e é a comparação dos dois textos que mostra
+// o que ele mudou. A leitura que interessa é uma só: "o que me pediram da
+// última vez, e o que eu fiz com isso agora".
+
+let contrasteCarregado = false
+// Guarda o resultado da avaliação atual para o contraste comparar contra ele.
+let ultimoResultado = null
+
+// O texto vai para innerHTML: escapar é obrigatório. Vale para o texto do
+// próprio aluno e para o que volta do servidor.
+function escaparHtml(texto) {
+  return String(texto === undefined || texto === null ? '' : texto)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+function respostaAtualDoAluno() {
+  return document.getElementById('clinicalInput').value.trim() ||
+    chatHistorico.filter(function (m) { return m.role === 'terapeuta' })
+      .map(function (m) { return m.texto }).join(' ')
+}
+
+function toggleContraste() {
+  const sec = document.getElementById('contrasteSection')
+  sec.classList.toggle('open')
+  if (sec.classList.contains('open') && !contrasteCarregado) carregarContraste()
+}
+
+async function carregarContraste() {
+  contrasteCarregado = true
+  const body = document.getElementById('contrasteBody')
+  body.innerHTML = '<div class="contraste-aviso">Buscando sua tentativa anterior...</div>'
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'tentativa_anterior',
+        email: SYSTEM.operator, curso: SYSTEM.protocol, aula: SYSTEM.module,
+        excluir_id: ultimoResultado && ultimoResultado.id_avaliacao ? ultimoResultado.id_avaliacao : ''
+      })
+    })
+    const data = await res.json()
+    const ant = data && data.anterior
+    if (!ant) {
+      body.innerHTML = '<div class="contraste-aviso">Esta é sua primeira tentativa nesta aula. '
+        + 'Da próxima vez, o que você escreveu hoje aparece aqui do lado.</div>'
+      return
+    }
+    body.innerHTML = montarContraste(ant)
+  } catch (err) {
+    contrasteCarregado = false   // permite tentar de novo
+    body.innerHTML = '<div class="contraste-aviso">Não foi possível carregar a tentativa anterior.</div>'
+  }
+}
+
+function montarContraste(ant) {
+  const notaAntes = Number(ant.nota || 0)
+  const notaAgora = Number((ultimoResultado && ultimoResultado.nota) || 0)
+  const delta = notaAgora - notaAntes
+  const sinal = delta > 0 ? '+' : ''
+  const classeDelta = delta > 0 ? 'subiu' : (delta < 0 ? 'caiu' : 'igual')
+  const data = ant.timestamp
+    ? new Date(ant.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    : '—'
+
+  return '' +
+    '<div class="contraste-delta ' + classeDelta + '">' +
+      '<span class="contraste-nota-antes">' + notaAntes.toFixed(1) + '</span>' +
+      '<span class="contraste-seta">→</span>' +
+      '<span class="contraste-nota-agora">' + notaAgora.toFixed(1) + '</span>' +
+      '<span class="contraste-variacao">' + sinal + delta.toFixed(1) + '</span>' +
+    '</div>' +
+
+    // O feedback anterior vem primeiro e sozinho: é o que estava pendente.
+    (ant.atencao
+      ? '<div class="contraste-pedido">' +
+          '<div class="contraste-pedido-label">O que foi apontado na tentativa anterior</div>' +
+          '<div class="contraste-pedido-texto">' + escaparHtml(ant.atencao) + '</div>' +
+        '</div>'
+      : '') +
+
+    '<div class="contraste-grid">' +
+      '<div class="contraste-col">' +
+        '<div class="contraste-col-head">Antes <span class="contraste-col-data">' + data + '</span></div>' +
+        '<div class="contraste-texto">' + escaparHtml(ant.resposta || '(texto não disponível)') + '</div>' +
+      '</div>' +
+      '<div class="contraste-col agora">' +
+        '<div class="contraste-col-head">Agora</div>' +
+        '<div class="contraste-texto">' + escaparHtml(respostaAtualDoAluno() || '(texto não disponível)') + '</div>' +
+      '</div>' +
+    '</div>'
 }
 
 function toggleHistorico() {
@@ -2950,6 +3066,116 @@ body.alto-contraste .sim-page input:focus {
     }
 
     /* ── COMPARAÇÃO ANÔNIMA ──────────────────────────── */
+    /* ── Contraste com a tentativa anterior ─────────────────────── */
+    .sim-page .contraste-section {
+      display: none;
+      border-radius: 18px;
+      border: 1px solid rgba(110,231,255,0.15);
+      background: rgba(110,231,255,0.03);
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .sim-page .contraste-section.visible { display: block; }
+
+    .sim-page .contraste-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+    .sim-page .contraste-title {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--cyan);
+    }
+    .sim-page .contraste-chevron { color: var(--text-faint); font-size: 11px; transition: transform .2s; }
+    .sim-page .contraste-section.open .contraste-chevron { transform: rotate(180deg); }
+    .sim-page .contraste-body { display: none; padding: 16px; }
+    .sim-page .contraste-section.open .contraste-body {
+      display: block;
+      /* O que decide se cabem duas colunas é a largura DESTE painel, não a da
+         tela: no desktop ele é a coluna direita (~426px) e numa tela menor
+         vira largura cheia (~942px). Uma media query de viewport acerta o
+         inverso do necessário. */
+      container-type: inline-size;
+      container-name: contraste;
+    }
+
+    .sim-page .contraste-aviso {
+      padding: 14px;
+      text-align: center;
+      color: var(--text-faint);
+      font-size: 13px;
+    }
+
+    /* A variação da nota é a manchete: número grande, uma linha só. */
+    .sim-page .contraste-delta {
+      display: flex; align-items: baseline; justify-content: center;
+      gap: 10px; margin-bottom: 16px;
+      font-variant-numeric: tabular-nums;
+    }
+    .sim-page .contraste-nota-antes { font-size: 22px; font-weight: 700; color: var(--text-faint); }
+    .sim-page .contraste-seta { font-size: 15px; color: var(--text-faint); }
+    .sim-page .contraste-nota-agora { font-size: 30px; font-weight: 800; color: var(--text); }
+    .sim-page .contraste-variacao {
+      font-size: 13px; font-weight: 800; padding: 3px 9px; border-radius: 999px;
+    }
+    .sim-page .contraste-delta.subiu .contraste-variacao { color: #0d2a20; background: var(--success); }
+    .sim-page .contraste-delta.caiu  .contraste-variacao { color: #2a0d14; background: var(--danger); }
+    .sim-page .contraste-delta.igual .contraste-variacao { color: var(--text-faint); background: rgba(255,255,255,0.06); }
+
+    /* O que estava pendente vem antes dos dois textos, sozinho. */
+    .sim-page .contraste-pedido {
+      padding: 12px 14px; margin-bottom: 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,107,136,0.2);
+      background: rgba(255,107,136,0.05);
+    }
+    .sim-page .contraste-pedido-label {
+      font-size: 10px; font-weight: 800; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--danger); margin-bottom: 6px;
+    }
+    .sim-page .contraste-pedido-texto { font-size: 13px; line-height: 1.6; color: var(--text-soft); }
+
+    /* Empilhado por padrão: é a forma legível em qualquer largura, e também o
+       que aparece se o navegador não suportar container queries. */
+    .sim-page .contraste-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @container contraste (min-width: 520px) {
+      .sim-page .contraste-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .sim-page .contraste-col {
+      border-radius: 12px; padding: 12px 14px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.02);
+    }
+    .sim-page .contraste-col.agora {
+      border-color: rgba(110,231,255,0.2);
+      background: rgba(110,231,255,0.04);
+    }
+    .sim-page .contraste-col-head {
+      font-size: 10px; font-weight: 800; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--text-faint); margin-bottom: 8px;
+      display: flex; align-items: baseline; gap: 6px;
+    }
+    .sim-page .contraste-col.agora .contraste-col-head { color: var(--cyan); }
+    .sim-page .contraste-col-data { font-weight: 600; letter-spacing: 0; text-transform: none; }
+    /* Rolagem dentro da coluna: uma resposta pode ter 5.000 caracteres, e as
+       duas colunas precisam continuar comparáveis lado a lado. */
+    .sim-page .contraste-texto {
+      font-size: 13px; line-height: 1.65; color: var(--text-soft);
+      white-space: pre-wrap; word-break: break-word;
+      max-height: 260px; overflow-y: auto;
+    }
+
+    @media (max-width: 720px) {
+      .sim-page .contraste-texto { max-height: 200px; }
+    }
+
     .sim-page .comparacao-section {
       display: none;
       border-radius: 18px;
