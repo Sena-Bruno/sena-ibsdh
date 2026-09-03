@@ -23,7 +23,12 @@ incompleta do arquivo original virar a fonte da verdade.
   `Codigo.gs` por uma versão que tenta vários modelos e repete em falha
   transitória. **Apague a `chamarGroqAPI` antiga ao colar**, senão ficam duas
   funções com o mesmo nome.
+- `evolucao-perfis.gs` — **arquivo novo**. Desempenho do aluno por perfil
+  clínico, para o card do dashboard. Cole como arquivo separado e adicione o
+  caso no `switch`.
 - `teste-equivalencia.mjs` — testes das funções corrigidas.
+- `teste-evolucao-perfis.mjs` — testes do desempenho por perfil
+  (`node appscript/teste-evolucao-perfis.mjs`).
 - `teste-groq-resiliente.mjs` — testes da chamada à Groq
   (`node appscript/teste-groq-resiliente.mjs`).
 - `teste-posicao-ranking.mjs` — testes da posição no ranking

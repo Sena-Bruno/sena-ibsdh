@@ -233,6 +233,9 @@
     <!-- GRÁFICO DE EVOLUÇÃO -->
     <GraficoEvolucao :pontos="dadosGrafico" />
 
+    <!-- DESEMPENHO POR PERFIL CLÍNICO -->
+    <DesempenhoPerfis :perfis="perfisDesempenho" :nota-minima="notaMinimaPerfis" />
+
     <!-- MAPA DE JORNADA -->
     <div class="journey-section">
       <div class="journey-label">Sua jornada</div>
@@ -296,6 +299,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useAccessibility } from '../composables/useAccessibility'
 import { callApi } from '../composables/useApi'
 import GraficoEvolucao from '../components/GraficoEvolucao.vue'
+import DesempenhoPerfis from '../components/DesempenhoPerfis.vue'
 
 // ── ACESSIBILIDADE (composable compartilhado) ──────────────────────
 // Usa as mesmas chaves de localStorage que o dashboard.html original já usava.
@@ -405,6 +409,23 @@ function renderConquistas() {
 // Gráfico de evolução — os dados vão para o componente GraficoEvolucao.vue,
 // que desenha em SVG (nítido em qualquer tela, acompanha o tema e tem tooltip).
 const dadosGrafico = ref([])
+
+// Desempenho por perfil clínico — vem agregado do backend (a origem é a
+// Avaliacoes_SENA, que o frontend não tem). Falhar aqui não pode derrubar o
+// painel: o card simplesmente não aparece.
+const perfisDesempenho = ref([])
+const notaMinimaPerfis = ref(7)
+
+async function carregarDesempenhoPerfis() {
+  try {
+    const data = await callApi({ action: 'evolucao_perfis', email: email, curso: CURSO })
+    if (!montado || !data || data.erro) return
+    perfisDesempenho.value = data.perfis || []
+    if (data.nota_minima) notaMinimaPerfis.value = Number(data.nota_minima)
+  } catch (e) {
+    console.warn('[SENA] desempenho por perfil indisponível:', e.message)
+  }
+}
 
 function montarDadosGrafico() {
   const pontos = []
@@ -714,6 +735,7 @@ async function carregarProgresso() {
     }
     renderDashboard()
     buscarPosicaoRanking()
+    carregarDesempenhoPerfis()
     verificarAlertaInatividade()
     setupPremiumMouseTracking()
     setupScrollAnimations()
