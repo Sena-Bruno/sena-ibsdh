@@ -40,6 +40,10 @@ function carregar(opcoes = {}) {
         resistencias: ['Interrompe com "e se"', 'Antecipa problemas']
       }
     },
+    buscarEntradasDiario: () => {
+      if (opcoes.diarioFalha) throw new Error('Aba do diário não encontrada')
+      return { entradas: opcoes.entradas === undefined ? [] : opcoes.entradas }
+    },
     extrairJSONRobusto: (bruto) => {
       // Réplica do comportamento do `Codigo.gs`: acha o primeiro objeto JSON
       // dentro do texto, mesmo cercado de markdown ou de prosa.
@@ -353,6 +357,103 @@ function replayIA(obj) {
   checar('vira { erro: true } que a tela já sabe mostrar', r2 && r2.erro === true)
   checar('e fica registrada, ao contrário da versão antiga',
     caiu.logs.some(l => l.tipo === 'REPLAY_ERROR'), JSON.stringify(caiu.logs))
+}
+
+console.log('\n=== analisarDiarioSemanal ===')
+
+function entradas(n, tamanho) {
+  const lista = []
+  for (let i = 0; i < n; i++) {
+    lista.push({ aula: 'Aula_' + (i + 1), reflexao: 'r'.repeat(tamanho || 40) + ' ' + i })
+  }
+  return lista
+}
+
+// ── o corte de "poucas entradas" ────────────────────────────────────────────
+//
+// Este é o caminho que o diagnosticarIA() exercitou (12ms, sem tocar na Groq).
+// Ele precisa continuar igual — e sem gastar chamada de IA.
+{
+  for (const n of [0, 1]) {
+    const t = carregar({ entradas: entradas(n) })
+    const r = t.sandbox.analisarDiarioSemanal('ana@t.com', 'Practitioner')
+    checar(`${n} entrada(s): devolve o convite a continuar registrando`,
+      /poucas entradas/.test(r.analise) && t.chamadas.length === 0, JSON.stringify(r))
+  }
+
+  const semAba = carregar({ diarioFalha: true })
+  let estourou = false
+  try { semAba.sandbox.analisarDiarioSemanal('ana@t.com', 'Practitioner') } catch (e) { estourou = true }
+  checar('falha ao ler o diário ainda propaga (é problema de planilha, não de IA)',
+    estourou === true)
+}
+
+// ── o prompt ────────────────────────────────────────────────────────────────
+{
+  const t = carregar({ entradas: entradas(3), respostaIA: '  Você tende a ancorar bem e a fechar cedo demais.  ' })
+  const r = t.sandbox.analisarDiarioSemanal('ana@t.com', 'Practitioner')
+  const prompt = t.chamadas[0].prompt
+
+  checar('devolve { analise } como antes, sem espaços nas pontas',
+    JSON.stringify(Object.keys(r)) === '["analise"]' &&
+    r.analise === 'Você tende a ancorar bem e a fechar cedo demais.', JSON.stringify(r))
+  checar('as reflexões chegam ao prompt, com a aula de cada uma',
+    /\[Aula_1\]/.test(prompt) && /\[Aula_3\]/.test(prompt))
+  checar('o curso entra no prompt', /Practitioner/.test(prompt))
+}
+
+// ── tetos de tamanho ────────────────────────────────────────────────────────
+//
+// Sem teto, dez reflexões longas estouram o contexto do modelo e a análise
+// inteira morre — inclusive para quem escreveu pouco nas outras nove.
+{
+  const t = carregar({ entradas: entradas(25) })
+  t.sandbox.analisarDiarioSemanal('ana@t.com', 'Practitioner')
+  const prompt = t.chamadas[0].prompt
+  checar('usa no máximo 10 entradas, como a versão antiga',
+    /\[Aula_10\]/.test(prompt) && !/\[Aula_11\]/.test(prompt))
+
+  const longa = carregar({ entradas: [
+    { aula: 'Aula_1', reflexao: 'x'.repeat(9000) },
+    { aula: 'Aula_2', reflexao: 'curta' }
+  ] })
+  longa.sandbox.analisarDiarioSemanal('ana@t.com', 'Practitioner')
+  const p2 = longa.chamadas[0].prompt
+  checar('reflexão gigante é cortada, não estoura o contexto',
+    p2.length < 3000 && /…/.test(p2), 'tamanho do prompt: ' + p2.length)
+  checar('e a entrada seguinte sobrevive ao corte', /curta/.test(p2))
+}
+
+// ── parâmetros ──────────────────────────────────────────────────────────────
+{
+  const t = carregar({ entradas: entradas(3) })
+  t.sandbox.analisarDiarioSemanal('ana@t.com', 'Practitioner')
+  const op = t.chamadas[0].op
+  checar('pede 1200 tokens, não 400 — 200 palavras não cabem num orçamento apertado',
+    op.maxTokens === 1200, 'maxTokens: ' + op.maxTokens)
+  checar('mantém a temperatura 0.5 da versão antiga', op.temperature === 0.5)
+}
+
+// ── falhas ──────────────────────────────────────────────────────────────────
+{
+  // O diário é um painel a mais na tela: se a IA cair, o aluno não pode perder
+  // o acesso ao que ele mesmo escreveu.
+  const caiu = carregar({ entradas: entradas(3), iaFalha: 'Nenhum modelo da Groq respondeu.' })
+  let estourou = false, r
+  try { r = caiu.sandbox.analisarDiarioSemanal('ana@t.com', 'Practitioner') }
+  catch (e) { estourou = true }
+  checar('falha da IA não propaga', estourou === false)
+  checar('devolve uma frase honesta, não uma caixa vazia',
+    r && /tente de novo/.test(r.analise), JSON.stringify(r))
+  checar('e diz que as entradas continuam salvas', r && /continuam salvas/.test(r.analise))
+  checar('registra a falha, que antes era silenciosa',
+    caiu.logs.some(l => l.tipo === 'DIARIO_ERROR'), JSON.stringify(caiu.logs))
+
+  // 200 com content vazio: o que o max_tokens 400 produzia.
+  const vazia = carregar({ entradas: entradas(3), respostaIA: '   ' })
+  const r2 = vazia.sandbox.analisarDiarioSemanal('ana@t.com', 'Practitioner')
+  checar('resposta vazia vira aviso, não parágrafo em branco',
+    /tente de novo/.test(r2.analise), JSON.stringify(r2))
 }
 
 console.log(falhas === 0 ? '\nTodos os testes passaram.' : `\n${falhas} falha(s).`)

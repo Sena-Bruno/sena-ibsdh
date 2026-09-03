@@ -254,3 +254,76 @@ function limparAusenciasReplay(lista) {
     .filter(function (a) { return a.length > 0; })
     .slice(0, 3);
 }
+
+
+// ── 4/5 · analisarDiarioSemanal ──────────────────────────────────────────────
+//
+// Lê as reflexões que o aluno escreveu no diário e devolve um parágrafo de
+// supervisão: padrões de força, pontos cegos e uma recomendação.
+//
+// Esta apareceu "OK | 12ms" no diagnosticarIA(), mas isso é enganoso: ela caiu
+// no retorno de "poucas entradas" e nem chegou a chamar a Groq. O caminho que
+// usa IA nunca foi exercitado em produção — o que torna a migração mais
+// importante aqui, não menos.
+//
+// Problemas da versão antiga:
+//   - max_tokens 400 com modelo de raciocínio: o mesmo aperto que deixava as
+//     boas-vindas vazias. Aqui o texto pedido é maior (200 palavras), então a
+//     chance de o content sair vazio é maior ainda. Agora são 1200.
+//   - `.message.content.trim()` estoura se content vier null.
+//   - sem checar o status HTTP: um 401 ou 429 virava
+//     `data.choices === undefined` e o aluno lia "Não foi possível gerar a
+//     análise", sem nada registrado em lugar nenhum.
+//   - o prompt não tinha teto de tamanho: dez reflexões longas podiam estourar
+//     o limite de contexto do modelo e derrubar a análise inteira.
+
+var DIARIO_MAX_ENTRADAS = 10;
+var DIARIO_MAX_CHARS_ENTRADA = 1200;
+
+function analisarDiarioSemanal(email, curso) {
+  const r = buscarEntradasDiario(email, curso, '');
+  const entradas = r && r.entradas;
+  if (!entradas || entradas.length < 2) {
+    return { analise: 'Você ainda tem poucas entradas no diário. Continue registrando suas reflexões para receber uma análise de padrões.' };
+  }
+
+  // Teto por entrada: uma reflexão longa demais não pode derrubar a análise
+  // das outras nove por estourar o contexto do modelo.
+  const texto = entradas.slice(0, DIARIO_MAX_ENTRADAS).map(function (e) {
+    const reflexao = String(e.reflexao || '');
+    return '[' + (e.aula || '') + '] ' +
+      (reflexao.length > DIARIO_MAX_CHARS_ENTRADA
+        ? reflexao.substring(0, DIARIO_MAX_CHARS_ENTRADA) + '…'
+        : reflexao);
+  }).join('\n\n');
+
+  const prompt = `Você é um supervisor clínico analisando o diário de um aluno em formação em ${curso}.
+Com base nas reflexões abaixo, identifique:
+1. Padrões recorrentes de força (o que o aluno faz bem consistentemente)
+2. Pontos cegos recorrentes (o que o aluno tende a evitar ou não percebe)
+3. Uma recomendação de desenvolvimento personalizada para a próxima semana
+
+Seja direto, específico e clínico. Máximo 200 palavras.
+
+Reflexões do aluno:
+${texto}`;
+
+  try {
+    const analise = String(chamarGroqTexto(prompt, {
+      // 400 era o mesmo aperto das boas-vindas, e aqui o texto pedido é maior.
+      maxTokens: 1200,
+      temperature: 0.5
+    })).trim();
+
+    // Modelo de raciocínio pode devolver 200 com content vazio. O núcleo já
+    // trata isso como falha e tenta o próximo modelo, mas se TODOS voltarem
+    // vazios chegamos aqui com string vazia — e uma caixa em branco na tela é
+    // pior do que uma frase honesta.
+    if (!analise) throw new Error('A IA respondeu sem conteúdo.');
+
+    return { analise: analise };
+  } catch (e) {
+    try { registrarLog('DIARIO_ERROR', email, curso, '', e.message, ''); } catch (e2) {}
+    return { analise: 'Não foi possível gerar a análise agora. Suas entradas continuam salvas — tente de novo em alguns minutos.' };
+  }
+}
