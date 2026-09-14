@@ -7,22 +7,25 @@
       <div class="eyebrow">⚡ Desafio da semana</div>
       <h1>Desafio Semanal SENA</h1>
       <p class="sub">Todo domingo um novo perfil de paciente é liberado para todos os alunos. Mostre sua competência clínica e compare com os melhores da turma.</p>
-      <div class="timer">{{ textoTimer }}</div>
+      <!-- O prazo muda a cada minuto: "polite" avisa sem interromper. -->
+      <div class="timer" role="timer" aria-live="polite">{{ textoTimer }}</div>
     </div>
 
-    <div class="curso-selector">
+    <div class="curso-selector" role="group" aria-label="Filtrar por curso">
       <button
         v-for="c in CURSOS"
         :key="c"
+        type="button"
         class="curso-btn"
         :class="{ ativo: c === cursoAtivo }"
+        :aria-pressed="String(c === cursoAtivo)"
         @click="selecionarCurso(c)"
       >{{ c.replace(/_/g, ' ') }}</button>
     </div>
 
     <div>
-      <div v-if="carregando" class="loading">Carregando...</div>
-      <div v-else-if="erro" class="loading">Erro ao carregar.</div>
+      <div v-if="carregando" class="loading" role="status">Carregando o desafio da semana...</div>
+      <div v-else-if="erro" class="loading" role="alert">Não foi possível carregar o desafio. Verifique sua conexão e tente recarregar a página.</div>
       <template v-else-if="desafio">
         <div class="card">
           <div class="card-title">Perfil do paciente desta semana</div>
@@ -109,12 +112,11 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
 * { margin:0;padding:0;box-sizing:border-box; }
 /* O fundo fica no wrapper full-width (.page) e a largura máxima no .shell —
    mesma divisão do desafio.html original. Se o fundo ficar no .shell, que é
    limitado a 680px, sobra o branco do body nas laterais da tela. */
-.page { --text:#edf3f8;--text-soft:#9aa7b5;--text-faint:#5a6470;--cyan:#59e1ff;--gold:#d6b36a;--success:#7ef0c2;--danger:#ff6b88;--border:rgba(112,141,173,0.15);--shadow:0 20px 48px rgba(0,0,0,0.38);
+.page { --text:#edf3f8;--text-soft:#9aa7b5;--text-faint:#8492a2;--cyan:#59e1ff;--gold:#d6b36a;--success:#7ef0c2;--danger:#ff6b88;--border:rgba(112,141,173,0.15);--shadow:0 20px 48px rgba(0,0,0,0.38);
   font-family:'Inter',sans-serif;min-height:100vh;background:radial-gradient(ellipse at top left,rgba(245,193,99,0.08),transparent 30%),linear-gradient(180deg,#06080c,#090c11);color:var(--text);line-height:1.6; }
 .shell { max-width:680px;margin:0 auto;padding:28px 18px 48px; }
 .btn-voltar { display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:var(--text-soft);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;margin-bottom:16px;transition:background .18s; }

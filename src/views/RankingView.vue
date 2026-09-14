@@ -9,23 +9,28 @@
       <p class="sub">Veja quais perfis de pacientes têm maior taxa de aprovação entre os alunos. Identifique onde a turma é forte e onde há mais desafio.</p>
     </div>
 
-    <div class="curso-selector">
+    <!-- Um grupo de botões que filtra a lista é um conjunto de opções, não
+         quatro botões independentes: group + aria-pressed diz qual está
+         ativo. Antes, o estado "selecionado" era só a cor do botão. -->
+    <div class="curso-selector" role="group" aria-label="Filtrar por curso">
       <button
         v-for="c in CURSOS"
         :key="c"
+        type="button"
         class="curso-btn"
         :class="{ ativo: c === cursoAtivo }"
+        :aria-pressed="String(c === cursoAtivo)"
         @click="selecionarCurso(c)"
       >{{ c.replace(/_/g, ' ') }}</button>
     </div>
 
     <div>
-      <div v-if="carregando" class="loading">Carregando...</div>
-      <div v-else-if="erro" class="loading">Erro ao carregar.</div>
-      <div v-else-if="!ranking.length" class="loading">Ainda não há dados suficientes para este curso.</div>
+      <div v-if="carregando" class="loading" role="status">Carregando ranking...</div>
+      <div v-else-if="erro" class="loading" role="alert">Não foi possível carregar o ranking. Verifique sua conexão e tente recarregar a página.</div>
+      <div v-else-if="!ranking.length" class="loading" role="status">Ainda não há dados suficientes para este curso.</div>
       <div v-else class="ranking-lista">
         <div class="ranking-item" v-for="(item, idx) in ranking" :key="item.perfil">
-          <div class="rank-pos" :class="posClass(idx)">{{ posEmoji(idx) }}</div>
+          <div class="rank-pos" :class="posClass(idx)"><span class="sr-only">Posição </span>{{ posEmoji(idx) }}</div>
           <div class="rank-info">
             <div class="rank-perfil">{{ item.perfil }}</div>
             <div class="rank-meta">{{ item.total_sessoes }} sessões · {{ item.alunos_unicos }} alunos · média {{ item.media }}/10</div>
@@ -94,13 +99,12 @@ onMounted(() => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
 * { margin:0;padding:0;box-sizing:border-box; }
 /* O fundo fica no wrapper full-width (.page) e a largura máxima no .shell —
    mesma divisão do ranking.html original. Se o fundo ficar no .shell, que é
    limitado a 760px, sobra o branco do body nas laterais da tela. */
 .page {
-  --text:#edf3f8;--text-soft:#9aa7b5;--text-faint:#5a6470;
+  --text:#edf3f8;--text-soft:#9aa7b5;--text-faint:#8492a2;
   --cyan:#59e1ff;--gold:#d6b36a;--success:#7ef0c2;--danger:#ff6b88;
   --border:rgba(112,141,173,0.15);--shadow:0 20px 48px rgba(0,0,0,0.38);
   font-family:'Inter',sans-serif;min-height:100vh;background:radial-gradient(ellipse at top left,rgba(89,225,255,0.07),transparent 30%),linear-gradient(180deg,#06080c,#090c11);color:var(--text);line-height:1.6; }

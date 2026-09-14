@@ -1,19 +1,23 @@
 <template>
   <div class="page">
     <div class="email-modal-overlay" :class="{ visible: mostrarModalEmail }">
-      <div class="email-modal">
-        <h2>Identificação do Mentor</h2>
+      <div class="email-modal" role="dialog" aria-modal="true" aria-labelledby="tituloMentorEmail">
+        <h2 id="tituloMentorEmail">Identificação do Mentor</h2>
         <p>Informe seu e-mail para acessar o modo mentor.</p>
+        <label class="sr-only" for="mentorEmail">Seu e-mail</label>
         <input
+          id="mentorEmail"
           ref="emailInputRef"
           class="email-input"
           type="email"
+          autocomplete="email"
           v-model="emailInput"
           placeholder="seu@email.com"
+          aria-describedby="mentorEmailErro"
           @keydown.enter="confirmarEmail"
         />
-        <div class="email-error">{{ erroEmail }}</div>
-        <button class="email-btn" @click="confirmarEmail">Entrar como mentor</button>
+        <div class="email-error" id="mentorEmailErro" role="alert">{{ erroEmail }}</div>
+        <button type="button" class="email-btn" @click="confirmarEmail">Entrar como mentor</button>
       </div>
     </div>
 
@@ -24,10 +28,10 @@
         <h1>Modo Mentor</h1>
         <p class="sub">Você já aprovou aulas neste curso. Agora pode ajudar outros alunos deixando feedback anônimo sobre respostas aprovadas. A IA modera todos os comentários.</p>
       </div>
-      <div class="aviso">⚠️ Os feedbacks são anônimos e moderados pela IA antes de serem exibidos. Seja construtivo e clínico — feedbacks inadequados são removidos automaticamente.</div>
+      <div class="aviso" role="note">⚠️ Os feedbacks são anônimos e moderados pela IA antes de serem exibidos. Seja construtivo e clínico — feedbacks inadequados são removidos automaticamente.</div>
 
-      <div v-if="carregando" class="loading">Carregando...</div>
-      <div v-else-if="erro" class="loading">Erro ao carregar.</div>
+      <div v-if="carregando" class="loading" role="status">Carregando feedbacks disponíveis...</div>
+      <div v-else-if="erro" class="loading" role="alert">Não foi possível carregar os itens para review. Verifique sua conexão e tente recarregar a página.</div>
       <div v-else-if="!itens.length" class="vazio">Não há respostas disponíveis para review neste momento.<br>Volte depois ou aprove mais aulas para desbloquear mais itens.</div>
       <div v-else class="mentor-lista">
         <div class="mentor-card" v-for="item in itens" :key="item.id_avaliacao">
@@ -43,16 +47,21 @@
               <div class="mentor-fortes">{{ item.fortes }}</div>
             </template>
             <div class="mentor-label">Seu feedback como mentor</div>
+            <label class="sr-only" :for="'fb-' + item.id_avaliacao">
+              Seu feedback como mentor sobre a resposta da aula {{ item.aula }}
+            </label>
             <textarea
+              :id="'fb-' + item.id_avaliacao"
               class="mentor-textarea"
               v-model="feedbacks[item.id_avaliacao]"
               :disabled="enviados[item.id_avaliacao]"
               placeholder="Deixe um comentário construtivo sobre a condução clínica desta resposta. O que o aluno fez bem? O que poderia aprofundar?"
             ></textarea>
             <div class="mentor-actions">
-              <span class="mentor-status" :class="statusClasse[item.id_avaliacao]">{{ statusTexto[item.id_avaliacao] || '' }}</span>
+              <span class="mentor-status" :class="statusClasse[item.id_avaliacao]" role="status">{{ statusTexto[item.id_avaliacao] || '' }}</span>
               <button
                 v-if="!enviados[item.id_avaliacao]"
+                type="button"
                 class="mentor-btn-enviar"
                 :disabled="enviando[item.id_avaliacao]"
                 @click="enviarFeedback(item.id_avaliacao)"
@@ -164,12 +173,11 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
 * { margin:0;padding:0;box-sizing:border-box; }
 /* O fundo fica no wrapper full-width (.page) e a largura máxima no .shell —
    mesma divisão do mentor.html original. Se o fundo ficar no .shell, que é
    limitado a 720px, sobra o branco do body nas laterais da tela. */
-.page { --text:#edf3f8;--text-soft:#9aa7b5;--text-faint:#5a6470;--cyan:#59e1ff;--gold:#d6b36a;--success:#7ef0c2;--danger:#ff6b88;--border:rgba(112,141,173,0.15);--shadow:0 20px 48px rgba(0,0,0,0.38);
+.page { --text:#edf3f8;--text-soft:#9aa7b5;--text-faint:#8492a2;--cyan:#59e1ff;--gold:#d6b36a;--success:#7ef0c2;--danger:#ff6b88;--border:rgba(112,141,173,0.15);--shadow:0 20px 48px rgba(0,0,0,0.38);
   font-family:'Inter',sans-serif;min-height:100vh;background:radial-gradient(ellipse at bottom right,rgba(126,240,194,0.06),transparent 30%),linear-gradient(180deg,#06080c,#090c11);color:var(--text);line-height:1.6; }
 .shell { max-width:720px;margin:0 auto;padding:28px 18px 48px; }
 .btn-voltar { display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:var(--text-soft);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;margin-bottom:16px;transition:background .18s; }
@@ -192,7 +200,7 @@ h1 { font-size:clamp(24px,5vw,36px);font-weight:800;letter-spacing:-.03em;margin
 .mentor-fortes { font-size:13px;color:var(--text-soft);line-height:1.65; }
 .mentor-textarea { width:100%;min-height:100px;resize:vertical;border:1px solid rgba(255,255,255,0.08);border-radius:12px;background:rgba(5,9,13,0.6);color:var(--text);padding:12px 14px;font-family:'Inter',sans-serif;font-size:13px;line-height:1.65;outline:none;margin-top:10px;transition:border-color .18s; }
 .mentor-textarea:focus { border-color:rgba(126,240,194,0.3); }
-.mentor-textarea::placeholder { color:#4a5568; }
+.mentor-textarea::placeholder { color:#7b8795; } /* era #4a5568 — 2.62:1, reprovava 1.4.3 */
 .mentor-actions { display:flex;align-items:center;justify-content:space-between;margin-top:8px; }
 .mentor-status { font-size:12px;color:var(--text-faint);min-height:16px; }
 .mentor-status.ok { color:var(--success); }
