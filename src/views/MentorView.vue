@@ -21,7 +21,7 @@
       </div>
     </div>
 
-    <div class="shell">
+    <div class="shell" id="conteudo" tabindex="-1">
       <router-link class="btn-voltar" to="/dashboard.html">← Voltar ao painel</router-link>
       <div class="hero">
         <div class="eyebrow">Comunidade de prática</div>
@@ -178,7 +178,7 @@ onMounted(async () => {
    mesma divisão do mentor.html original. Se o fundo ficar no .shell, que é
    limitado a 720px, sobra o branco do body nas laterais da tela. */
 .page { --text:#edf3f8;--text-soft:#9aa7b5;--text-faint:#8492a2;--cyan:#59e1ff;--gold:#d6b36a;--success:#7ef0c2;--danger:#ff6b88;--border:rgba(112,141,173,0.15);--shadow:0 20px 48px rgba(0,0,0,0.38);
-  font-family:'Inter',sans-serif;min-height:100vh;background:radial-gradient(ellipse at bottom right,rgba(126,240,194,0.06),transparent 30%),linear-gradient(180deg,#06080c,#090c11);color:var(--text);line-height:1.6; }
+  font-family:'Inter',sans-serif;min-height:100vh;min-height:100dvh;background:radial-gradient(ellipse at bottom right,rgba(126,240,194,0.06),transparent 30%),linear-gradient(180deg,#06080c,#090c11);color:var(--text);line-height:1.6; }
 .shell { max-width:720px;margin:0 auto;padding:28px 18px 48px; }
 .btn-voltar { display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:var(--text-soft);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;margin-bottom:16px;transition:background .18s; }
 .btn-voltar:hover { background:rgba(255,255,255,0.06); }

@@ -22,7 +22,7 @@
       </div>
     </div>
 
-    <div class="shell">
+    <div class="shell" id="conteudo" tabindex="-1">
       <router-link class="btn-voltar" to="/dashboard.html">← Voltar ao painel</router-link>
 
       <!-- ── ABERTURA ─────────────────────────────────────────────── -->
@@ -492,7 +492,7 @@ document.title = 'SENA | Modo Plantão'
   --text:#edf3f8;--text-soft:#9aa7b5;--text-faint:#8492a2;
   --cyan:#59e1ff;--gold:#d6b36a;--success:#7ef0c2;--danger:#ff6b88;
   --border:rgba(112,141,173,0.15);--shadow:0 20px 48px rgba(0,0,0,0.38);
-  font-family:'Inter',sans-serif; min-height:100vh; color:var(--text); line-height:1.6;
+  font-family:'Inter',sans-serif; min-height:100vh;min-height:100dvh; color:var(--text); line-height:1.6;
   background:radial-gradient(ellipse at top left,rgba(255,107,136,0.07),transparent 30%),linear-gradient(180deg,#06080c,#090c11);
 }
 .shell { max-width:680px;margin:0 auto;padding:28px 18px 48px; }

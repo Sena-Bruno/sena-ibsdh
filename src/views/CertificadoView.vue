@@ -1,6 +1,6 @@
 <template>
   <div class="wrap">
-    <div class="card">
+    <div class="card" id="conteudo" tabindex="-1">
       <div class="header">
         <div class="eyebrow">Certificação SENA</div>
         <h1>Certificado de Proficiência Clínica</h1>
@@ -200,6 +200,7 @@ onMounted(() => {
   --danger: #ff6b88;
   font-family: 'Inter', sans-serif;
   min-height: 100vh;
+  min-height: 100dvh;
   background:
     radial-gradient(circle at top left, rgba(89,225,255,0.08), transparent 28%),
     radial-gradient(circle at top right, rgba(214,179,106,0.06), transparent 22%),

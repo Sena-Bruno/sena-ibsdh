@@ -41,6 +41,7 @@
 
   <div class="gate-loading" id="gateLoading" role="status">Verificando seu acesso...</div>
 
+  <span id="conteudo" tabindex="-1"></span>
   <div class="shell" id="appShell" style="display:none;">
     <section class="hero">
       <div class="acess-btns">
@@ -176,8 +177,19 @@ Inclua:
 Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
 
             <div class="input-footer">
-              <div class="count" id="charCount">0 caracteres | mínimo: 50</div>
-              <button class="primary-btn" @click="submitAnalysis" id="submitBtn" style="width:auto;min-width:220px;">Enviar resposta</button>
+              <!-- Contador e erro ficam JUNTOS do botão. Antes, o único canal de
+                   erro do envio era o #alertBox, que vive no cartão do PACIENTE
+                   — no desktop, na coluna da esquerda. O aluno clicava em
+                   "Enviar resposta" na direita e a mensagem aparecia do outro
+                   lado da tela, muitas vezes fora da área visível: da
+                   perspectiva dele, o botão não fazia nada. -->
+              <div class="input-footer-msg">
+                <div class="count" id="charCount">Mínimo de 50 caracteres</div>
+                <div class="alert-inline" id="submitError" role="alert"></div>
+              </div>
+              <button class="primary-btn" @click="submitAnalysis" id="submitBtn"
+                      aria-disabled="true" aria-describedby="charCount"
+                      style="width:auto;min-width:220px;">Enviar resposta</button>
             </div>
           </div>
 
@@ -517,12 +529,8 @@ function setInitialUI() {
   document.getElementById('criteriaBox').textContent = SYSTEM.criteria
   carregarBoasVindas()
 
-  document.getElementById('clinicalInput').addEventListener('input', function () {
-    const count = this.value.length
-    const counter = document.getElementById('charCount')
-    counter.textContent = count + ' caracteres | mínimo: ' + MIN_CHARS
-    counter.className = 'count' + (count < MIN_CHARS ? ' warning' : '')
-  })
+  document.getElementById('clinicalInput').addEventListener('input', atualizarEstadoEnvio)
+  atualizarEstadoEnvio()
 
   document.getElementById('tutorInput').addEventListener('input', function () {
     document.getElementById('tutorCount').textContent = this.value.length + ' caracteres'
@@ -573,18 +581,80 @@ function initializeSimulation() {
 }
 
 // ── ENVIAR RESPOSTA ────────────────────────────────────────────────
+// Espelha o modelo que o PlantaoView já usava: o aluno vê quando pode enviar,
+// em vez de descobrir no clique. O texto diz o que falta — o estado não é
+// comunicado só por cor, senão 1.4.1 voltaria a reprovar aqui.
+function atualizarEstadoEnvio() {
+  const campo = document.getElementById('clinicalInput')
+  const contador = document.getElementById('charCount')
+  const botao = document.getElementById('submitBtn')
+  if (!campo || !contador || !botao) return
+
+  const n = campo.value.trim().length
+  let texto, classe, podeEnviar
+
+  if (n === 0) {
+    texto = 'Mínimo de ' + MIN_CHARS + ' caracteres'
+    classe = ''
+    podeEnviar = false
+  } else if (n < MIN_CHARS) {
+    const faltam = MIN_CHARS - n
+    texto = (faltam === 1 ? 'Falta 1 caractere' : 'Faltam ' + faltam + ' caracteres')
+    classe = ' warning'
+    podeEnviar = false
+  } else if (n > MAX_CHARS) {
+    texto = n + ' caracteres · máximo ' + MAX_CHARS
+    classe = ' warning'
+    podeEnviar = false
+  } else {
+    texto = n + ' caracteres · pronto para enviar'
+    classe = ' ok'
+    podeEnviar = true
+  }
+
+  contador.textContent = texto
+  contador.className = 'count' + classe
+  // aria-disabled, e não o atributo `disabled`: um botão realmente desabilitado
+  // sai da ordem de tabulação, então quem navega por teclado passa do campo
+  // direto para o próximo elemento e nunca descobre que existe um botão de
+  // enviar. Com aria-disabled ele continua alcançável e é anunciado como
+  // indisponível; o clique cai na guarda de submitAnalysis, que diz o que
+  // falta. O aria-describedby liga o botão ao contador, que é a explicação.
+  botao.setAttribute('aria-disabled', String(processing || !podeEnviar))
+  if (podeEnviar) hideSubmitError()
+}
+
+function showSubmitError(msg) {
+  const b = document.getElementById('submitError')
+  if (!b) return
+  b.textContent = msg
+  b.classList.add('visible')
+  // Sem isto a mensagem pode nascer fora da área visível em telas curtas —
+  // que é exatamente o problema que este bloco existe para resolver.
+  b.scrollIntoView({ block: 'nearest' })
+}
+
+function hideSubmitError() {
+  const b = document.getElementById('submitError')
+  if (b) { b.textContent = ''; b.classList.remove('visible') }
+}
+
 async function submitAnalysis() {
   if (processing) return
   if (gravando) pararGravacao()
 
   const input = document.getElementById('clinicalInput').value.trim()
-  if (!activeProfile) { showAlert('Gere um paciente virtual antes de responder.'); return }
-  if (input.length < MIN_CHARS) { showAlert('Resposta muito curta. Mínimo ' + MIN_CHARS + ' caracteres.'); return }
-  if (input.length > MAX_CHARS) { showAlert('Resposta muito longa. Máximo ' + MAX_CHARS + ' caracteres.'); return }
+  // Com o botão desabilitado abaixo do mínimo, estas guardas viram rede de
+  // segurança (texto colado por script, estado dessincronizado). Ainda assim
+  // falam junto do botão, não na outra coluna.
+  if (!activeProfile) { showSubmitError('Gere um paciente virtual antes de responder.'); return }
+  if (input.length < MIN_CHARS) { showSubmitError('Faltam ' + (MIN_CHARS - input.length) + ' caracteres para o mínimo de ' + MIN_CHARS + '.'); return }
+  if (input.length > MAX_CHARS) { showSubmitError('Resposta muito longa. Máximo ' + MAX_CHARS + ' caracteres.'); return }
 
   processing = true
   hideAlert()
-  document.getElementById('submitBtn').disabled = true
+  hideSubmitError()
+  document.getElementById('submitBtn').setAttribute('aria-disabled', 'true')
   document.getElementById('submitBtn').textContent = 'Processando...'
   document.getElementById('clinicalInput').disabled = true
 
@@ -601,11 +671,12 @@ async function submitAnalysis() {
 function handleResult(data, autoavaliacao) {
   processing = false
   document.getElementById('processingModule').classList.remove('visible')
-  document.getElementById('submitBtn').disabled = false
   document.getElementById('submitBtn').textContent = 'Enviar resposta'
+  // Reabilitar às cegas deixava o botão ativo com o campo vazio.
+  atualizarEstadoEnvio()
   document.getElementById('clinicalInput').disabled = false
 
-  if (!data || data.erro) { showAlert((data && data.mensagem) || 'Erro no processamento.'); return }
+  if (!data || data.erro) { showSubmitError((data && data.mensagem) || 'Erro no processamento. Tente enviar novamente.'); return }
 
   const approved = !!data.aprovado
   document.getElementById('scoreCard').className = 'score-card ' + (approved ? 'approved' : 'rejected')
@@ -678,14 +749,16 @@ function handleResult(data, autoavaliacao) {
 function handleError(err) {
   processing = false
   document.getElementById('processingModule').classList.remove('visible')
-  document.getElementById('submitBtn').disabled = false
   document.getElementById('submitBtn').textContent = 'Enviar resposta'
+  // Reabilitar às cegas deixava o botão ativo com o campo vazio.
+  atualizarEstadoEnvio()
   document.getElementById('clinicalInput').disabled = false
-  showAlert((err && err.message) || 'Falha de conexão. Tente novamente.')
+  showSubmitError((err && err.message) || 'Falha de conexão. Sua resposta continua no campo — tente enviar novamente.')
 }
 
 function resetForRetry() {
   hideAlert()
+  hideSubmitError()
   document.getElementById('resultModule').classList.remove('visible')
   document.getElementById('historicoSection').classList.remove('visible')
   document.getElementById('historicoToggle').classList.remove('open')
@@ -708,6 +781,7 @@ function resetForRetry() {
   prontuarioDados = null
   document.getElementById('desafioCard').style.display = 'none'
   document.getElementById('clinicalInput').focus()
+  atualizarEstadoEnvio()
   document.getElementById('clinicalInput').scrollIntoView({ behavior: 'smooth', block: 'center' })
 }
 
@@ -1057,8 +1131,9 @@ function cancelarSupervisor() {
   document.getElementById('supervisorOverlay').classList.remove('visible')
   pendingPayload = null
   processing = false
-  document.getElementById('submitBtn').disabled = false
   document.getElementById('submitBtn').textContent = 'Enviar resposta'
+  // Reabilitar às cegas deixava o botão ativo com o campo vazio.
+  atualizarEstadoEnvio()
   document.getElementById('clinicalInput').disabled = false
   document.getElementById('processingModule').classList.remove('visible')
 }
@@ -1903,7 +1978,8 @@ body.tema-claro .sim-page input::placeholder { color: var(--text-faint); }
     /* min-height: no HTML original o fundo ficava no body, que propaga a
        pintura para a tela inteira; numa div comum isso não acontece, então
        sem isso sobra área sem fundo quando o conteúdo é curto. */
-    .sim-page { font-family: 'Inter', sans-serif; min-height: 100vh; background: radial-gradient(circle at top left,rgba(110,231,255,0.07),transparent 28%), radial-gradient(circle at bottom right,rgba(224,192,120,0.05),transparent 22%), linear-gradient(180deg,#05070a 0%,#090c11 100%); color: var(--text); line-height: 1.6; overflow-x: hidden; }
+    .sim-page { font-family: 'Inter', sans-serif; min-height: 100vh;
+  min-height: 100dvh; background: radial-gradient(circle at top left,rgba(110,231,255,0.07),transparent 28%), radial-gradient(circle at bottom right,rgba(224,192,120,0.05),transparent 22%), linear-gradient(180deg,#05070a 0%,#090c11 100%); color: var(--text); line-height: 1.6; overflow-x: hidden; }
     /* Acessibilidade - Alto Contraste aprimorado */
     /* Alto Contraste Aprimorado */
     body.alto-contraste { background: #000; }
@@ -1955,7 +2031,7 @@ body.alto-contraste .sim-page .chat-send-btn {
       background: #00ffff;
       color: #000000;
       border: 2px solid #00ffff;
-      font-weight: 900;
+      font-weight: 800;   /* a família Inter carregada vai até 800; 900 fazia o navegador sintetizar o negrito e deformar o traço */
     }
 
     body.alto-contraste .sim-page .btn-primary:hover,
@@ -2109,8 +2185,50 @@ body.alto-contraste .sim-page input:focus {
     .sim-page textarea:focus { border-color: rgba(110,231,255,0.3); box-shadow: 0 0 0 4px rgba(110,231,255,0.08); }
     .sim-page textarea::placeholder { color: #5a6470; }
     .sim-page .input-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    /* O contador e o erro ocupam UMA coluna do rodapé, para que o
+       .input-footer continue sendo um flex de dois filhos e as regras de
+       celular que já existiam continuem valendo. */
+    /* flex-basis de 220px + o flex-wrap que o .input-footer já tinha: quando
+       não cabem mensagem e botão lado a lado, a mensagem passa para a própria
+       linha inteira em vez de ser espremida em duas linhas de texto. */
+    .sim-page .input-footer-msg { flex: 1 1 220px; min-width: 0; display: grid; gap: 5px; }
     .sim-page .count { color: var(--text-faint); font-size: 13px; font-family: 'JetBrains Mono',monospace; }
     .sim-page .count.warning { color: var(--danger); }
+    .sim-page .count.ok { color: var(--success); }
+
+    /* Erro de envio, junto do botão. Some do fluxo quando vazio para não
+       abrir um buraco no layout. */
+    .sim-page .alert-inline {
+      display: none;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #ffb4c2;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,107,136,0.28);
+      background: var(--danger-dim);
+    }
+    .sim-page .alert-inline.visible { display: block; }
+    body.tema-claro .sim-page .alert-inline { color: var(--danger); }
+    body.alto-contraste .sim-page .alert-inline {
+      color: var(--danger); background: #000; border: 2px solid var(--danger);
+    }
+
+    /* Um botão desabilitado precisa PARECER desabilitado — senão o aluno
+       clica, nada acontece, e voltamos ao problema que este bloco resolve.
+       O contador ao lado diz o que falta para habilitar. */
+    .sim-page #submitBtn[aria-disabled="true"] {
+      opacity: .45;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    /* Sem isto o botão ainda "salta" no hover enquanto está indisponível, o que
+       o faz parecer clicável. */
+    .sim-page #submitBtn[aria-disabled="true"]:hover {
+      transform: none;
+      box-shadow: none;
+    }
     .sim-page .processing { display: none; place-items: center; min-height: 260px; text-align: center; }
     .sim-page .processing.visible { display: grid; }
     .sim-page .orbital { width: 120px; height: 120px; position: relative; margin-bottom: 18px; }
@@ -2275,7 +2393,7 @@ body.alto-contraste .sim-page input:focus {
       .sim-page .nivel-btn { padding: 10px; text-align: left; }
 
       .sim-page .input-footer { flex-direction: column; align-items: stretch; }
-      .sim-page .input-footer .count { order: 2; text-align: center; }
+      .sim-page .input-footer .input-footer-msg { order: 2; text-align: center; }
       .sim-page #submitBtn,
 .sim-page #tutorBtn { width: 100% !important; min-width: unset !important; }
 
@@ -2354,7 +2472,7 @@ body.alto-contraste .sim-page input:focus {
 
       /* Input footer */
       .sim-page .input-footer { flex-direction: column; align-items: stretch; }
-      .sim-page .input-footer .count { order: 2; text-align: center; }
+      .sim-page .input-footer .input-footer-msg { order: 2; text-align: center; }
       .sim-page #submitBtn { width: 100% !important; min-width: unset !important; }
       .sim-page #tutorBtn  { width: 100% !important; min-width: unset !important; margin-top: 0 !important; }
 

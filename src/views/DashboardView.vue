@@ -2,8 +2,19 @@
 <div class="dash-page">
   <!-- LOADER ANIMADO -->
   <div class="loading-overlay" id="loadingEl">
-    <div class="loader-logo">S</div>
-    <div class="loader-text">Carregando</div>
+    <div class="loader-logo" id="loaderLogo" aria-hidden="true">S</div>
+    <div class="loader-text" id="loaderText" role="status">Carregando</div>
+    <!-- Estado de erro COM saída. Antes, uma falha de rede escondia o logo e
+         trocava o texto por "Recarregue a página" — sem botão, e com o painel
+         inteiro inacessível atrás deste overlay. O aluno ficava preso numa
+         tela morta cuja única saída era um gesto que ninguém sugeriu. -->
+    <div class="loader-erro" id="loaderErro">
+      <p class="loader-erro-msg" id="loaderErroMsg"></p>
+      <div class="loader-erro-acoes">
+        <button type="button" class="btn-primary" id="btnTentarNovamente" @click="tentarNovamente">Tentar novamente</button>
+        <button type="button" class="btn-secondary" @click="sair">Usar outro e-mail</button>
+      </div>
+    </div>
   </div>
 
   <!-- MODAL EMAIL -->
@@ -88,6 +99,7 @@
     </div>
   </div>
 
+  <span id="conteudo" tabindex="-1"></span>
   <div class="shell" id="appShell">
 
     <div class="cert-banner" id="certBanner">
@@ -745,7 +757,53 @@ async function buscarPosicaoRanking() {
   }
 }
 
+// Um estado de erro que não oferece ação é um beco sem saída. Estas duas
+// funções mantêm o overlay com UMA responsabilidade: ou carrega, ou explica o
+// que houve e oferece o que fazer.
+function mostrarErroCarregamento(mensagem) {
+  document.getElementById('loadingEl').classList.remove('hidden')
+  document.getElementById('loaderLogo').style.display = 'none'
+  document.getElementById('loaderText').style.display = 'none'
+  document.getElementById('loaderErroMsg').textContent = mensagem
+  document.getElementById('loaderErro').classList.add('visible')
+}
+
+function limparErroCarregamento() {
+  document.getElementById('loaderErro').classList.remove('visible')
+  document.getElementById('loaderLogo').style.display = ''
+  document.getElementById('loaderText').style.display = ''
+  document.getElementById('loaderText').textContent = 'Carregando'
+}
+
+// Refaz o passo que falhou: se ainda não passamos pela verificação de acesso,
+// é ela que precisa rodar de novo; se já passamos, é o progresso.
+async function tentarNovamente() {
+  limparErroCarregamento()
+  mostrarLoader()
+  if (email) { carregarProgresso(); return }
+
+  const salvo = localStorage.getItem('sena_email')
+  if (!salvo) { ocultarLoader(); mostrarModal(); return }
+  try {
+    const acesso = await verificarAcesso(salvo)
+    if (!montado) return
+    if (acesso && acesso.liberado) {
+      email = salvo
+      carregarProgresso()
+    } else {
+      // Agora sim é acesso negado de verdade, com resposta do servidor.
+      localStorage.removeItem('sena_email')
+      ocultarLoader()
+      mostrarModal()
+    }
+  } catch (e) {
+    if (!montado) return
+    mostrarErroCarregamento('Ainda não foi possível verificar seu acesso. Verifique sua conexão e tente novamente.')
+  }
+}
+
 async function carregarProgresso() {
+  limparErroCarregamento()
   try {
     const [resEst, resProg] = await Promise.all([
       fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'estrutura_curso', curso: CURSO }) }),
@@ -765,9 +823,10 @@ async function carregarProgresso() {
     ocultarLoader()
 
     if (!MODULOS.length) {
-      document.getElementById('loadingEl').classList.remove('hidden')
-      document.querySelector('.loader-logo').style.display = 'none'
-      document.querySelector('.loader-text').textContent = 'Nenhuma aula encontrada para o curso "' + CURSO + '". Verifique a Base_Aulas.'
+      // Este caso não é falha de rede: o curso veio vazio. Tentar de novo não
+      // resolve, então a mensagem aponta para quem consegue resolver.
+      mostrarErroCarregamento('Nenhuma aula encontrada para o curso "' + CURSO + '". '
+        + 'Confira se o curso do seu link está correto, ou fale com o suporte do IBSDH.')
       return
     }
     renderDashboard()
@@ -779,10 +838,18 @@ async function carregarProgresso() {
     mostrarOnboarding()
     solicitarNotificacoes()
   } catch (err) {
-    document.querySelector('.loader-logo').style.display = 'none'
-    document.querySelector('.loader-text').textContent = 'Erro ao carregar progresso. Recarregue a página.'
+    if (!montado) return
+    // A mensagem distingue os dois casos que o aluno vive de forma diferente:
+    // o servidor demorou demais (vale tentar de novo já) de uma falha de rede
+    // (vale conferir a conexão antes).
+    const demorou = err && /demorou/i.test(err.message || '')
+    mostrarErroCarregamento(demorou
+      ? 'O servidor demorou demais para responder. Isso costuma ser temporário.'
+      : 'Não foi possível carregar seu progresso. Verifique sua conexão e tente novamente.')
   }
 }
+
+let scrollAnimObserver = null
 
 function setupPremiumMouseTracking() {
   document.querySelectorAll('.premium-card').forEach(card => {
@@ -794,13 +861,46 @@ function setupPremiumMouseTracking() {
   })
 }
 
+// O observer é guardado numa variável de módulo porque setupScrollAnimations()
+// roda a cada renderDashboard() — inclusive na atualização silenciosa de
+// progresso, disparada quando o aluno conclui uma aula. Sem disconnect(), cada
+// ciclo criava um observer novo sobre os mesmos nós e nenhum era liberado.
 function setupScrollAnimations() {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) entry.target.classList.add('visible')
-    })
-  }, { threshold: 0.1 })
-  document.querySelectorAll('.module-card, .premium-card, .info-card').forEach(card => observer.observe(card))
+  scrollAnimObserver?.disconnect()
+  scrollAnimObserver = null
+
+  const container = document.getElementById('modulesContainer')
+  // Sem IntersectionObserver não há revelação — e, o que importa mais, não há
+  // esconderijo: a classe .js-reveal nunca entra e os módulos ficam visíveis.
+  if (typeof IntersectionObserver !== 'function') {
+    container?.classList.remove('js-reveal')
+    return
+  }
+
+  let obs
+  try {
+    obs = new IntersectionObserver((entries, o) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible')
+          // Revelar é definitivo: não há por que continuar observando.
+          o.unobserve(entry.target)
+        }
+      })
+    }, { threshold: 0.1 })
+  } catch (e) {
+    container?.classList.remove('js-reveal')
+    return
+  }
+
+  // A classe só entra DEPOIS de o observer existir de fato. Esta ordem é o
+  // ponto do conserto: se ela entrasse antes e a construção falhasse, a lista
+  // de módulos — o conteúdo central do painel — ficaria escondida para sempre,
+  // com a página aparentemente carregada.
+  if (container) container.classList.add('js-reveal')
+  scrollAnimObserver = obs
+  document.querySelectorAll('.module-card, .premium-card, .info-card')
+    .forEach(card => obs.observe(card))
 }
 
 function renderDashboard() {
@@ -1090,9 +1190,16 @@ onMounted(async () => {
       }
     } catch (e) {
       if (!montado) return
-      localStorage.removeItem('sena_email')
-      ocultarLoader()
-      mostrarModal()
+      // Este catch tratava falha de REDE como se fosse acesso negado: apagava o
+      // e-mail salvo e devolvia o aluno ao modal de identificação. Com o
+      // backend fora do ar, todo aluno era informado de que precisava se
+      // identificar de novo — e perdia o e-mail salvo no processo, tendo de
+      // redigitar a cada tentativa. "Não deu para verificar" não é "não pode
+      // entrar": o e-mail fica onde está e a tela oferece tentar de novo.
+      const demorou = /demorou/i.test(e.message || '')
+      mostrarErroCarregamento(demorou
+        ? 'O servidor demorou demais para responder ao verificar seu acesso. Isso costuma ser temporário.'
+        : 'Não foi possível verificar seu acesso agora. Verifique sua conexão e tente novamente.')
     }
   } else {
     ocultarLoader()
@@ -1109,6 +1216,8 @@ onUnmounted(() => {
   montado = false
   document.getElementById('emailInput')?.removeEventListener('keydown', onEmailInputKeydown)
   document.getElementById('modulesContainer')?.removeEventListener('click', onModulesClick)
+  scrollAnimObserver?.disconnect()
+  scrollAnimObserver = null
   window.removeEventListener('storage', onStorageEvent)
   limparClasses()
 })
@@ -1164,6 +1273,7 @@ onUnmounted(() => {
          precisa do min-height para cobrir a viewport quando o conteúdo é
          curto (tela de e-mail, loader) e não sobrar área sem fundo. */
       min-height: 100vh;
+  min-height: 100dvh;
       background-color: var(--bg);
       background-image: 
         radial-gradient(ellipse at top left, rgba(110,231,255,0.07), transparent 30%),
@@ -1186,6 +1296,11 @@ onUnmounted(() => {
       transition: opacity 0.6s ease, visibility 0.6s ease;
     }
     .dash-page .loading-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+    .dash-page .loader-erro { display: none; width: 100%; max-width: 420px; padding: 0 24px; text-align: center; }
+    .dash-page .loader-erro.visible { display: block; }
+    .dash-page .loader-erro-msg { color: var(--text-soft); font-size: 15px; line-height: 1.65; margin-bottom: 20px; }
+    .dash-page .loader-erro-acoes { display: grid; gap: 10px; }
     
     .dash-page .loader-logo {
       width: 72px; height: 72px; border-radius: 20px;
@@ -1632,9 +1747,17 @@ body.alto-contraste .dash-page .rank-badge {
       background:var(--panel); border:1px solid rgba(255,255,255,0.08); border-radius:var(--r-xl);
       overflow:hidden; transition:border-color .2s, transform .2s, background-color 0.4s, opacity .6s ease, transform .6s ease;
       backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow:0 4px 12px rgba(0,0,0,0.2);
-      opacity:0; transform:translateY(20px);
     }
-    .dash-page .module-card.visible { opacity:1; transform:translateY(0); }
+    /* O estado de REPOUSO é visível. Antes era opacity:0, revertido só quando
+       o IntersectionObserver adicionava .visible — ou seja, a lista de módulos,
+       que é o conteúdo central do painel, dependia de um efeito decorativo
+       para existir. Qualquer erro de JS antes do observer, ou um navegador sem
+       IntersectionObserver, deixava a página "carregada" e permanentemente
+       vazia. Agora o esconder só acontece sob .js-reveal, que o próprio JS
+       adiciona imediatamente antes de observar. */
+    .dash-page .modules.js-reveal .module-card:not(.visible) {
+      opacity: 0; transform: translateY(20px);
+    }
     .dash-page .module-card.locked { opacity:.5; }
     .dash-page .module-card.complete { border-color:rgba(126,240,194,0.2); }
     .dash-page .module-card:hover:not(.locked) { border-color:rgba(110,231,255,0.3); }
