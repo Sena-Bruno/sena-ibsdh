@@ -4,13 +4,37 @@
     <base target="_top">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>SENA | IBSDH</title>
+    <meta name="description" content="SENA — Sistema Evolutivo de Neuroaprendizagem Aplicada do IBSDH. Simulador clínico com paciente virtual, painel de progresso, plantão, ranking e certificação." />
+    <!-- Pinta a barra do navegador na cor da página em cada tema, em vez de
+         deixar o branco padrão brigar com a interface escura. -->
+    <meta name="theme-color" content="#05070a" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- As fontes vêm por <link> e não por @import no CSS: assim o navegador
+         as descobre no primeiro byte do HTML e baixa em paralelo com o JS,
+         em vez de esperar o CSS ser baixado e analisado primeiro. Peso 500
+         do Space Grotesk saiu da lista — não é usado em nenhuma view. -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>SENA | IBSDH</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@700&display=swap"
+    >
   </head>
   <body>
     <div id="app"></div>
+    <noscript>
+      <div style="font-family:system-ui,sans-serif;max-width:34rem;margin:15vh auto;padding:0 1.5rem;color:#edf3f8;text-align:center;line-height:1.6">
+        <h1 style="font-size:1.3rem;margin-bottom:.75rem">SENA — IBSDH</h1>
+        <p>O simulador clínico precisa de JavaScript para funcionar. Ative o
+        JavaScript no navegador e recarregue a página, ou abra o link em
+        outro navegador.</p>
+      </div>
+    </noscript>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

@@ -2,19 +2,23 @@
   <div class="page">
     <!-- Identificação -->
     <div class="email-modal-overlay" :class="{ visible: mostrarModalEmail }">
-      <div class="email-modal">
-        <h2>Identificação</h2>
+      <div class="email-modal" role="dialog" aria-modal="true" aria-labelledby="tituloPlantaoEmail">
+        <h2 id="tituloPlantaoEmail">Identificação</h2>
         <p>Informe seu e-mail para iniciar o plantão.</p>
+        <label class="sr-only" for="plantaoEmail">Seu e-mail</label>
         <input
+          id="plantaoEmail"
           ref="emailInputRef"
           class="email-input"
           type="email"
+          autocomplete="email"
           v-model="emailInput"
           placeholder="seu@email.com"
+          aria-describedby="plantaoEmailErro"
           @keydown.enter="confirmarEmail"
         />
-        <div class="email-error">{{ erroEmail }}</div>
-        <button class="email-btn" @click="confirmarEmail">Entrar</button>
+        <div class="email-error" id="plantaoEmailErro" role="alert">{{ erroEmail }}</div>
+        <button type="button" class="email-btn" @click="confirmarEmail">Entrar</button>
       </div>
     </div>
 
@@ -43,12 +47,12 @@
           </ul>
         </div>
 
-        <div v-if="erro" class="aviso-erro">
+        <div v-if="erro" class="aviso-erro" role="alert">
           {{ erro }}
           <div v-if="erroDetalhe" class="detalhe-erro">{{ erroDetalhe }}</div>
         </div>
 
-        <button class="btn-principal" :disabled="carregando" @click="iniciarPlantao">
+        <button type="button" class="btn-principal" :disabled="carregando" @click="iniciarPlantao">
           {{ carregando ? 'Preparando plantão...' : 'Iniciar plantão →' }}
         </button>
 
@@ -58,9 +62,13 @@
           <div class="turno" v-for="t in turnos" :key="t.id_plantao">
             <div class="turno-data">{{ formatarData(t.data) }}</div>
             <div class="turno-notas">
+              <!-- A nota aparecia colorida de verde ou vermelho, e era só a
+                   cor que dizia se o caso foi aprovado — falha de 1.4.1
+                   (Uso de cor). O texto oculto carrega a mesma informação. -->
               <span v-for="c in t.casos" :key="c.numero"
                     class="pill" :class="pillClasse(c.nota)">
                 {{ c.nota === null ? '—' : c.nota.toFixed(1) }}
+                <span class="sr-only">{{ rotuloPill(c.nota) }}</span>
               </span>
             </div>
             <div class="turno-media">
@@ -73,16 +81,29 @@
       <!-- ── CASO EM ANDAMENTO ────────────────────────────────────── -->
       <template v-else-if="etapa === 'caso'">
         <div class="barra-turno">
-          <div class="passos">
-            <span
+          <!-- "concluído / atual / pendente" era comunicado só por cor
+               (verde/vermelho/cinza) — falha de 1.4.1. O texto para leitor de
+               tela e o aria-current dizem o mesmo sem depender de cor. -->
+          <ol class="passos" aria-label="Progresso do turno">
+            <li
               v-for="n in totalCasos" :key="n"
               class="passo"
+              :aria-current="n === casoAtual + 1 ? 'step' : undefined"
               :class="{ feito: n < casoAtual + 1, atual: n === casoAtual + 1 }"
-            >{{ n }}</span>
-          </div>
-          <div class="cronometro" :class="{ alerta: segundosRestantes <= 60, esgotado: segundosRestantes === 0 }">
+            >{{ n }}<span class="sr-only">
+              {{ n < casoAtual + 1 ? ' — concluído' : n === casoAtual + 1 ? ' — caso atual' : ' — pendente' }}
+            </span></li>
+          </ol>
+          <!-- Um cronômetro que só muda de cor no último minuto avisa apenas
+               quem está olhando para ele. role="timer" com aria-live="off"
+               evita a leitura a cada segundo; o aviso vem da região abaixo,
+               que só fala nos marcos (1 minuto e tempo esgotado). -->
+          <div class="cronometro" role="timer" aria-live="off"
+               :aria-label="'Tempo restante: ' + formatarTempo(segundosRestantes)"
+               :class="{ alerta: segundosRestantes <= 60, esgotado: segundosRestantes === 0 }">
             {{ formatarTempo(segundosRestantes) }}
           </div>
+          <p class="sr-only" role="status">{{ avisoTempo }}</p>
         </div>
 
         <div class="card caso">
@@ -101,18 +122,22 @@
 
         <div class="card">
           <div class="card-title">Sua condução</div>
+          <label class="sr-only" for="plantaoResposta">Sua condução para este caso</label>
           <textarea
+            id="plantaoResposta"
             ref="respostaRef"
             v-model="resposta"
             class="resposta"
+            aria-describedby="plantaoContador"
             :disabled="avaliando"
             placeholder="O que você faz primeiro? Como conduz? O que observa e o que não pode passar?"
           ></textarea>
           <div class="resposta-rodape">
-            <span class="contador" :class="{ ok: resposta.trim().length >= MIN_CHARS }">
+            <span class="contador" id="plantaoContador" :class="{ ok: resposta.trim().length >= MIN_CHARS }">
               {{ resposta.trim().length }} caracteres · mínimo {{ MIN_CHARS }}
             </span>
             <button
+              type="button"
               class="btn-principal btn-enviar"
               :disabled="avaliando || resposta.trim().length < MIN_CHARS"
               @click="enviarCaso(false)"
@@ -152,7 +177,7 @@
           </template>
         </div>
 
-        <button class="btn-principal" @click="proximoCaso">
+        <button type="button" class="btn-principal" @click="proximoCaso">
           {{ casoAtual + 1 < totalCasos ? 'Próximo caso →' : 'Ver resumo do plantão →' }}
         </button>
       </template>
@@ -180,7 +205,7 @@
           </template>
         </div>
 
-        <button class="btn-principal" @click="reiniciar">Novo plantão</button>
+        <button type="button" class="btn-principal" @click="reiniciar">Novo plantão</button>
         <router-link class="btn-secundario" to="/dashboard.html">Voltar ao painel</router-link>
       </template>
 
@@ -283,6 +308,20 @@ function pararCronometro() {
   if (intervalo) { clearInterval(intervalo); intervalo = null }
 }
 onUnmounted(pararCronometro)
+
+// Só os marcos são anunciados. Uma região viva que fala a cada segundo é
+// inutilizável com leitor de tela.
+const avisoTempo = computed(() => {
+  if (segundosRestantes.value === 0) return 'Tempo esgotado. A resposta escrita foi enviada.'
+  if (segundosRestantes.value === 60) return 'Um minuto restante.'
+  return ''
+})
+
+// Mesma regra de aprovação de pillClasse, em palavras.
+function rotuloPill(nota) {
+  if (nota === null) return ' — caso não concluído'
+  return pillClasse(nota) === 'ok' ? ' — adequada' : ' — abaixo da mínima'
+}
 
 function formatarTempo(s) {
   const m = Math.floor(s / 60)
@@ -446,12 +485,11 @@ document.title = 'SENA | Modo Plantão'
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
 * { margin:0;padding:0;box-sizing:border-box; }
 
 /* Fundo no wrapper full-width; largura máxima no .shell */
 .page {
-  --text:#edf3f8;--text-soft:#9aa7b5;--text-faint:#5a6470;
+  --text:#edf3f8;--text-soft:#9aa7b5;--text-faint:#8492a2;
   --cyan:#59e1ff;--gold:#d6b36a;--success:#7ef0c2;--danger:#ff6b88;
   --border:rgba(112,141,173,0.15);--shadow:0 20px 48px rgba(0,0,0,0.38);
   font-family:'Inter',sans-serif; min-height:100vh; color:var(--text); line-height:1.6;
@@ -520,7 +558,7 @@ h1 { font-size:clamp(24px,5vw,34px);font-weight:800;letter-spacing:-.03em;margin
 
 /* ── Barra do turno ─────────────────────────────────────────────── */
 .barra-turno { display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px; }
-.passos { display:flex;gap:8px; }
+.passos { display:flex;gap:8px;list-style:none;margin:0;padding:0; }
 .passo {
   width:28px;height:28px;border-radius:9px;display:grid;place-items:center;
   font-size:12px;font-weight:800;color:var(--text-faint);
@@ -559,7 +597,7 @@ h1 { font-size:clamp(24px,5vw,34px);font-weight:800;letter-spacing:-.03em;margin
   transition:border-color .18s;
 }
 .resposta:focus { border-color:rgba(255,107,136,0.35); }
-.resposta::placeholder { color:#4a5568; }
+.resposta::placeholder { color:#7b8795; } /* era #4a5568 — 2.62:1, reprovava 1.4.3 */
 .resposta-rodape { display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;flex-wrap:wrap; }
 .contador { font-size:12px;color:var(--text-faint);font-variant-numeric:tabular-nums; }
 .contador.ok { color:var(--success); }

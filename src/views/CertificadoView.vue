@@ -10,12 +10,12 @@
       </div>
 
       <div class="body">
-        <div class="alert error" :class="{ visible: alertaErro }">{{ alertaErro }}</div>
-        <div class="alert success" :class="{ visible: alertaSucesso }">{{ alertaSucesso }}</div>
+        <div class="alert error" :class="{ visible: alertaErro }" role="alert">{{ alertaErro }}</div>
+        <div class="alert success" :class="{ visible: alertaSucesso }" role="status">{{ alertaSucesso }}</div>
 
         <div class="field">
           <label for="emailInput">E-mail</label>
-          <input id="emailInput" type="email" placeholder="seuemail@exemplo.com" v-model="form.email">
+          <input id="emailInput" type="email" autocomplete="email" placeholder="seuemail@exemplo.com" v-model="form.email">
         </div>
 
         <div class="field">
@@ -25,14 +25,18 @@
 
         <div class="field">
           <label for="nomeInput">Nome completo</label>
-          <input id="nomeInput" type="text" placeholder="Seu nome completo" v-model="form.nome">
+          <input id="nomeInput" type="text" autocomplete="name" placeholder="Seu nome completo" v-model="form.nome">
         </div>
 
         <div class="btn-row">
-          <button class="btn" :disabled="consultando" @click="consultarStatus">{{ consultando ? 'Consultando...' : 'Consultar status' }}</button>
-          <button v-if="status && status.status === 'elegivel'" class="btn-success" :disabled="emitindo" @click="emitirCertificado">{{ emitindo ? 'Emitindo...' : 'Emitir certificado' }}</button>
-          <button v-if="status && status.status === 'emitido'" class="btn-secondary" :disabled="reenviando" @click="reenviarCertificado">{{ reenviando ? 'Reenviando...' : 'Reenviar por e-mail' }}</button>
-          <a v-if="status && status.status === 'emitido'" :href="status.link_pdf || '#'" target="_blank" class="btn-success">Abrir PDF</a>
+          <button type="button" class="btn" :disabled="consultando" @click="consultarStatus">{{ consultando ? 'Consultando...' : 'Consultar status' }}</button>
+          <button v-if="status && status.status === 'elegivel'" type="button" class="btn-success" :disabled="emitindo" @click="emitirCertificado">{{ emitindo ? 'Emitindo...' : 'Emitir certificado' }}</button>
+          <button v-if="status && status.status === 'emitido'" type="button" class="btn-secondary" :disabled="reenviando" @click="reenviarCertificado">{{ reenviando ? 'Reenviando...' : 'Reenviar por e-mail' }}</button>
+          <!-- target="_blank" sem aviso surpreende quem usa leitor de tela
+               e quebra o botão "voltar" no celular (3.2.5). O sufixo no nome
+               acessível avisa; rel evita o vazamento de window.opener. -->
+          <a v-if="status && status.status === 'emitido'" :href="status.link_pdf || '#'"
+             target="_blank" rel="noopener noreferrer" class="btn-success">Abrir PDF<span class="sr-only"> (abre em nova aba)</span></a>
         </div>
 
         <div class="status-box" :class="{ visible: status }" v-if="status">
@@ -181,7 +185,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 * { box-sizing: border-box; margin: 0; padding: 0; }
 .wrap {
   --bg: #07090d;
@@ -190,6 +193,7 @@ onMounted(() => {
   --border: rgba(112,141,173,0.18);
   --text: #edf3f8;
   --text-soft: #9aa7b5;
+  --text-faint: #8492a2;
   --gold: #d6b36a;
   --cyan: #59e1ff;
   --success: #7ef0c2;

@@ -3,12 +3,13 @@
 
   <!-- Modal email -->
   <div class="modal-overlay" id="emailModalOverlay">
-    <div class="modal-card">
-      <div class="modal-icon">S</div>
-      <h2>Identificação do Aluno</h2>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="tituloModalEmailSim">
+      <div class="modal-icon" aria-hidden="true">S</div>
+      <h2 id="tituloModalEmailSim">Identificação do Aluno</h2>
       <p>Informe o e-mail utilizado na sua matrícula para acessar o simulador clínico.</p>
-      <input class="modal-input" type="email" id="emailModalInput" placeholder="seu@email.com" autocomplete="email" />
-      <div class="modal-error" id="emailModalError"></div>
+      <label class="sr-only" for="emailModalInput">E-mail da sua matrícula</label>
+      <input class="modal-input" type="email" id="emailModalInput" placeholder="seu@email.com" autocomplete="email" aria-describedby="emailModalError" />
+      <div class="modal-error" id="emailModalError" role="alert"></div>
       <button class="btn-confirm" @click="confirmarEmailModal">Entrar no SENA</button>
       <div class="modal-note">IBSDH — Instituto Bruno Sena de Desenvolvimento Humano</div>
     </div>
@@ -16,16 +17,16 @@
 
   <!-- Prontuário Modal -->
   <div class="prontuario-overlay" id="prontuarioOverlay">
-    <div class="prontuario-modal" id="prontuarioConteudo">
+    <div class="prontuario-modal" id="prontuarioConteudo" role="dialog" aria-modal="true" aria-label="Prontuário desta sessão">
       <!-- Gerado dinamicamente -->
     </div>
   </div>
 
   <div class="supervisor-overlay" id="supervisorOverlay">
-    <div class="supervisor-card">
+    <div class="supervisor-card" role="dialog" aria-modal="true" aria-labelledby="tituloSupervisor">
       <div class="supervisor-header">
         <div class="supervisor-eyebrow">Supervisão clínica</div>
-        <h2>Autoavaliação antes da IA</h2>
+        <h2 id="tituloSupervisor">Autoavaliação antes da IA</h2>
         <p>Antes de enviar sua resposta para avaliação, responda honestamente sobre sua própria condução. A IA vai comparar a sua percepção com o que ela encontrou.</p>
       </div>
       <div class="supervisor-body" id="supervisorItems">
@@ -38,14 +39,14 @@
     </div>
   </div>
 
-  <div class="gate-loading" id="gateLoading">Verificando seu acesso...</div>
+  <div class="gate-loading" id="gateLoading" role="status">Verificando seu acesso...</div>
 
   <div class="shell" id="appShell" style="display:none;">
     <section class="hero">
       <div class="acess-btns">
-        <button class="acess-btn" @click="toggleTema" title="Alternar tema claro/escuro" aria-label="Alternar tema claro ou escuro">☀️</button>
-        <button class="acess-btn" @click="toggleAltoContraste" title="Alto contraste" aria-label="Ativar alto contraste">◐</button>
-        <button class="acess-btn" @click="toggleReduzirMovimento" title="Reduzir movimento" aria-label="Reduzir animações da interface">⊘</button>
+        <button type="button" class="acess-btn" @click="toggleTema" :aria-pressed="String(prefs.claro)" title="Alternar tema claro/escuro" aria-label="Tema claro">☀️</button>
+        <button type="button" class="acess-btn" @click="toggleAltoContraste" :aria-pressed="String(prefs.contraste)" title="Alto contraste" aria-label="Alto contraste">◐</button>
+        <button type="button" class="acess-btn" @click="toggleReduzirMovimento" :aria-pressed="String(prefs.movimento)" title="Reduzir movimento" aria-label="Reduzir animações da interface">⊘</button>
       </div>
       <div class="hero-top">
         <div class="seal"></div>
@@ -70,7 +71,12 @@
           <div class="card-title">Paciente virtual e cenário clínico</div>
         </div>
         <div class="card-body">
-          <div class="alert" id="alertBox"></div>
+          <!-- Este é o único lugar onde os erros de envio aparecem, e ele fica
+               no cartão do PACIENTE — no desktop, na coluna da ESQUERDA,
+               enquanto o botão "Enviar resposta" está na coluna da direita.
+               role="alert" garante ao menos o anúncio; a correção visual
+               (mensagem junto do botão) está proposta no relatório. -->
+          <div class="alert" id="alertBox" role="alert"></div>
           <div class="patient-shell">
             <div class="patient-hero" id="patientCard">
               <div class="patient-id" id="patientId">Patient ID: NULL</div>
@@ -145,9 +151,10 @@
               <button class="mic-btn" id="micBtn" @click="toggleGravacao" title="Gravar resposta por voz" aria-label="Gravar resposta por voz">🎙️</button>
               <div class="audio-info">
                 <div class="audio-label">Resposta por voz</div>
-                <div class="audio-status" id="audioStatus">Clique no microfone para falar sua resposta</div>
+                <div class="audio-status" id="audioStatus" role="status">Clique no microfone para falar sua resposta</div>
               </div>
               <div class="audio-lang">
+                <label class="sr-only" for="audioLang">Idioma do reconhecimento de voz</label>
                 <select id="audioLang" title="Idioma">
                   <option value="pt-BR" selected>PT-BR</option>
                   <option value="en-US">EN-US</option>
@@ -156,7 +163,8 @@
               </div>
             </div>
 
-            <textarea id="clinicalInput" placeholder="Descreva sua condução clínica de forma prática e objetiva.
+            <label class="sr-only" for="clinicalInput">Sua condução clínica</label>
+            <textarea id="clinicalInput" aria-describedby="charCount" placeholder="Descreva sua condução clínica de forma prática e objetiva.
 
 Inclua:
 - como você inicia;
@@ -177,12 +185,13 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
           <div class="section-block" style="margin-top:16px;">
             <div class="section-title alt">Tutor SENA</div>
             <div class="section-body" style="margin-bottom:12px;">Tire dúvidas sobre esta aula, conceitos, aplicação prática e critérios. O tutor explica, mas não entrega uma resposta pronta para avaliação.</div>
-            <textarea id="tutorInput" placeholder="Digite sua dúvida sobre esta aula..." style="min-height:120px;"></textarea>
+            <label class="sr-only" for="tutorInput">Sua dúvida para o tutor</label>
+            <textarea id="tutorInput" aria-describedby="tutorCount" placeholder="Digite sua dúvida sobre esta aula..." style="min-height:120px;"></textarea>
             <div class="input-footer" style="margin-top:12px;">
               <div class="count" id="tutorCount">0 caracteres</div>
               <button class="ghost-btn" @click="perguntarTutor" id="tutorBtn" style="width:auto;min-width:220px;margin-top:0;">Perguntar ao tutor</button>
             </div>
-            <div id="tutorLoading" style="display:none;margin-top:14px;color:var(--text-soft);font-size:14px;">O tutor está preparando a resposta...</div>
+            <div id="tutorLoading" role="status" style="display:none;margin-top:14px;color:var(--text-soft);font-size:14px;">O tutor está preparando a resposta...</div>
             <div id="tutorResponseWrap" style="display:none;margin-top:14px;" class="result-block">
               <div class="result-block-title mid">Resposta do tutor</div>
               <div class="result-block-text" id="tutorResponse"></div>
@@ -197,10 +206,13 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
 
           <!-- Chat de simulação bidirecional -->
           <div class="chat-panel" id="chatPanel">
-            <div class="chat-messages" id="chatMessages">
+            <!-- A fala do paciente chega de forma assíncrona: sem região viva,
+                 quem usa leitor de tela não percebe que a resposta chegou.
+                 "polite" espera a leitura atual terminar. -->
+            <div class="chat-messages" id="chatMessages" role="log" aria-live="polite" aria-label="Conversa com o paciente virtual">
               <div class="chat-empty" id="chatEmpty">O paciente está aguardando você iniciar a sessão.<br>Digite sua primeira fala como terapeuta.</div>
             </div>
-            <div class="chat-typing" id="chatTyping">
+            <div class="chat-typing" id="chatTyping" aria-hidden="true">
               <div class="chat-avatar" style="width:32px;height:32px;border-radius:10px;background:rgba(255,107,136,0.12);border:1px solid rgba(255,107,136,0.2);display:grid;place-items:center;font-size:14px;color:var(--danger);font-weight:800;">P</div>
               <div class="typing-dots">
                 <div class="typing-dot"></div>
@@ -209,20 +221,23 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
               </div>
             </div>
             <div class="chat-input-row">
+              <label class="sr-only" for="chatInput">Sua fala como terapeuta</label>
               <textarea class="chat-input" id="chatInput" placeholder="Digite sua fala como terapeuta..." rows="1"></textarea>
               <button class="chat-send-btn" id="chatSendBtn" @click="enviarMensagemChat" title="Enviar mensagem" aria-label="Enviar mensagem">➤</button>
             </div>
             <div class="chat-footer">
               <span class="chat-turns" id="chatTurns">0 trocas</span>
-              <div class="voz-toggle" id="vozToggle" @click="toggleVozPaciente" title="Ativar voz do paciente (Chrome)">
-                <span class="voz-toggle-dot"></span>
+              <button type="button" class="voz-toggle" id="vozToggle" @click="toggleVozPaciente"
+                      :aria-pressed="String(vozLigada)"
+                      title="Ativar voz do paciente (Chrome)">
+                <span class="voz-toggle-dot" aria-hidden="true"></span>
                 <span id="vozLabel">Voz do paciente</span>
-              </div>
+              </button>
               <button class="chat-encerrar" id="chatEncerrarBtn" @click="encerrarSessaoChat" disabled>Encerrar sessão e avaliar</button>
             </div>
           </div>
 
-          <div class="processing" id="processingModule">
+          <div class="processing" id="processingModule" role="status">
             <div>
               <div class="orbital"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="core"></div></div>
               <div class="processing-title">Analisando sua resposta</div>
@@ -254,44 +269,45 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
 
             <!-- Contraste com a tentativa anterior -->
             <div class="contraste-section" id="contrasteSection">
-              <div class="contraste-header" @click="toggleContraste">
+              <button type="button" class="contraste-header" :aria-expanded="String(aberto.contraste)" aria-controls="contrasteBody" @click="toggleContraste">
                 <span class="contraste-title">🔁 O que mudou desde a tentativa anterior</span>
-                <span class="contraste-chevron">▼</span>
-              </div>
+                <span class="contraste-chevron" aria-hidden="true">▼</span>
+              </button>
               <div class="contraste-body" id="contrasteBody"></div>
             </div>
 
             <!-- Replay com marcações -->
             <div class="replay-section" id="replaySection">
-              <div class="replay-header" @click="toggleReplay">
+              <button type="button" class="replay-header" :aria-expanded="String(aberto.replay)" aria-controls="replayBody" @click="toggleReplay">
                 <span class="replay-title">🎯 Replay — veja sua resposta marcada pela IA</span>
-                <span class="replay-chevron">▼</span>
-              </div>
+                <span class="replay-chevron" aria-hidden="true">▼</span>
+              </button>
               <div class="replay-body" id="replayBody"></div>
             </div>
 
             <!-- Comparação anônima -->
             <div class="comparacao-section" id="comparacaoSection">
-              <div class="comparacao-header" @click="toggleComparacao">
+              <button type="button" class="comparacao-header" :aria-expanded="String(aberto.comparacao)" aria-controls="comparacaoBody" @click="toggleComparacao">
                 <span class="comparacao-title">👥 Ver como outros alunos responderam</span>
-                <span class="comparacao-chevron">▼</span>
-              </div>
+                <span class="comparacao-chevron" aria-hidden="true">▼</span>
+              </button>
               <div class="comparacao-body" id="comparacaoBody"></div>
             </div>
 
             <!-- Diário Clínico -->
             <div class="diario-section" id="diarioSection">
-              <div class="diario-header" @click="toggleDiario">
+              <button type="button" class="diario-header" :aria-expanded="String(aberto.diario)" aria-controls="diarioBody" @click="toggleDiario">
                 <span class="diario-title">📓 Diário clínico — registre sua reflexão</span>
-                <span class="diario-chevron">▼</span>
-              </div>
-              <div class="diario-body">
+                <span class="diario-chevron" aria-hidden="true">▼</span>
+              </button>
+              <div class="diario-body" id="diarioBody">
+                <label class="sr-only" for="diarioInput">Sua reflexão no diário clínico</label>
                 <textarea class="diario-textarea" id="diarioInput" placeholder="O que você percebeu sobre sua própria condução? Que padrão notou? O que faria diferente?"></textarea>
                 <div class="diario-actions">
                   <button class="diario-btn-salvar" @click="salvarDiario" id="diarioBtnSalvar">Salvar reflexão</button>
                   <button class="diario-btn-analise" @click="analisarDiario" id="diarioBtnAnalise">✨ Ver análise semanal da IA</button>
                 </div>
-                <div class="diario-status" id="diarioStatus"></div>
+                <div class="diario-status" id="diarioStatus" role="status"></div>
                 <div class="diario-analise-box" id="diarioAnaliseBox">
                   <div class="diario-analise-title">Análise de padrões — Supervisor IA</div>
                   <div class="diario-analise-text" id="diarioAnaliseText"></div>
@@ -302,10 +318,12 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
 
             <!-- Histórico de tentativas -->
             <div class="historico-section" id="historicoSection">
-              <div class="historico-toggle" id="historicoToggle" @click="toggleHistorico">
+              <button type="button" class="historico-toggle" id="historicoToggle"
+                      :aria-expanded="String(aberto.historico)" aria-controls="historicoLista"
+                      @click="toggleHistorico">
                 <span id="historicoLabel">Ver tentativas anteriores</span>
-                <span class="historico-chevron">▼</span>
-              </div>
+                <span class="historico-chevron" aria-hidden="true">▼</span>
+              </button>
               <div class="historico-lista" id="historicoLista"></div>
             </div>
           </div>
@@ -316,7 +334,7 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
   </div>
 
   <!-- Mobile Navigation -->
-  <nav class="mobile-nav" id="mobileNav">
+  <nav class="mobile-nav" id="mobileNav" aria-label="Atalhos do simulador">
     <a href="#inicio" @click.prevent="scrollParaTopo" class="mobile-nav-item" data-nav="inicio">🏠<span>Início</span></a>
     <a href="#paciente" @click.prevent="scrollPara('patientCard')" class="mobile-nav-item" data-nav="paciente">👤<span>Paciente</span></a>
     <a href="#resposta" @click.prevent="scrollPara('inputModule')" class="mobile-nav-item" data-nav="resposta">✍️<span>Resposta</span></a>
@@ -326,20 +344,47 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
 </template>
 
 <script setup>
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useAccessibility } from '../composables/useAccessibility'
 import { juntarSemDuplicar, montarTextoDaSessao } from '../composables/useTranscricao'
 
 // ── ACESSIBILIDADE (composable compartilhado) ──────────────────────
 // Usa as mesmas chaves de localStorage do Dashboard, para que o tema/alto
 // contraste/reduzir movimento escolhido numa tela valha também na outra.
-const { carregarPreferencias, toggleTema, toggleAltoContraste, toggleReduzirMovimento, limparClasses } =
-  useAccessibility({ tema: 'sena_tema', altoContraste: 'sena_alto_contraste', reduzirMovimento: 'sena_reduzir_movimento' })
+const {
+  carregarPreferencias,
+  toggleTema: _toggleTema,
+  toggleAltoContraste: _toggleAltoContraste,
+  toggleReduzirMovimento: _toggleReduzirMovimento,
+  limparClasses
+} = useAccessibility({ tema: 'sena_tema', altoContraste: 'sena_alto_contraste', reduzirMovimento: 'sena_reduzir_movimento' })
+
+// Mesmo espelho reativo do Dashboard, pelo mesmo motivo (aria-pressed).
+const prefs = reactive({ claro: false, contraste: false, movimento: false })
+function lerPrefs() {
+  const c = document.body.classList
+  prefs.claro = c.contains('tema-claro')
+  prefs.contraste = c.contains('alto-contraste')
+  prefs.movimento = c.contains('reduzir-movimento')
+}
+function toggleTema() { _toggleTema(); lerPrefs() }
+function toggleAltoContraste() { _toggleAltoContraste(); lerPrefs() }
+function toggleReduzirMovimento() { _toggleReduzirMovimento(); lerPrefs() }
 
 // ── CONFIGURAÇÃO ────────────────────────────────────────────────────
 const APPS_SCRIPT_URL = '/api'
 const MIN_CHARS = 50
 const MAX_CHARS = 5000
+
+// Estado das seções dobráveis. Existe só para alimentar aria-expanded: a
+// abertura em si continua sendo feita pela classe .open, como antes, para não
+// mexer no CSS (e no risco) das duas telas maiores. Sem aria-expanded, um
+// <button> que abre conteúdo não informa se está aberto ou fechado — falha de
+// 4.1.2 (Nome, Função, Valor).
+const aberto = reactive({
+  contraste: false, replay: false, comparacao: false, diario: false, historico: false
+})
+const vozLigada = ref(false)
 
 const urlParams = new URLSearchParams(window.location.search)
 const SYSTEM = {
@@ -773,7 +818,8 @@ function respostaAtualDoAluno() {
 function toggleContraste() {
   const sec = document.getElementById('contrasteSection')
   sec.classList.toggle('open')
-  if (sec.classList.contains('open') && !contrasteCarregado) carregarContraste()
+  aberto.contraste = sec.classList.contains('open')
+  if (aberto.contraste && !contrasteCarregado) carregarContraste()
 }
 
 async function carregarContraste() {
@@ -844,6 +890,7 @@ function montarContraste(ant) {
 function toggleHistorico() {
   const toggle = document.getElementById('historicoToggle')
   toggle.classList.toggle('open')
+  aberto.historico = toggle.classList.contains('open')
 }
 
 function voltarAoPainel() {
@@ -1206,7 +1253,8 @@ let replayGerado = false
 function toggleReplay() {
   const sec = document.getElementById('replaySection')
   sec.classList.toggle('open')
-  if (sec.classList.contains('open') && !replayGerado) carregarReplay()
+  aberto.replay = sec.classList.contains('open')
+  if (aberto.replay && !replayGerado) carregarReplay()
 }
 
 async function carregarReplay() {
@@ -1266,7 +1314,8 @@ let comparacaoGerada = false
 function toggleComparacao() {
   const sec = document.getElementById('comparacaoSection')
   sec.classList.toggle('open')
-  if (sec.classList.contains('open') && !comparacaoGerada) carregarComparacao()
+  aberto.comparacao = sec.classList.contains('open')
+  if (aberto.comparacao && !comparacaoGerada) carregarComparacao()
 }
 
 async function carregarComparacao() {
@@ -1306,7 +1355,8 @@ async function carregarComparacao() {
 function toggleDiario() {
   const sec = document.getElementById('diarioSection')
   sec.classList.toggle('open')
-  if (sec.classList.contains('open')) carregarEntradasDiario()
+  aberto.diario = sec.classList.contains('open')
+  if (aberto.diario) carregarEntradasDiario()
 }
 
 async function salvarDiario() {
@@ -1438,6 +1488,7 @@ function toggleVozPaciente() {
     return
   }
   vozAtiva = !vozAtiva
+  vozLigada.value = vozAtiva
   const toggle = document.getElementById('vozToggle')
   const label = document.getElementById('vozLabel')
   if (vozAtiva) {
@@ -1709,6 +1760,7 @@ function onChatInputKeydown(e) {
 onMounted(() => {
   document.title = 'SENA | Simulador Clínico'
   carregarPreferencias()
+  lerPrefs()
 
   if (!SYSTEM.protocol || !SYSTEM.module) {
     document.getElementById('gateLoading').textContent =
@@ -1748,13 +1800,18 @@ onUnmounted(() => {
 </script>
 
 <style>
-    body {
+    /* Tokens no elemento raiz da PÁGINA, não no <body> — ver a mesma nota em
+       DashboardView.vue: as duas views declaravam `body { --cyan: ... }` com
+       valores diferentes e especificidade igual, e a folha de estilo
+       carregada por último (ou seja, a última rota visitada) decidia a
+       paleta das duas. */
+    .sim-page {
       --bg: #05070a;
       --panel: rgba(16,21,29,0.85);
       --border: rgba(112,141,173,0.25);
       --text: #edf3f8;
       --text-soft: #a0aec0;
-      --text-faint: #64748b;
+      --text-faint: #8492a2;   /* era #64748b — 4.24:1, reprovava 1.4.3; agora 6.35:1 */
       --cyan: #38bdf8;
       --cyan-dim: rgba(56,189,248,0.12);
       --gold: #fbbf24;
@@ -1774,23 +1831,37 @@ onUnmounted(() => {
     }
 
     /* Tema Claro */
-    body.tema-claro {
+    /* Mesmos valores do tema claro do Dashboard, para que as duas telas
+       principais não tenham dois temas claros levemente diferentes. */
+    body.tema-claro .sim-page {
       --bg: #f8fafc;
       --panel: rgba(255,255,255,0.85);
       --border: rgba(112,141,173,0.2);
       --text: #1e293b;
-      --text-soft: #64748b;
-      --text-faint: #94a3b8;
-      --cyan: #0891b2;
-      --cyan-dim: rgba(8,145,178,0.1);
-      --gold: #b45309;
-      --gold-dim: rgba(180,83,9,0.1);
-      --success: #059669;
-      --success-dim: rgba(5,150,105,0.1);
-      --danger: #dc2626;
-      --danger-dim: rgba(220,38,38,0.1);
+      --text-soft: #56637a;    /* 5.80:1 */
+      --text-faint: #64748b;   /* era #94a3b8 (2.45:1) → 4.55:1 */
+      --cyan: #0e7490;         /* era #0891b2 (3.52:1) → 5.12:1 */
+      --cyan-dim: rgba(14,116,144,0.1);
+      --gold: #a1500a;         /* 5.47:1 */
+      --gold-dim: rgba(161,80,10,0.1);
+      --success: #047857;      /* era #059669 (3.60:1) → 5.24:1 */
+      --success-dim: rgba(4,120,87,0.1);
+      --danger: #c81e1e;       /* 5.48:1 */
+      --danger-dim: rgba(200,30,30,0.1);
     }
-    body.tema-claro { background: radial-gradient(circle at top left,rgba(8,145,178,0.08),transparent 28%), radial-gradient(circle at bottom right,rgba(180,83,9,0.06),transparent 22%), linear-gradient(180deg,#f8fafc 0%,#e2e8f0 100%); }
+    body.tema-claro { background: linear-gradient(180deg,#f8fafc 0%,#e2e8f0 100%); }
+    /* Este override não existia, e era o bug mais visível do tema claro no
+       Simulador: `.sim-page` traz um gradiente ESCURO fixo
+       (#05070a → #090c11) escrito à mão, sem token. Com os cartões virando
+       brancos e o fundo da página continuando preto, a tela ficava
+       ilegível — texto claro sobre cartão claro em algumas áreas e o
+       contorno dos painéis desaparecendo no fundo. */
+    body.tema-claro .sim-page {
+      background:
+        radial-gradient(circle at top left, rgba(14,116,144,0.08), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(161,80,10,0.06), transparent 22%),
+        linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+    }
     body.tema-claro .sim-page .hero { background: linear-gradient(180deg,rgba(255,255,255,0.95) 0%,rgba(241,245,249,0.98) 100%); border-color: rgba(112,141,173,0.25); }
     body.tema-claro .sim-page .hero::before { background: linear-gradient(135deg,rgba(8,145,178,0.1),transparent 40%),linear-gradient(225deg,rgba(180,83,9,0.08),transparent 35%); }
     body.tema-claro .sim-page .seal { background: radial-gradient(circle at 30% 30%,rgba(8,145,178,0.2),transparent 45%),linear-gradient(180deg,rgba(255,255,255,1),rgba(241,245,249,1)); border-color: rgba(8,145,178,0.3); }
@@ -1835,7 +1906,11 @@ body.tema-claro .sim-page input::placeholder { color: var(--text-faint); }
     .sim-page { font-family: 'Inter', sans-serif; min-height: 100vh; background: radial-gradient(circle at top left,rgba(110,231,255,0.07),transparent 28%), radial-gradient(circle at bottom right,rgba(224,192,120,0.05),transparent 22%), linear-gradient(180deg,#05070a 0%,#090c11 100%); color: var(--text); line-height: 1.6; overflow-x: hidden; }
     /* Acessibilidade - Alto Contraste aprimorado */
     /* Alto Contraste Aprimorado */
-    body.alto-contraste {
+    body.alto-contraste { background: #000; }
+    /* Idem: o gradiente escrito à mão em .sim-page ignorava var(--bg), então
+       o alto contraste nunca pintava a página de preto. */
+    body.alto-contraste .sim-page { background: #000; }
+    body.alto-contraste .sim-page {
       --bg: #000000;
       --panel: #000000;
       --border: #ffffff;
@@ -2380,7 +2455,36 @@ body.alto-contraste .sim-page input:focus {
       .sim-page .replay-body { padding: 12px; }
       .sim-page .replay-text { font-size: 13px; }
 
-      .sim-page .historico-toggle { padding: 11px 12px; font-size: 12px; }
+      /* ── Reset dos cabeçalhos dobráveis ─────────────────────────────────
+       Eram <div @click>: sem foco, sem Enter/Espaço, sem função anunciada.
+       Cinco seções do resultado da avaliação (contraste com a tentativa
+       anterior, replay marcado pela IA, comparação com outros alunos, diário
+       clínico e histórico de tentativas) só abriam com mouse — falha de
+       2.1.1. Viraram <button>; estes resets mantêm a aparência intacta. */
+    .sim-page .contraste-header,
+    .sim-page .replay-header,
+    .sim-page .comparacao-header,
+    .sim-page .diario-header,
+    .sim-page .historico-toggle,
+    .sim-page .voz-toggle {
+      width: 100%;
+      font: inherit;
+      color: inherit;
+      text-align: left;
+      /* Os quatro *-header não declaravam background nem border (eram <div>).
+         Como <button> herdariam o cinza e a moldura padrão do navegador. As
+         regras específicas de cada um vêm depois deste bloco, então quem já
+         tinha fundo/borda próprios (historico-toggle, voz-toggle) mantém. */
+      background: none;
+      border: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    /* .voz-toggle é um interruptor na barra do chat, não uma faixa: continua
+       com a largura do conteúdo. */
+    .sim-page .voz-toggle { width: auto; }
+
+    .sim-page .historico-toggle { padding: 11px 12px; font-size: 12px; }
 
       .sim-page .diario-textarea { min-height: 80px; }
 

@@ -1,7 +1,14 @@
-/* Reset e fontes globais — compartilhados por todas as páginas do SENA.
-   Cada view mantém suas próprias variáveis de cor (:root) em <style scoped>
-   para preservar a identidade visual exata que cada página já tinha. */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@500;700&display=swap');
+/* Reset e camada global — compartilhados por todas as páginas do SENA.
+   Cada view ainda mantém suas próprias variáveis de cor escopadas ao
+   elemento raiz da página (.dash-page, .sim-page, .page) para preservar a
+   identidade visual exata que cada tela já tinha. Os tokens canônicos, para
+   onde as views migram aos poucos, estão em styles/tokens.css. */
+@import './styles/tokens.css';
+
+/* As fontes saíram daqui e foram para o <link> em index.html. Um @import
+   dentro de CSS só é descoberto DEPOIS que o navegador baixa e analisa este
+   arquivo, o que serializa duas viagens de rede antes de qualquer texto
+   aparecer. Cada uma das 6 views repetia o mesmo @import. */
 
 * {
   margin: 0;
@@ -13,12 +20,113 @@ html, body {
   min-height: 100%;
 }
 
+html {
+  /* Impede o Safari no iOS de aumentar a fonte sozinho ao girar a tela. */
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--sena-fonte);
   /* Rede de segurança: cada view pinta o próprio fundo, mas se sobrar
      qualquer área descoberta (overscroll no mobile, por exemplo) ela fica
      escura em vez do branco padrão do navegador. O tema claro do Dashboard
      e do Simulador (body.tema-claro) tem especificidade maior e continua
      sobrescrevendo isso normalmente. */
   background-color: #06080c;
+}
+
+body.tema-claro { background-color: #f8fafc; }
+body.alto-contraste { background-color: #000; }
+
+/* ─── Foco visível ───────────────────────────────────────────────────────
+   Antes: nenhum controle tinha anel de foco desenhado. Os campos zeravam o
+   outline do navegador (`outline: none`) e trocavam a cor da borda — 2.2:1,
+   abaixo do 3:1 que um indicador de estado exige (WCAG 1.4.11). Em
+   MentorView e PlantaoView o `.email-input` zerava o outline e não tinha
+   NENHUMA regra :focus: quem navega por teclado ficava sem saber onde
+   estava (falha direta de 2.4.7).
+
+   :focus-visible é o seletor certo aqui: o anel aparece para teclado e não
+   aparece no clique de mouse, então não muda a estética de quem usa mouse.
+   O !important existe porque as views legadas declaram `outline: none`
+   dentro de regras mais específicas. */
+:focus-visible {
+  outline: var(--sena-foco-largura) solid var(--sena-foco) !important;
+  outline-offset: var(--sena-foco-offset) !important;
+  border-radius: inherit;
+}
+
+/* Campos de texto ganham anel + halo, porque o anel sozinho encosta na
+   borda arredondada e fica difícil de ver sobre painel translúcido. */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: var(--sena-foco-largura) solid var(--sena-foco) !important;
+  outline-offset: 1px !important;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--sena-foco) 22%, transparent);
+}
+
+/* ─── Alvo de toque ──────────────────────────────────────────────────────
+   Apple HIG (44pt) e Material (48dp) pedem mais do que os 24px mínimos de
+   2.5.8. Em telas de dedo, qualquer botão/link ganha piso de 44px. Não vale
+   para os que estão em linha dentro de um texto corrido. */
+@media (pointer: coarse) {
+  button,
+  [role='button'],
+  a.btn-voltar,
+  .acess-btn,
+  .mobile-nav-item {
+    min-height: var(--sena-toque-min);
+  }
+  button.acess-btn,
+  .acess-btn {
+    min-width: var(--sena-toque-min);
+  }
+}
+
+/* ─── Zoom involuntário no iOS ───────────────────────────────────────────
+   O Safari no iPhone dá zoom na página quando o campo focado tem fonte
+   menor que 16px — e sai do zoom desalinhado. O projeto usa 13–15px em
+   todos os campos (textarea do Mentor a 13px, chat do Simulador a 13px em
+   telas ≤480px), então o zoom acontecia em todo formulário do sistema. */
+@media (max-width: 820px) {
+  input,
+  textarea,
+  select {
+    font-size: max(16px, 1em);
+  }
+}
+
+/* ─── Movimento ──────────────────────────────────────────────────────────
+   O sistema tem um botão "reduzir movimento" (classe .reduzir-movimento no
+   body), mas nunca respeitava a preferência já declarada no sistema
+   operacional. Quem liga "Reduzir movimento" no iOS/Android/Windows espera
+   que o site obedeça sem ter que achar um botão.
+
+   scroll-behavior entra aqui porque as duas telas maiores usam
+   scrollIntoView({ behavior: 'smooth' }) na navegação mobile. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─── Utilitário para leitor de tela ─────────────────────────────────────
+   Texto lido em voz alta e invisível na tela. Estava duplicado dentro de
+   GraficoEvolucao.vue; aqui vale para qualquer view. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

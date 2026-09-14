@@ -8,12 +8,18 @@
 
   <!-- MODAL EMAIL -->
   <div class="modal-overlay" id="modalOverlay">
-    <div class="modal-card">
-      <div class="modal-icon">S</div>
-      <h2>Identificação do Aluno</h2>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="tituloModalEmail">
+      <div class="modal-icon" aria-hidden="true">S</div>
+      <h2 id="tituloModalEmail">Identificação do Aluno</h2>
       <p>Informe o e-mail da sua matrícula para acessar seu painel de progresso no SENA.</p>
-      <input class="modal-input" type="email" id="emailInput" placeholder="seu@email.com" autocomplete="email" />
-      <div class="modal-error" id="emailError"></div>
+      <!-- O placeholder não é rótulo: ele desaparece quando o aluno começa a
+           digitar e não é lido como nome do campo por parte dos leitores de
+           tela. Nenhum campo do sistema tinha nome acessível. -->
+      <label class="sr-only" for="emailInput">E-mail da sua matrícula</label>
+      <input class="modal-input" type="email" id="emailInput" placeholder="seu@email.com" autocomplete="email" aria-describedby="emailError" />
+      <!-- role="alert" faz o leitor de tela anunciar o erro na hora. Antes a
+           mensagem aparecia só visualmente. -->
+      <div class="modal-error" id="emailError" role="alert"></div>
       <button class="btn-primary" id="btnConfirmarEmail" @click="confirmarEmail">Acessar meu painel</button>
       <div class="modal-note">IBSDH — Instituto Bruno Sena de Desenvolvimento Humano</div>
     </div>
@@ -21,9 +27,9 @@
 
   <!-- MODAL ONBOARDING -->
   <div class="modal-overlay" id="onboardingModal">
-    <div class="modal-card" style="max-width:500px;">
-      <div class="modal-icon" style="background:rgba(110,231,255,0.1);border-color:rgba(110,231,255,0.2);color:var(--cyan);">👋</div>
-      <h2>Bem-vindo ao SENA!</h2>
+    <div class="modal-card" style="max-width:500px;" role="dialog" aria-modal="true" aria-labelledby="tituloOnboarding">
+      <div class="modal-icon" style="background:rgba(110,231,255,0.1);border-color:rgba(110,231,255,0.2);color:var(--cyan);" aria-hidden="true">👋</div>
+      <h2 id="tituloOnboarding">Bem-vindo ao SENA!</h2>
       <div id="onboardingSteps">
         <div class="onboard-step active">
           <p style="font-size:15px;">Este é o seu painel de progresso. Aqui você acompanha sua evolução clínica.</p>
@@ -54,14 +60,15 @@
 
   <!-- MODAL WHATSAPP -->
   <div class="modal-overlay" id="modalWpp">
-    <div class="modal-card">
-      <div class="modal-icon" style="background:rgba(37,211,102,0.1);border-color:rgba(37,211,102,0.25);color:#25d366;">💬</div>
-      <h2>Ativar alertas no WhatsApp</h2>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="tituloWpp">
+      <div class="modal-icon" style="background:rgba(37,211,102,0.1);border-color:rgba(37,211,102,0.25);color:#25d366;" aria-hidden="true">💬</div>
+      <h2 id="tituloWpp">Ativar alertas no WhatsApp</h2>
       <div class="wpp-step active" id="wppStep1">
         <p>Receba uma mensagem automática se ficar mais de 10 dias sem praticar. É gratuito — basta ativar em 2 passos.</p>
         <p style="color:var(--text-faint);font-size:12px;margin-bottom:16px;">Passo 1 de 2 — Informe seu número</p>
-        <input class="modal-input" type="tel" id="wppNumero" placeholder="+55 11 99999-9999" />
-        <div class="modal-error" id="wppError"></div>
+        <label class="sr-only" for="wppNumero">Número de WhatsApp com código do país</label>
+        <input class="modal-input" type="tel" id="wppNumero" placeholder="+55 11 99999-9999" autocomplete="tel" inputmode="tel" aria-describedby="wppError" />
+        <div class="modal-error" id="wppError" role="alert"></div>
         <button class="btn-primary" @click="wppPasso2">Continuar</button>
         <button class="btn-secondary" @click="fecharModalWpp">Agora não</button>
       </div>
@@ -102,9 +109,19 @@
           <div class="hero-email" id="emailDisplay"></div>
           <div class="rank-badge" id="rankBadge">🏆 Ranking <span id="rankPos">—</span>º</div>
           <div style="display:flex;gap:8px;margin-top:4px;">
-            <button class="acess-btn" @click="toggleTema" title="Alternar tema claro/escuro">☀️</button>
-            <button class="acess-btn" @click="toggleAltoContraste" title="Alto contraste">◐</button>
-            <button class="acess-btn" @click="toggleReduzirMovimento" title="Reduzir animações">⊘</button>
+            <!-- title não é nome acessível confiável (não aparece em toque e
+                 alguns leitores ignoram). Sem aria-label, o nome do botão era
+                 o próprio emoji: "sol com raios". aria-pressed informa se a
+                 preferência está ligada. -->
+            <button type="button" class="acess-btn" @click="toggleTema"
+                    :aria-pressed="String(prefs.claro)"
+                    aria-label="Tema claro" title="Alternar tema claro/escuro">☀️</button>
+            <button type="button" class="acess-btn" @click="toggleAltoContraste"
+                    :aria-pressed="String(prefs.contraste)"
+                    aria-label="Alto contraste" title="Alto contraste">◐</button>
+            <button type="button" class="acess-btn" @click="toggleReduzirMovimento"
+                    :aria-pressed="String(prefs.movimento)"
+                    aria-label="Reduzir animações" title="Reduzir animações">⊘</button>
           </div>
           <button class="hero-sair" @click="sair">Trocar e-mail</button>
         </div>
@@ -285,17 +302,18 @@
   </div>
 
   <!-- MOBILE NAV -->
-  <div class="mobile-nav" id="mobileNav">
+  <nav class="mobile-nav" id="mobileNav" aria-label="Atalhos do painel">
     <a href="#" @click.prevent="scrollPara('hero')" class="mobile-nav-item">🏠<span>Início</span></a>
     <a href="#" @click.prevent="scrollPara('modulesContainer')" class="mobile-nav-item">📚<span>Aulas</span></a>
     <a href="#" @click.prevent="scrollPara('premium-nav')" class="mobile-nav-item">🏆<span>Extra</span></a>
-  </div>
-  <button class="btn-flutuante" @click="praticarProximaAula" title="Praticar agora">⚡</button>
+  </nav>
+  <button type="button" class="btn-flutuante" @click="praticarProximaAula"
+          aria-label="Praticar a próxima aula" title="Praticar agora">⚡</button>
 </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { useAccessibility } from '../composables/useAccessibility'
 import { callApi } from '../composables/useApi'
 import GraficoEvolucao from '../components/GraficoEvolucao.vue'
@@ -303,8 +321,27 @@ import DesempenhoPerfis from '../components/DesempenhoPerfis.vue'
 
 // ── ACESSIBILIDADE (composable compartilhado) ──────────────────────
 // Usa as mesmas chaves de localStorage que o dashboard.html original já usava.
-const { carregarPreferencias, toggleTema, toggleAltoContraste, toggleReduzirMovimento, limparClasses } =
-  useAccessibility({ tema: 'sena_tema', altoContraste: 'sena_alto_contraste', reduzirMovimento: 'sena_reduzir_movimento' })
+const {
+  carregarPreferencias,
+  toggleTema: _toggleTema,
+  toggleAltoContraste: _toggleAltoContraste,
+  toggleReduzirMovimento: _toggleReduzirMovimento,
+  limparClasses
+} = useAccessibility({ tema: 'sena_tema', altoContraste: 'sena_alto_contraste', reduzirMovimento: 'sena_reduzir_movimento' })
+
+// Espelho reativo das classes do <body>, só para alimentar aria-pressed: um
+// botão de preferência que não diz se está ligado obriga quem usa leitor de
+// tela a apertar e comparar de ouvido.
+const prefs = reactive({ claro: false, contraste: false, movimento: false })
+function lerPrefs() {
+  const c = document.body.classList
+  prefs.claro = c.contains('tema-claro')
+  prefs.contraste = c.contains('alto-contraste')
+  prefs.movimento = c.contains('reduzir-movimento')
+}
+function toggleTema() { _toggleTema(); lerPrefs() }
+function toggleAltoContraste() { _toggleAltoContraste(); lerPrefs() }
+function toggleReduzirMovimento() { _toggleReduzirMovimento(); lerPrefs() }
 
 const urlParams = new URLSearchParams(window.location.search)
 const CURSO = urlParams.get('curso') || 'Practitioner'
@@ -807,18 +844,29 @@ function renderDashboard() {
     else { badgeClass = 'pending'; badgeText = 'Não iniciado' }
     const card = document.createElement('div')
     card.className = 'module-card' + (bloqueado ? ' locked' : '') + (completo ? ' complete' : '')
+    const idAulas = 'aulas-modulo-' + idx
+    // O cabeçalho do módulo é um <button>, não uma <div onclick>.
+    // Antes: só respondia a clique de mouse. Como as aulas (e os botões
+    // "Praticar") ficam em display:none enquanto o módulo está fechado,
+    // quem navega por teclado ou usa leitor de tela não tinha NENHUM
+    // caminho até o simulador — o Tab passava por cima do cabeçalho e o
+    // conteúdo nunca abria. É falha de 2.1.1 (Teclado) e 4.1.2 (Nome,
+    // Função, Valor), e na prática bloqueava o fluxo principal do produto.
+    // <button> traz de graça: foco, Enter/Espaço e a função anunciada.
     card.innerHTML =
-      '<div class="module-header" onclick="toggleModulo(this)">' +
-        '<div class="module-num">' + (idx + 1) + '</div>' +
-        '<div class="module-info">' +
-          '<div class="module-title">' + mod.nome + '</div>' +
-          '<div class="module-meta">' + totalMod + ' aula' + (totalMod !== 1 ? 's' : '') + ' · ' + aprovMod + ' aprovada' + (aprovMod !== 1 ? 's' : '') + '</div>' +
-        '</div>' +
+      '<button type="button" class="module-header"' +
+        ' aria-expanded="false" aria-controls="' + idAulas + '"' +
+        (bloqueado ? ' aria-disabled="true"' : '') + '>' +
+        '<span class="module-num">' + (idx + 1) + '</span>' +
+        '<span class="module-info">' +
+          '<span class="module-title">' + esc(mod.nome) + '</span>' +
+          '<span class="module-meta">' + totalMod + ' aula' + (totalMod !== 1 ? 's' : '') + ' · ' + aprovMod + ' aprovada' + (aprovMod !== 1 ? 's' : '') + '</span>' +
+        '</span>' +
         '<span class="module-badge ' + badgeClass + '">' + badgeText + '</span>' +
-        '<span class="module-chevron">▼</span>' +
-      '</div>' +
+        '<span class="module-chevron" aria-hidden="true">▼</span>' +
+      '</button>' +
       '<div class="module-progress"><div class="mod-track"><div class="mod-fill" style="width:' + pctMod + '%"></div></div></div>' +
-      '<div class="aulas-list">' + renderAulas(mod.aulas, bloqueado) + '</div>'
+      '<div class="aulas-list" id="' + idAulas + '">' + renderAulas(mod.aulas, bloqueado) + '</div>'
     container.appendChild(card)
   })
   const primeiroModuloAberto = MODULOS.findIndex((mod, idx) => {
@@ -828,6 +876,7 @@ function renderDashboard() {
     setTimeout(() => {
       const cards = document.querySelectorAll('.module-card')
       if (cards[primeiroModuloAberto]) cards[primeiroModuloAberto].classList.add('open')
+      sincronizarAriaModulos()
     }, 100)
   }
 
@@ -863,7 +912,7 @@ function renderJornada(bloqueados) {
     }
     const node = document.createElement('div')
     node.className = 'journey-node ' + estado
-    node.innerHTML = '<div class="journey-tooltip">' + nomeCompleto + '</div><div class="journey-circle">' + icone + '</div><div class="journey-num">M' + (idx + 1) + '</div>'
+    node.innerHTML = '<div class="journey-tooltip">' + esc(nomeCompleto) + '</div><div class="journey-circle">' + icone + '</div><div class="journey-num">M' + (idx + 1) + '</div>'
     if (!bloqueado) {
       node.style.cursor = 'pointer'
       node.addEventListener('click', function () {
@@ -892,6 +941,15 @@ function calcularBloqueados() {
   return b
 }
 
+// Nome de módulo, título de aula e mensagens do backend entravam crus em
+// innerHTML. Vindo de planilha isso é ingênuo mais que perigoso, mas um
+// título com "&" ou "<" já quebrava a marcação — e a sanitização é barata.
+function esc(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+}
+
 function renderAulas(aulasList, bloqueado) {
   return aulasList.map(a => {
     const p = progresso[a.aula]
@@ -904,14 +962,20 @@ function renderAulas(aulasList, bloqueado) {
     const numDisplay = a.aula.replace('Aula_', '')
     let btnHtml = ''
     if (!bloqueado) {
-      if (aprovado) btnHtml = '<button class="btn-praticar rever" data-aula="' + a.aula + '" onclick="abrirSimulador(this.dataset.aula)">Rever</button>'
-      else if (reprovado) btnHtml = '<button class="btn-praticar retry" data-aula="' + a.aula + '" onclick="abrirSimulador(this.dataset.aula)">Tentar novamente</button>'
-      else btnHtml = '<button class="btn-praticar" data-aula="' + a.aula + '" onclick="abrirSimulador(this.dataset.aula)">Praticar →</button>'
+      // "Praticar →" repetido 12 vezes na página é indistinguível na lista de
+      // links/botões de um leitor de tela. O aria-label diz de qual aula é.
+      // O texto visível continua curto, como o layout precisa (2.5.3 é
+      // respeitado porque o rótulo visível está contido no nome acessível).
+      const alvo = 'Aula ' + numDisplay + ' — ' + titulo
+      const rot = (verbo) => ' data-aula="' + esc(a.aula) + '" aria-label="' + esc(verbo + ' ' + alvo) + '"'
+      if (aprovado) btnHtml = '<button type="button" class="btn-praticar rever"' + rot('Rever') + '>Rever</button>'
+      else if (reprovado) btnHtml = '<button type="button" class="btn-praticar retry"' + rot('Tentar novamente') + '>Tentar novamente</button>'
+      else btnHtml = '<button type="button" class="btn-praticar"' + rot('Praticar') + '>Praticar →</button>'
     }
     const notaHtml = nota ? '<span class="aula-nota ' + status + '">' + nota + '</span>' : '<span class="aula-nota pending">—</span>'
     return '<div class="aula-row' + (bloqueado ? ' locked' : '') + '">' +
       '<div class="aula-status ' + status + '">' + icon + '</div>' +
-      '<div class="aula-info"><div class="aula-num">Aula ' + numDisplay + '</div><div class="aula-title">' + titulo + '</div></div>' +
+      '<div class="aula-info"><div class="aula-num">Aula ' + numDisplay + '</div><div class="aula-title">' + esc(titulo) + '</div></div>' +
       notaHtml + btnHtml +
       '</div>'
   }).join('')
@@ -923,6 +987,27 @@ function toggleModulo(header) {
   const jaAberto = card.classList.contains('open')
   document.querySelectorAll('.module-card.open').forEach(c => c.classList.remove('open'))
   if (!jaAberto) card.classList.add('open')
+  sincronizarAriaModulos()
+}
+
+// aria-expanded tem que contar a mesma história que a classe .open: é por ele
+// que o leitor de tela sabe se as aulas estão visíveis.
+function sincronizarAriaModulos() {
+  document.querySelectorAll('.module-card').forEach(card => {
+    const h = card.querySelector('.module-header')
+    if (h) h.setAttribute('aria-expanded', card.classList.contains('open') ? 'true' : 'false')
+  })
+}
+
+// Delegação em vez de onclick="" no HTML gerado: assim o handler vive e morre
+// com o componente, não precisa de função global no window, e não depende de
+// permitir script inline (o onclick="" inviabiliza qualquer CSP sem
+// 'unsafe-inline').
+function onModulesClick(e) {
+  const header = e.target.closest('.module-header')
+  if (header) { toggleModulo(header); return }
+  const btn = e.target.closest('.btn-praticar')
+  if (btn && btn.dataset.aula) abrirSimulador(btn.dataset.aula)
 }
 
 function abrirSimulador(codigoAula) {
@@ -979,15 +1064,14 @@ async function recarregarProgressoSilencioso() {
 }
 
 // ── MONTAGEM ─────────────────────────────────────────────────────────
-// Funções chamadas a partir de HTML gerado dinamicamente (innerHTML) via
-// onclick="..." precisam estar acessíveis globalmente, já que esse HTML
-// não passa pelo compilador de templates do Vue.
-window.toggleModulo = toggleModulo
-window.abrirSimulador = abrirSimulador
+// Não há mais window.toggleModulo/window.abrirSimulador: o HTML gerado por
+// innerHTML não usa mais onclick="", e sim um único listener delegado em
+// #modulesContainer (ver onModulesClick).
 
 onMounted(async () => {
   document.title = 'SENA | Painel de Progresso'
   carregarPreferencias()
+  lerPrefs()
   onboardingSteps = document.querySelectorAll('.onboard-step')
 
   mostrarLoader()
@@ -1016,6 +1100,7 @@ onMounted(async () => {
   }
 
   document.getElementById('emailInput').addEventListener('keydown', onEmailInputKeydown)
+  document.getElementById('modulesContainer').addEventListener('click', onModulesClick)
 
   window.addEventListener('storage', onStorageEvent)
 })
@@ -1023,21 +1108,30 @@ onMounted(async () => {
 onUnmounted(() => {
   montado = false
   document.getElementById('emailInput')?.removeEventListener('keydown', onEmailInputKeydown)
+  document.getElementById('modulesContainer')?.removeEventListener('click', onModulesClick)
   window.removeEventListener('storage', onStorageEvent)
-  delete window.toggleModulo
-  delete window.abrirSimulador
   limparClasses()
 })
 </script>
 
 <style>
-    body {
+    /* Os tokens ficam no elemento raiz da PÁGINA, não no <body>.
+       Por que: DashboardView e SimuladorView declaravam os dois o mesmo
+       `body { --cyan: ...; --gold: ... }` com valores diferentes e a MESMA
+       especificidade. Como as rotas são carregadas sob demanda, o Vite
+       insere o CSS de cada view quando ela é aberta pela primeira vez — e
+       a folha inserida por último ganha. Resultado: depois de ir ao
+       Simulador e voltar, o Dashboard renderizava com a paleta do
+       Simulador (cyan #38bdf8 em vez de #6ee7ff, gold #fbbf24 em vez de
+       #e0c078, e assim por diante). Escopando em .dash-page cada tela
+       passa a ser dona da sua paleta, em qualquer ordem de navegação. */
+    .dash-page {
       --bg: #05070a;
       --panel: rgba(16,21,29,0.7);
       --border: rgba(112,141,173,0.15);
       --text: #edf3f8;
       --text-soft: #9aa7b5;
-      --text-faint: #5a6470;
+      --text-faint: #8492a2;   /* era #5a6470 — 3.35:1, reprovava 1.4.3; agora 6.35:1 */
       --cyan: #6ee7ff;
       --cyan-dim: rgba(110,231,255,0.12);
       --gold: #e0c078;
@@ -1127,7 +1221,7 @@ onUnmounted(() => {
     .dash-page .modal-card p  { color:var(--text-soft);font-size:14px;line-height:1.7;margin-bottom:22px; }
     .dash-page .modal-input { width:100%;padding:13px 16px;border-radius:var(--r-md);border:1px solid rgba(255,255,255,0.09);background:rgba(5,9,13,0.6);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;outline:none;text-align:center;transition:border-color .18s,box-shadow .18s;margin-bottom:10px; }
     .dash-page .modal-input:focus { border-color:rgba(110,231,255,0.32);box-shadow:0 0 0 3px rgba(110,231,255,0.07); }
-    .dash-page .modal-input::placeholder { color:#3d4a56; }
+    .dash-page .modal-input::placeholder { color:#7b8795; } /* era #3d4a56 — 2.22:1, reprovava 1.4.3 */
     .dash-page .modal-error { color:var(--danger);font-size:13px;min-height:18px;margin-bottom:10px; }
     .dash-page .btn-primary { width:100%;padding:14px 20px;border:none;border-radius:var(--r-md);background:linear-gradient(135deg,var(--cyan),#9be9ff);color:#061018;font-family:'Inter',sans-serif;font-size:13px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;transition:all .2s cubic-bezier(.4,0,.2,1); }
     .dash-page .btn-primary:hover { transform:translateY(-1px);box-shadow:0 12px 24px rgba(110,231,255,0.2); }
@@ -1145,24 +1239,41 @@ onUnmounted(() => {
     .dash-page .wpp-step { display:none; }
     .dash-page .wpp-step.active { display:block; }
 
-    /* Tema Claro */
-    body.tema-claro {
+    /* Tema Claro — escopado em .dash-page pelo mesmo motivo do bloco base.
+       Os acentos escureceram: #0891b2 dava 3.52:1 e #059669 dava 3.60:1
+       como texto sobre #f8fafc, ambos abaixo do 4.5:1 de 1.4.3. Eles também
+       são o fundo de .btn-primary/.btn-praticar/.meta-btn.ativo com texto
+       branco em cima — que ficava em 3.68:1. Os novos valores resolvem os
+       dois usos de uma vez. */
+    body.tema-claro .dash-page {
       --bg: #f8fafc;
       --panel: rgba(255,255,255,0.85);
       --border: rgba(112,141,173,0.2);
       --text: #1e293b;
-      --text-soft: #64748b;
-      --text-faint: #94a3b8;
-      --cyan: #0891b2;
-      --cyan-dim: rgba(8,145,178,0.1);
-      --gold: #b45309;
-      --gold-dim: rgba(180,83,9,0.1);
-      --success: #059669;
-      --success-dim: rgba(5,150,105,0.1);
-      --danger: #dc2626;
-      --danger-dim: rgba(220,38,38,0.1);
+      --text-soft: #56637a;    /* era #64748b (4.55:1, no limite) → 5.80:1 */
+      --text-faint: #64748b;   /* era #94a3b8 (2.45:1, reprovava)  → 4.55:1 */
+      --cyan: #0e7490;         /* era #0891b2 (3.52:1)             → 5.12:1 */
+      --cyan-dim: rgba(14,116,144,0.1);
+      --gold: #a1500a;         /* era #b45309 (4.80:1)             → 5.47:1 */
+      --gold-dim: rgba(161,80,10,0.1);
+      --success: #047857;      /* era #059669 (3.60:1, reprovava)  → 5.24:1 */
+      --success-dim: rgba(4,120,87,0.1);
+      --danger: #c81e1e;       /* era #dc2626 (4.62:1)             → 5.48:1 */
+      --danger-dim: rgba(200,30,30,0.1);
     }
-    body.tema-claro { background-color: var(--bg); background-image: radial-gradient(circle at top left,rgba(8,145,178,0.08),transparent 28%), radial-gradient(circle at bottom right,rgba(180,83,9,0.06),transparent 22%), linear-gradient(180deg,transparent 0%,#e2e8f0 100%); }
+    /* O <body> continua pintado com valor literal: os tokens já não moram
+       nele, então var(--bg) aqui não resolveria. */
+    body.tema-claro { background-color: #f8fafc; }
+    /* Sem esta regra o tema claro ficava quebrado: .dash-page pinta um
+       gradiente que termina em #090c11, ou seja, o rodapé do painel claro
+       desbotava para quase preto atrás de cartões brancos. */
+    body.tema-claro .dash-page {
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(ellipse at top left, rgba(14,116,144,0.08), transparent 30%),
+        radial-gradient(ellipse at bottom right, rgba(161,80,10,0.06), transparent 28%),
+        linear-gradient(180deg, transparent 0%, #e2e8f0 100%);
+    }
     body.tema-claro .dash-page .hero { background: linear-gradient(180deg,rgba(255,255,255,0.95) 0%,rgba(241,245,249,0.98) 100%); border-color: rgba(112,141,173,0.25); }
     body.tema-claro .dash-page .hero::before { background: linear-gradient(135deg,rgba(8,145,178,0.1),transparent 40%),linear-gradient(225deg,rgba(180,83,9,0.08),transparent 35%); }
     body.tema-claro .dash-page .seal { background: radial-gradient(circle at 30% 30%,rgba(8,145,178,0.2),transparent 45%),linear-gradient(180deg,rgba(255,255,255,1),rgba(241,245,249,1)); border-color: rgba(8,145,178,0.3); }
@@ -1201,7 +1312,12 @@ body.tema-claro .dash-page .info-card { background: rgba(255,255,255,0.7); borde
     body.tema-claro .dash-page .hero-stat { border-right-color: rgba(112,141,173,0.15); }
 
     /* Acessibilidade - Alto Contraste Aprimorado */
-    body.alto-contraste {
+    body.alto-contraste { background-color: #000; }
+    /* .dash-page pintava gradientes cyan/gold e um degradê escuro por cima
+       de var(--bg): o "alto contraste" nunca chegava à superfície da
+       página, só aos componentes. background-image:none resolve. */
+    body.alto-contraste .dash-page { background-image: none; }
+    body.alto-contraste .dash-page {
       --bg: #000000;
       --panel: #000000;
       --border: #ffffff;
@@ -1522,7 +1638,17 @@ body.alto-contraste .dash-page .rank-badge {
     .dash-page .module-card.locked { opacity:.5; }
     .dash-page .module-card.complete { border-color:rgba(126,240,194,0.2); }
     .dash-page .module-card:hover:not(.locked) { border-color:rgba(110,231,255,0.3); }
-    .dash-page .module-header { display:flex; align-items:center; gap:14px; padding:18px 20px; cursor:pointer; user-select:none; border-bottom:1px solid transparent; transition:border-color .2s; }
+    /* Agora é um <button>: precisa dos resets para continuar parecendo o
+       cabeçalho de cartão que sempre foi. */
+    .dash-page .module-header {
+      display:flex; align-items:center; gap:14px; padding:18px 20px;
+      width:100%; background:none; border:none; border-bottom:1px solid transparent;
+      color:inherit; font:inherit; text-align:left;
+      cursor:pointer; user-select:none; transition:border-color .2s;
+    }
+    .dash-page .module-card.locked .module-header { cursor:not-allowed; }
+    /* Os filhos viraram <span> (um <button> não pode conter <div>). */
+    .dash-page .module-info, .dash-page .module-title, .dash-page .module-meta { display:block; }
     .dash-page .module-card.open .module-header { border-bottom-color:rgba(255,255,255,0.06); }
     .dash-page .module-num { width:36px; height:36px; flex-shrink:0; border-radius:11px; display:grid; place-items:center; font-size:13px; font-weight:800; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:var(--text-soft); }
     .dash-page .module-card.complete .module-num { background:var(--success-dim); border-color:rgba(126,240,194,0.2); color:var(--success); }
