@@ -4,7 +4,7 @@
     <router-link class="btn-voltar" to="/dashboard.html">← Voltar ao painel</router-link>
 
     <div class="hero">
-      <div class="eyebrow">⚡ Desafio da semana</div>
+      <div class="eyebrow">Desafio da semana</div>
       <h1>Desafio Semanal SENA</h1>
       <p class="sub">Todo domingo um novo perfil de paciente é liberado para todos os alunos. Mostre sua competência clínica e compare com os melhores da turma.</p>
       <!-- O prazo muda a cada minuto: "polite" avisa sem interromper. -->
@@ -36,7 +36,7 @@
             <div class="resistencia" v-for="(r, i) in desafio.resistencias || []" :key="i">{{ r }}</div>
           </div>
         </div>
-        <a :href="urlAceitar" class="btn-aceitar">⚡ Aceitar o desafio desta semana →</a>
+        <a :href="urlAceitar" class="btn-aceitar">Aceitar o desafio desta semana →</a>
       </template>
     </div>
 
@@ -123,7 +123,7 @@ onUnmounted(() => {
 .btn-voltar:hover { background:rgba(255,255,255,0.06); }
 .hero { background:linear-gradient(135deg,rgba(245,193,99,0.08),rgba(255,107,136,0.04)),linear-gradient(180deg,rgba(16,21,29,0.96),rgba(10,14,20,0.99));border:1px solid rgba(245,193,99,0.2);border-radius:24px;padding:28px;margin-bottom:18px;box-shadow:var(--shadow); }
 .eyebrow { display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;background:rgba(245,193,99,0.1);border:1px solid rgba(245,193,99,0.2);color:#f5c163;font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:12px; }
-.eyebrow::before { content:'⚡';font-size:9px; }
+.eyebrow::before { content:'';width:6px;height:6px;border-radius:999px;background:#f5c163;box-shadow:0 0 8px rgba(245,193,99,0.55); }
 h1 { font-size:clamp(24px,5vw,36px);font-weight:800;letter-spacing:-.03em;margin-bottom:6px; }
 .sub { color:var(--text-soft);font-size:14px; }
 .timer { font-family:'JetBrains Mono',monospace;font-size:13px;color:#f5c163;margin-top:10px; }
@@ -133,7 +133,7 @@ h1 { font-size:clamp(24px,5vw,36px);font-weight:800;letter-spacing:-.03em;margin
 .perfil-desc { font-size:14px;color:var(--text-soft);line-height:1.7;margin-bottom:14px; }
 .resistencias { display:grid;gap:6px; }
 .resistencia { font-size:13px;color:var(--danger);padding-left:16px;position:relative; }
-.resistencia::before { content:'⚡';position:absolute;left:0;font-size:10px; }
+.resistencia::before { content:'';position:absolute;left:0;top:6px;width:5px;height:5px;border-radius:999px;background:currentColor; }
 .curso-selector { display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap; }
 .curso-btn { padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:var(--text-soft);font-family:'Inter',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .18s; }
 .curso-btn.ativo { background:rgba(245,193,99,0.1);border-color:rgba(245,193,99,0.25);color:#f5c163; }

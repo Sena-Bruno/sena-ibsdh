@@ -28,7 +28,7 @@
       <!-- ── ABERTURA ─────────────────────────────────────────────── -->
       <template v-if="etapa === 'intro'">
         <div class="hero">
-          <div class="eyebrow">🚨 Plantão clínico</div>
+          <div class="eyebrow">Plantão clínico</div>
           <h1>Modo Plantão</h1>
           <p class="sub">
             Três pacientes em sequência, cada um com tempo próprio. Você lê o caso
@@ -514,6 +514,7 @@ document.title = 'SENA | Modo Plantão'
   background:rgba(255,107,136,0.1);border:1px solid rgba(255,107,136,0.2);color:#ff8fa3;
   font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:12px;
 }
+.eyebrow::before { content:'';width:6px;height:6px;border-radius:999px;background:#ff8fa3;box-shadow:0 0 8px rgba(255,143,163,0.55); }
 h1 { font-size:clamp(24px,5vw,34px);font-weight:800;letter-spacing:-.03em;margin-bottom:8px; }
 .sub { color:var(--text-soft);font-size:14px; }
 
@@ -588,7 +589,7 @@ h1 { font-size:clamp(24px,5vw,34px);font-weight:800;letter-spacing:-.03em;margin
 .caso-label { font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--text-faint);margin-bottom:6px; }
 .caso-resist { list-style:none;display:grid;gap:5px; }
 .caso-resist li { font-size:13px;color:#ff8fa3;padding-left:14px;position:relative; }
-.caso-resist li::before { content:'⚡';position:absolute;left:0;font-size:9px; }
+.caso-resist li::before { content:'';position:absolute;left:0;top:6px;width:5px;height:5px;border-radius:999px;background:currentColor; }
 
 .resposta {
   width:100%;min-height:180px;resize:vertical;border-radius:12px;

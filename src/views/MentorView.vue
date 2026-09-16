@@ -28,7 +28,7 @@
         <h1>Modo Mentor</h1>
         <p class="sub">Você já aprovou aulas neste curso. Agora pode ajudar outros alunos deixando feedback anônimo sobre respostas aprovadas. A IA modera todos os comentários.</p>
       </div>
-      <div class="aviso" role="note">⚠️ Os feedbacks são anônimos e moderados pela IA antes de serem exibidos. Seja construtivo e clínico — feedbacks inadequados são removidos automaticamente.</div>
+      <div class="aviso" role="note">Os feedbacks são anônimos e moderados pela IA antes de serem exibidos. Seja construtivo e clínico — feedbacks inadequados são removidos automaticamente.</div>
 
       <div v-if="carregando" class="loading" role="status">Carregando feedbacks disponíveis...</div>
       <div v-else-if="erro" class="loading" role="alert">Não foi possível carregar os itens para review. Verifique sua conexão e tente recarregar a página.</div>
