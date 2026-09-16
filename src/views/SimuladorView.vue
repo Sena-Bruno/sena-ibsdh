@@ -44,7 +44,7 @@
   <div class="shell" id="appShell" style="display:none;">
     <section class="hero">
       <div class="acess-btns">
-        <button type="button" class="acess-btn" @click="toggleTema" :aria-pressed="String(prefs.claro)" title="Alternar tema claro/escuro" aria-label="Tema claro">☀️</button>
+        <button type="button" class="acess-btn" @click="toggleTema" :aria-pressed="String(prefs.claro)" title="Alternar tema claro/escuro" aria-label="Tema claro"><Icone nome="sol" /></button>
         <button type="button" class="acess-btn" @click="toggleAltoContraste" :aria-pressed="String(prefs.contraste)" title="Alto contraste" aria-label="Alto contraste">◐</button>
         <button type="button" class="acess-btn" @click="toggleReduzirMovimento" :aria-pressed="String(prefs.movimento)" title="Reduzir movimento" aria-label="Reduzir animações da interface">⊘</button>
       </div>
@@ -88,7 +88,7 @@
               <div class="mini-panel"><div class="mini-title">Abordagem recomendada</div><div class="mini-text" id="approachText"></div></div>
             </div>
             <div class="estado-paciente" id="estadoPaciente">
-              <div class="estado-icon" id="estadoIcon">😐</div>
+              <div class="estado-icon" id="estadoIcon" aria-hidden="true"></div>
               <div class="estado-info">
                 <div class="estado-label">Estado do paciente</div>
                 <div class="estado-valor" id="estadoValor">Neutro</div>
@@ -103,15 +103,15 @@
             <div class="desafio-nivel-selector" id="desafioNivelSelector">
               <div class="desafio-nivel-title">Escolha o nível de dificuldade</div>
               <div class="nivel-btns">
-                <button class="nivel-btn nivel-1" @click="gerarDesafio(1)">🟢 Intermediário<br><small>Nota min: 8</small></button>
-                <button class="nivel-btn nivel-2" @click="gerarDesafio(2)">🟡 Avançado<br><small>Nota min: 9</small></button>
-                <button class="nivel-btn nivel-3" @click="gerarDesafio(3)">🔴 Extremo<br><small>Nota min: 10</small></button>
+                <button class="nivel-btn nivel-1" @click="gerarDesafio(1)">Intermediário<br><small>Nota min: 8</small></button>
+                <button class="nivel-btn nivel-2" @click="gerarDesafio(2)">Avançado<br><small>Nota min: 9</small></button>
+                <button class="nivel-btn nivel-3" @click="gerarDesafio(3)">Extremo<br><small>Nota min: 10</small></button>
               </div>
             </div>
 
             <div id="desafioCard" style="display:none;"></div>
             <div class="selo-desafio" id="seloDesafio">
-              <div class="selo-icon">🏆</div>
+              <div class="selo-icon"><Icone nome="trofeu" :tamanho="26" /></div>
               <div class="selo-info">
                 <div class="selo-label">Selo conquistado</div>
                 <div class="selo-nome" id="seloNome"></div>
@@ -148,7 +148,7 @@
 
             <!-- Barra de áudio -->
             <div class="audio-bar">
-              <button class="mic-btn" id="micBtn" @click="toggleGravacao" title="Gravar resposta por voz" aria-label="Gravar resposta por voz">🎙️</button>
+              <button class="mic-btn" id="micBtn" @click="toggleGravacao" title="Gravar resposta por voz" aria-label="Gravar resposta por voz"><Icone nome="microfone" :tamanho="18" /></button>
               <div class="audio-info">
                 <div class="audio-label">Resposta por voz</div>
                 <div class="audio-status" id="audioStatus" role="status">Clique no microfone para falar sua resposta</div>
@@ -200,8 +200,8 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
 
           <!-- Seletor de modo -->
           <div class="mode-selector" id="modeSelector">
-            <button class="mode-btn active" id="modeTxtBtn" @click="setMode('texto')">✍️ Modo Texto</button>
-            <button class="mode-btn" id="modeConvBtn" @click="setMode('conversa')">💬 Modo Conversa <span style="font-size:10px;opacity:.7;">· 🎙️ voz</span></button>
+            <button class="mode-btn active" id="modeTxtBtn" @click="setMode('texto')"><Icone nome="lapis" :tamanho="14" /> Modo Texto</button>
+            <button class="mode-btn" id="modeConvBtn" @click="setMode('conversa')"><Icone nome="chat" :tamanho="14" /> Modo Conversa <span style="font-size:10px;opacity:.7;">· voz</span></button>
           </div>
 
           <!-- Chat de simulação bidirecional -->
@@ -259,18 +259,18 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
 
               <!-- Comparação supervisor x IA -->
               <div class="supervisor-compare" id="supervisorCompare" style="display:none;">
-                <div class="supervisor-compare-title">🔍 Supervisão — sua percepção vs a IA</div>
+                <div class="supervisor-compare-title">Supervisão — sua percepção vs a IA</div>
                 <div class="compare-grid" id="compareGrid"></div>
               </div>
             </div>
             <button class="ghost-btn" id="retryBtn" @click="resetForRetry" style="display:none;">Fazer nova tentativa</button>
-            <button class="prontuario-btn" id="prontuarioBtn" @click="abrirProntuario">📋 Ver prontuário desta sessão</button>
+            <button class="prontuario-btn" id="prontuarioBtn" @click="abrirProntuario">Ver prontuário desta sessão</button>
             <button class="ghost-btn" id="backBtn" @click="voltarAoPainel" style="display:none;margin-top:8px;border-color:rgba(110,231,255,0.15);color:var(--cyan);">← Voltar ao painel</button>
 
             <!-- Contraste com a tentativa anterior -->
             <div class="contraste-section" id="contrasteSection">
               <button type="button" class="contraste-header" :aria-expanded="String(aberto.contraste)" aria-controls="contrasteBody" @click="toggleContraste">
-                <span class="contraste-title">🔁 O que mudou desde a tentativa anterior</span>
+                <span class="contraste-title">O que mudou desde a tentativa anterior</span>
                 <span class="contraste-chevron" aria-hidden="true">▼</span>
               </button>
               <div class="contraste-body" id="contrasteBody"></div>
@@ -279,7 +279,7 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
             <!-- Replay com marcações -->
             <div class="replay-section" id="replaySection">
               <button type="button" class="replay-header" :aria-expanded="String(aberto.replay)" aria-controls="replayBody" @click="toggleReplay">
-                <span class="replay-title">🎯 Replay — veja sua resposta marcada pela IA</span>
+                <span class="replay-title">Replay — veja sua resposta marcada pela IA</span>
                 <span class="replay-chevron" aria-hidden="true">▼</span>
               </button>
               <div class="replay-body" id="replayBody"></div>
@@ -288,7 +288,7 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
             <!-- Comparação anônima -->
             <div class="comparacao-section" id="comparacaoSection">
               <button type="button" class="comparacao-header" :aria-expanded="String(aberto.comparacao)" aria-controls="comparacaoBody" @click="toggleComparacao">
-                <span class="comparacao-title">👥 Ver como outros alunos responderam</span>
+                <span class="comparacao-title">Ver como outros alunos responderam</span>
                 <span class="comparacao-chevron" aria-hidden="true">▼</span>
               </button>
               <div class="comparacao-body" id="comparacaoBody"></div>
@@ -297,7 +297,7 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
             <!-- Diário Clínico -->
             <div class="diario-section" id="diarioSection">
               <button type="button" class="diario-header" :aria-expanded="String(aberto.diario)" aria-controls="diarioBody" @click="toggleDiario">
-                <span class="diario-title">📓 Diário clínico — registre sua reflexão</span>
+                <span class="diario-title">Diário clínico — registre sua reflexão</span>
                 <span class="diario-chevron" aria-hidden="true">▼</span>
               </button>
               <div class="diario-body" id="diarioBody">
@@ -305,7 +305,7 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
                 <textarea class="diario-textarea" id="diarioInput" placeholder="O que você percebeu sobre sua própria condução? Que padrão notou? O que faria diferente?"></textarea>
                 <div class="diario-actions">
                   <button class="diario-btn-salvar" @click="salvarDiario" id="diarioBtnSalvar">Salvar reflexão</button>
-                  <button class="diario-btn-analise" @click="analisarDiario" id="diarioBtnAnalise">✨ Ver análise semanal da IA</button>
+                  <button class="diario-btn-analise" @click="analisarDiario" id="diarioBtnAnalise">Ver análise semanal da IA</button>
                 </div>
                 <div class="diario-status" id="diarioStatus" role="status"></div>
                 <div class="diario-analise-box" id="diarioAnaliseBox">
@@ -335,10 +335,10 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
 
   <!-- Mobile Navigation -->
   <nav class="mobile-nav" id="mobileNav" aria-label="Atalhos do simulador">
-    <a href="#inicio" @click.prevent="scrollParaTopo" class="mobile-nav-item" data-nav="inicio">🏠<span>Início</span></a>
-    <a href="#paciente" @click.prevent="scrollPara('patientCard')" class="mobile-nav-item" data-nav="paciente">👤<span>Paciente</span></a>
-    <a href="#resposta" @click.prevent="scrollPara('inputModule')" class="mobile-nav-item" data-nav="resposta">✍️<span>Resposta</span></a>
-    <a href="#resultado" @click.prevent="scrollPara('resultModule')" class="mobile-nav-item" data-nav="resultado">📊<span>Resultado</span></a>
+    <a href="#inicio" @click.prevent="scrollParaTopo" class="mobile-nav-item" data-nav="inicio"><Icone nome="casa" /><span>Início</span></a>
+    <a href="#paciente" @click.prevent="scrollPara('patientCard')" class="mobile-nav-item" data-nav="paciente"><Icone nome="usuario" /><span>Paciente</span></a>
+    <a href="#resposta" @click.prevent="scrollPara('inputModule')" class="mobile-nav-item" data-nav="resposta"><Icone nome="lapis" /><span>Resposta</span></a>
+    <a href="#resultado" @click.prevent="scrollPara('resultModule')" class="mobile-nav-item" data-nav="resultado"><Icone nome="grafico" /><span>Resultado</span></a>
   </nav>
 </div>
 </template>
@@ -347,6 +347,7 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
 import { onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useAccessibility } from '../composables/useAccessibility'
 import { juntarSemDuplicar, montarTextoDaSessao } from '../composables/useTranscricao'
+import Icone from '../components/Icone.vue'
 
 // ── ACESSIBILIDADE (composable compartilhado) ──────────────────────
 // Usa as mesmas chaves de localStorage do Dashboard, para que o tema/alto
@@ -908,6 +909,11 @@ function showAlert(msg) { const b = document.getElementById('alertBox'); b.textC
 function hideAlert() { document.getElementById('alertBox').classList.remove('visible') }
 
 // ── RECONHECIMENTO DE VOZ ──────────────────────────────────────────
+// O botão de microfone troca de ícone via innerHTML (fora do template do
+// Vue, junto com o resto do reconhecimento de voz) — mesmo desenho de
+// src/components/Icone.vue, como string SVG.
+const SVG_MICROFONE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 19v3"/><path d="M8 22h8"/></svg>'
+const SVG_PARAR = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>'
 let recognition = null
 let gravando = false
 let restartTimeoutId = null
@@ -938,7 +944,7 @@ function initSpeech() {
 
   recognition.onstart = function () {
     gravando = true
-    btn.classList.add('recording'); btn.textContent = '⏹️'
+    btn.classList.add('recording'); btn.innerHTML = SVG_PARAR
     statusEl.textContent = 'Ouvindo... fale sua resposta'
     statusEl.className = 'audio-status active'
   }
@@ -955,7 +961,7 @@ function initSpeech() {
     ta.value = (juntarSemDuplicar(textoConsolidado, textoSessao) + ' ' + interim).trim()
     ta.dispatchEvent(new Event('input'))
     statusEl.textContent = interim
-      ? '🔴 "' + interim.slice(0, 50) + (interim.length > 50 ? '...' : '') + '"'
+      ? 'Ouvindo: "' + interim.slice(0, 50) + (interim.length > 50 ? '...' : '') + '"'
       : 'Ouvindo... continue falando'
   }
 
@@ -1006,11 +1012,11 @@ function pararGravacao() {
   clearTimeout(restartTimeoutId)
   try { recognition.stop() } catch (e) {}
   const btn = document.getElementById('micBtn')
-  btn.classList.remove('recording'); btn.textContent = '🎙️'
+  btn.classList.remove('recording'); btn.innerHTML = SVG_MICROFONE
   const statusEl = document.getElementById('audioStatus')
   const texto = document.getElementById('clinicalInput').value.trim()
   if (texto.length > 0) {
-    statusEl.textContent = '✓ Transcrição concluída — revise o texto antes de enviar'
+    statusEl.textContent = 'Transcrição concluída — revise o texto antes de enviar'
     statusEl.className = 'audio-status done'
   } else {
     statusEl.textContent = 'Clique no microfone para falar sua resposta'
@@ -1203,7 +1209,7 @@ async function enviarMensagemChat() {
     typing.classList.remove('visible')
 
     if (data.erro) {
-      adicionarMensagemChat('sistema', '⚠️ ' + (data.mensagem || 'Erro ao processar.'))
+      adicionarMensagemChat('sistema', data.mensagem || 'Erro ao processar.')
       return
     }
 
@@ -1222,7 +1228,7 @@ async function enviarMensagemChat() {
 
   } catch (err) {
     typing.classList.remove('visible')
-    adicionarMensagemChat('sistema', '⚠️ Falha de conexão: ' + (err.message || 'tente novamente.'))
+    adicionarMensagemChat('sistema', 'Falha de conexão: ' + (err.message || 'tente novamente.'))
   } finally {
     sendBtn.disabled = false
     input.focus()
@@ -1339,7 +1345,7 @@ async function carregarComparacao() {
     let html = ''
     data.exemplos.forEach(function (ex) {
       html += '<div class="comp-card"><div class="comp-card-header">' +
-        '<div class="comp-card-id">🎭 ' + ex.id + ' · Perfil: ' + (ex.perfil || '—') + '</div>' +
+        '<div class="comp-card-id">' + ex.id + ' · Perfil: ' + (ex.perfil || '—') + '</div>' +
         '<span class="comp-card-nota">' + Number(ex.nota).toFixed(1) + '/10</span></div>' +
         '<div class="comp-card-body">' +
         '<div class="comp-label">Trecho da resposta</div>' +
@@ -1372,7 +1378,7 @@ async function salvarDiario() {
     })
     const data = await res.json()
     if (data.sucesso) {
-      status.textContent = '✓ Reflexão salva.'; status.className = 'diario-status ok'
+      status.textContent = 'Reflexão salva.'; status.className = 'diario-status ok'
       document.getElementById('diarioInput').value = ''
       carregarEntradasDiario()
     } else { throw new Error('erro') }
@@ -1395,7 +1401,7 @@ async function analisarDiario() {
     txt.textContent = data.analise || 'Sem análise disponível.'
     box.classList.add('visible')
   } catch (err) { txt.textContent = 'Erro ao gerar análise.'; box.classList.add('visible') }
-  finally { btn.disabled = false; btn.textContent = '✨ Ver análise semanal da IA' }
+  finally { btn.disabled = false; btn.textContent = 'Ver análise semanal da IA' }
 }
 
 async function carregarEntradasDiario() {
@@ -1530,11 +1536,11 @@ function falarTexto(texto) {
 
 // ── ESTADO EMOCIONAL DO PACIENTE ────────────────────────────────────
 const ESTADOS_EMOCIONAIS = {
-  aberto: { icon: '🟢', label: 'Aberto', cor: 'var(--success)', pct: 85 },
-  engajado: { icon: '🔵', label: 'Engajado', cor: 'var(--cyan)', pct: 70 },
-  neutro: { icon: '⚪', label: 'Neutro', cor: 'var(--text-faint)', pct: 50 },
-  resistente: { icon: '🟡', label: 'Resistente', cor: '#f5c163', pct: 35 },
-  fechado: { icon: '🔴', label: 'Fechado', cor: 'var(--danger)', pct: 15 }
+  aberto: { label: 'Aberto', cor: 'var(--success)', pct: 85 },
+  engajado: { label: 'Engajado', cor: 'var(--cyan)', pct: 70 },
+  neutro: { label: 'Neutro', cor: 'var(--text-faint)', pct: 50 },
+  resistente: { label: 'Resistente', cor: '#f5c163', pct: 35 },
+  fechado: { label: 'Fechado', cor: 'var(--danger)', pct: 15 }
 }
 
 function inferirEstadoPaciente(texto) {
@@ -1556,7 +1562,7 @@ function atualizarEstadoPaciente(texto) {
   const def = ESTADOS_EMOCIONAIS[estado]
   const wrap = document.getElementById('estadoPaciente')
   wrap.classList.add('visible')
-  document.getElementById('estadoIcon').textContent = def.icon
+  document.getElementById('estadoIcon').style.background = def.cor
   document.getElementById('estadoValor').textContent = def.label
   document.getElementById('estadoValor').style.color = def.cor
   document.getElementById('estadoBarra').style.width = def.pct + '%'
@@ -1705,7 +1711,7 @@ function abrirProntuario() {
       '<div><div style="font-size:11px;color:#999;margin-bottom:2px;">Nota final</div><div class="prontuario-nota-num">' + d.nota + '/10</div><span class="prontuario-resultado ' + aprovClass + '">' + d.aprovado + '</span></div>' +
       '<div class="prontuario-action-btns">' +
         '<button class="pron-btn-fechar" onclick="fecharProntuario()">Fechar</button>' +
-        '<button class="pron-btn-imprimir" onclick="imprimirProntuario()">🖨️ Imprimir / Salvar PDF</button>' +
+        '<button class="pron-btn-imprimir" onclick="imprimirProntuario()">Imprimir / Salvar PDF</button>' +
       '</div>' +
     '</div>'
 
@@ -2803,6 +2809,10 @@ body.alto-contraste .sim-page input:focus {
 
     .sim-page .mode-btn {
       flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
       padding: 10px 14px;
       border-radius: 12px;
       border: 1px solid rgba(255,255,255,0.08);
@@ -3667,7 +3677,7 @@ body.alto-contraste .sim-page input:focus {
 
     .sim-page .selo-desafio.visible { display: flex; }
 
-    .sim-page .selo-icon { font-size: 28px; }
+    .sim-page .selo-icon { flex-shrink: 0; color: #f5c163; }
 
     .sim-page .selo-info {}
     .sim-page .selo-label { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #f5c163; }
@@ -3732,7 +3742,7 @@ body.alto-contraste .sim-page input:focus {
     }
     .sim-page .estado-paciente.visible { display: flex; }
 
-    .sim-page .estado-icon { font-size: 18px; transition: all .4s; }
+    .sim-page .estado-icon { width: 12px; height: 12px; flex-shrink: 0; border-radius: 999px; background: var(--text-faint); transition: background-color .4s; }
 
     .sim-page .estado-info { flex: 1; }
     .sim-page .estado-label {

@@ -28,27 +28,27 @@
   <!-- MODAL ONBOARDING -->
   <div class="modal-overlay" id="onboardingModal">
     <div class="modal-card" style="max-width:500px;" role="dialog" aria-modal="true" aria-labelledby="tituloOnboarding">
-      <div class="modal-icon" style="background:rgba(110,231,255,0.1);border-color:rgba(110,231,255,0.2);color:var(--cyan);" aria-hidden="true">👋</div>
+      <div class="modal-icon" style="background:rgba(110,231,255,0.1);border-color:rgba(110,231,255,0.2);color:var(--cyan);" aria-hidden="true">S</div>
       <h2 id="tituloOnboarding">Bem-vindo ao SENA!</h2>
       <div id="onboardingSteps">
         <div class="onboard-step active">
           <p style="font-size:15px;">Este é o seu painel de progresso. Aqui você acompanha sua evolução clínica.</p>
           <div style="text-align:left;background:rgba(110,231,255,0.05);padding:14px;border-radius:12px;margin-bottom:16px;">
-            <div style="font-size:12px;color:var(--cyan);font-weight:700;margin-bottom:6px;">📊 VISÃO GERAL</div>
+            <div style="font-size:12px;color:var(--cyan);font-weight:700;margin-bottom:6px;">VISÃO GERAL</div>
             <div style="font-size:13px;color:var(--text-soft);">Veja suas notas, sequência de prática e posição no ranking.</div>
           </div>
         </div>
         <div class="onboard-step">
           <p style="font-size:15px;">Os módulos são liberados conforme você avança.</p>
           <div style="text-align:left;background:rgba(126,240,194,0.05);padding:14px;border-radius:12px;margin-bottom:16px;">
-            <div style="font-size:12px;color:var(--success);font-weight:700;margin-bottom:6px;">🔓 LIBERAÇÃO PROGRESSIVA</div>
+            <div style="font-size:12px;color:var(--success);font-weight:700;margin-bottom:6px;">LIBERAÇÃO PROGRESSIVA</div>
             <div style="font-size:13px;color:var(--text-soft);">Complete todas as aulas de um módulo para desbloquear o próximo.</div>
           </div>
         </div>
         <div class="onboard-step">
           <p style="font-size:15px;">Pratique regularmente para manter sua sequência!</p>
           <div style="text-align:left;background:rgba(255,107,136,0.05);padding:14px;border-radius:12px;margin-bottom:16px;">
-            <div style="font-size:12px;color:var(--danger);font-weight:700;margin-bottom:6px;">🔥 STREAK</div>
+            <div style="font-size:12px;color:var(--danger);font-weight:700;margin-bottom:6px;">STREAK</div>
             <div style="font-size:13px;color:var(--text-soft);">Pratique todos os dias para acumular dias consecutivos e não perder o ritmo.</div>
           </div>
         </div>
@@ -61,7 +61,7 @@
   <!-- MODAL WHATSAPP -->
   <div class="modal-overlay" id="modalWpp">
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="tituloWpp">
-      <div class="modal-icon" style="background:rgba(37,211,102,0.1);border-color:rgba(37,211,102,0.25);color:#25d366;" aria-hidden="true">💬</div>
+      <div class="modal-icon" style="background:rgba(37,211,102,0.1);border-color:rgba(37,211,102,0.25);color:#25d366;" aria-hidden="true"><Icone nome="chat" :tamanho="24" /></div>
       <h2 id="tituloWpp">Ativar alertas no WhatsApp</h2>
       <div class="wpp-step active" id="wppStep1">
         <p>Receba uma mensagem automática se ficar mais de 10 dias sem praticar. É gratuito — basta ativar em 2 passos.</p>
@@ -75,13 +75,13 @@
       <div class="wpp-step" id="wppStep2">
         <p>Passo 2 de 2 — Ative o serviço enviando esta mensagem exata para o número abaixo:</p>
         <div class="wpp-code" style="background:rgba(255,255,255,0.05);padding:10px;border-radius:6px;font-family:monospace;margin:10px 0;">I allow callmebot to send me messages</div>
-        <a id="wppLink" href="#" target="_blank" class="btn-wpp" style="display:inline-block; margin-bottom:16px; text-decoration:none;">📲 Abrir WhatsApp e enviar</a>
+        <a id="wppLink" href="#" target="_blank" class="btn-wpp" style="display:inline-block; margin-bottom:16px; text-decoration:none;">Abrir WhatsApp e enviar</a>
         <p style="color:var(--text-faint);font-size:12px;margin-bottom:16px;">Após enviar a mensagem, clique em "Já ativei"</p>
         <button class="btn-primary" @click="confirmarWpp">✓ Já ativei</button>
         <button class="btn-secondary" @click="fecharModalWpp">Cancelar</button>
       </div>
       <div class="wpp-step" id="wppStep3">
-        <p style="font-size:32px;margin-bottom:12px;">✅</p>
+        <p style="margin-bottom:12px;color:var(--success);"><Icone nome="check-circulo" :tamanho="32" /></p>
         <p>Perfeito! Você receberá uma mensagem no WhatsApp se ficar mais de 10 dias sem praticar.</p>
         <button class="btn-primary" @click="fecharModalWpp" style="margin-top:8px;">Entendi</button>
       </div>
@@ -91,7 +91,7 @@
   <div class="shell" id="appShell">
 
     <div class="cert-banner" id="certBanner">
-      <h2>🏆 Você está elegível para a certificação!</h2>
+      <h2>Você está elegível para a certificação!</h2>
       <p>Concluiu todas as aulas do curso. Emita agora seu certificado oficial do IBSDH.</p>
       <button class="btn-cert" @click="irParaCertificado">Emitir meu certificado</button>
     </div>
@@ -107,7 +107,7 @@
         </div>
         <div class="hero-right">
           <div class="hero-email" id="emailDisplay"></div>
-          <div class="rank-badge" id="rankBadge">🏆 Ranking <span id="rankPos">—</span>º</div>
+          <div class="rank-badge" id="rankBadge">Ranking <span id="rankPos">—</span>º</div>
           <div style="display:flex;gap:8px;margin-top:4px;">
             <!-- title não é nome acessível confiável (não aparece em toque e
                  alguns leitores ignoram). Sem aria-label, o nome do botão era
@@ -115,7 +115,7 @@
                  preferência está ligada. -->
             <button type="button" class="acess-btn" @click="toggleTema"
                     :aria-pressed="String(prefs.claro)"
-                    aria-label="Tema claro" title="Alternar tema claro/escuro">☀️</button>
+                    aria-label="Tema claro" title="Alternar tema claro/escuro"><Icone nome="sol" /></button>
             <button type="button" class="acess-btn" @click="toggleAltoContraste"
                     :aria-pressed="String(prefs.contraste)"
                     aria-label="Alto contraste" title="Alto contraste">◐</button>
@@ -153,7 +153,7 @@
 
     <!-- CHECKLIST INICIAL -->
     <div id="checklistInicial" style="display:none;margin-bottom:22px;padding:20px;border-radius:16px;border:1px solid rgba(110,231,255,0.2);background:rgba(110,231,255,0.03);">
-      <div style="font-size:13px;font-weight:700;color:var(--cyan);margin-bottom:12px;">✅ Comece por aqui</div>
+      <div style="font-size:13px;font-weight:700;color:var(--cyan);margin-bottom:12px;">Comece por aqui</div>
       <div style="display:grid;gap:8px;">
         <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-soft);"><span style="color:var(--success);">✓</span> Complete a primeira aula para desbloquear o próximo conteúdo</div>
         <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-soft);"><span style="color:var(--success);">✓</span> Ative os alertas no WhatsApp para não perder o ritmo</div>
@@ -163,7 +163,7 @@
 
     <!-- STREAK -->
     <div class="streak-bar" id="streakBar">
-      <div class="streak-fire">🔥</div>
+      <div class="streak-fire"><Icone nome="chama" :tamanho="22" /></div>
       <div class="streak-info">
         <div class="streak-title" id="streakTitle">Sequência ativa!</div>
         <div class="streak-sub" id="streakSub">Continue praticando para não perder</div>
@@ -213,7 +213,7 @@
       <div class="section-title">Explore</div>
       <div class="premium-grid">
         <router-link to="/ranking.html" class="premium-card" id="premRanking">
-          <div class="premium-icon" style="background: rgba(126,240,194,0.1); border-color: rgba(126,240,194,0.2);">🏆</div>
+          <div class="premium-icon" style="background: rgba(126,240,194,0.1); border-color: rgba(126,240,194,0.2); color: var(--success);"><Icone nome="trofeu" :tamanho="20" /></div>
           <div>
             <div class="premium-title">Ranking</div>
             <div class="premium-sub">Compare-se com outros alunos</div>
@@ -221,7 +221,7 @@
           <span class="premium-arrow">→</span>
         </router-link>
         <router-link to="/desafio.html" class="premium-card" id="premDesafio">
-          <div class="premium-icon" style="background: rgba(245,193,99,0.1); border-color: rgba(245,193,99,0.2);">⚡</div>
+          <div class="premium-icon" style="background: rgba(245,193,99,0.1); border-color: rgba(245,193,99,0.2); color: #f5c163;"><Icone nome="raio" :tamanho="20" /></div>
           <div>
             <div class="premium-title">Desafio Semanal</div>
             <div class="premium-sub">Teste seus conhecimentos</div>
@@ -229,7 +229,7 @@
           <span class="premium-arrow">→</span>
         </router-link>
         <router-link to="/mentor.html" class="premium-card" id="premMentor">
-          <div class="premium-icon" style="background: rgba(110,231,255,0.1); border-color: rgba(110,231,255,0.2);">🎓</div>
+          <div class="premium-icon" style="background: rgba(110,231,255,0.1); border-color: rgba(110,231,255,0.2); color: var(--cyan);"><Icone nome="formatura" :tamanho="20" /></div>
           <div>
             <div class="premium-title">Mentor IA</div>
             <div class="premium-sub">Feedback personalizado</div>
@@ -237,7 +237,7 @@
           <span class="premium-arrow">→</span>
         </router-link>
         <router-link :to="{ path: '/plantao.html', query: { curso: CURSO } }" class="premium-card">
-          <div class="premium-icon" style="background: rgba(255,107,136,0.1); border-color: rgba(255,107,136,0.2);">🚨</div>
+          <div class="premium-icon" style="background: rgba(255,107,136,0.1); border-color: rgba(255,107,136,0.2); color: var(--danger);"><Icone nome="alerta" :tamanho="20" /></div>
           <div>
             <div class="premium-title">Modo Plantão</div>
             <div class="premium-sub">3 casos em sequência, com tempo</div>
@@ -265,7 +265,7 @@
 
     <!-- BANNER WHATSAPP -->
     <div class="wpp-banner" id="wppBanner">
-      <div class="wpp-banner-icon">💬</div>
+      <div class="wpp-banner-icon"><Icone nome="chat" :tamanho="24" /></div>
       <div class="wpp-banner-text">
         <div class="wpp-banner-title">Alertas no WhatsApp</div>
         <div class="wpp-banner-sub" id="wppBannerSub">Receba uma mensagem se ficar mais de 10 dias sem praticar</div>
@@ -279,7 +279,7 @@
         <div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;">Relatório de Evolução Clínica</div>
         <div style="font-size:13px;color:var(--text-soft);">Gerado pela IA com base em todas as suas avaliações — assinatura clínica, padrões de força e recomendações personalizadas.</div>
       </div>
-      <button @click="gerarRelatorio" id="btnRelatorio" class="btn-relatorio">✨ Gerar relatório</button>
+      <button @click="gerarRelatorio" id="btnRelatorio" class="btn-relatorio">Gerar relatório</button>
     </div>
 
     <!-- Modal relatório -->
@@ -303,12 +303,12 @@
 
   <!-- MOBILE NAV -->
   <nav class="mobile-nav" id="mobileNav" aria-label="Atalhos do painel">
-    <a href="#" @click.prevent="scrollPara('hero')" class="mobile-nav-item">🏠<span>Início</span></a>
-    <a href="#" @click.prevent="scrollPara('modulesContainer')" class="mobile-nav-item">📚<span>Aulas</span></a>
-    <a href="#" @click.prevent="scrollPara('premium-nav')" class="mobile-nav-item">🏆<span>Extra</span></a>
+    <a href="#" @click.prevent="scrollPara('hero')" class="mobile-nav-item"><Icone nome="casa" /><span>Início</span></a>
+    <a href="#" @click.prevent="scrollPara('modulesContainer')" class="mobile-nav-item"><Icone nome="livro" /><span>Aulas</span></a>
+    <a href="#" @click.prevent="scrollPara('premium-nav')" class="mobile-nav-item"><Icone nome="trofeu" /><span>Extra</span></a>
   </nav>
   <button type="button" class="btn-flutuante" @click="praticarProximaAula"
-          aria-label="Praticar a próxima aula" title="Praticar agora">⚡</button>
+          aria-label="Praticar a próxima aula" title="Praticar agora"><Icone nome="raio" :tamanho="20" /></button>
 </div>
 </template>
 
@@ -317,6 +317,7 @@ import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { useAccessibility } from '../composables/useAccessibility'
 import { callApi } from '../composables/useApi'
 import GraficoEvolucao from '../components/GraficoEvolucao.vue'
+import Icone from '../components/Icone.vue'
 import DesempenhoPerfis from '../components/DesempenhoPerfis.vue'
 
 // ── ACESSIBILIDADE (composable compartilhado) ──────────────────────
@@ -417,15 +418,25 @@ function atualizarMeta() {
 }
 
 // Conquistas
+// Ícones de traço (24x24, currentColor) em vez de emoji: aqui o badge é
+// montado via innerHTML (fora do template do Vue), então usamos o mesmo
+// desenho de src/components/Icone.vue como string SVG.
+const SVG_CONQUISTA = {
+  alvo: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg>',
+  livro: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H12v18H6.5A2.5 2.5 0 0 1 4 18.5v-13z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H12v18h5.5a2.5 2.5 0 0 0 2.5-2.5v-13z"/></svg>',
+  estrela: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9-6.3 3.9 1.7-7L2 9.2l7.1-.6L12 2z"/></svg>',
+  chama: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1.2 3-3 4.3-3 8a3 3 0 0 0 6 0c0-1-.6-1.8-.6-1.8 1.8 1 2.6 3 2.6 4.8a5 5 0 0 1-10 0c0-4.4 3.4-6.6 5-11z"/></svg>',
+  raio: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>',
+}
 function calcularConquistas() {
   const conquistas = []
   const totalAprovadas = Object.values(progresso).filter(p => p.aprovado === 'SIM').length
-  if (totalAprovadas >= 1) conquistas.push({ icone: '🎯', nome: 'Primeira aprovação', desc: 'Aprovou a primeira aula' })
-  if (totalAprovadas >= 5) conquistas.push({ icone: '📚', nome: 'Estudioso', desc: '5 aulas aprovadas' })
-  if (totalAprovadas >= 10) conquistas.push({ icone: '💪', nome: 'Dedicado', desc: '10 aulas aprovadas' })
+  if (totalAprovadas >= 1) conquistas.push({ icone: 'alvo', nome: 'Primeira aprovação', desc: 'Aprovou a primeira aula' })
+  if (totalAprovadas >= 5) conquistas.push({ icone: 'livro', nome: 'Estudioso', desc: '5 aulas aprovadas' })
+  if (totalAprovadas >= 10) conquistas.push({ icone: 'estrela', nome: 'Dedicado', desc: '10 aulas aprovadas' })
   const streak = calcularStreak()
-  if (streak >= 3) conquistas.push({ icone: '🔥', nome: 'Sequência de 3 dias', desc: '3 dias seguidos praticando' })
-  if (streak >= 7) conquistas.push({ icone: '⚡', nome: 'Imparável', desc: '7 dias seguidos' })
+  if (streak >= 3) conquistas.push({ icone: 'chama', nome: 'Sequência de 3 dias', desc: '3 dias seguidos praticando' })
+  if (streak >= 7) conquistas.push({ icone: 'raio', nome: 'Imparável', desc: '7 dias seguidos' })
   return conquistas
 }
 function renderConquistas() {
@@ -434,7 +445,7 @@ function renderConquistas() {
   const conquistas = calcularConquistas()
   container.innerHTML = conquistas.map(c =>
     `<div class="conquista-badge">
-      <span style="font-size:16px;">${c.icone}</span>
+      <span style="display:inline-flex;color:var(--gold);">${SVG_CONQUISTA[c.icone] || ''}</span>
       <div>
         <div style="font-size:12px;font-weight:700;color:var(--text);">${c.nome}</div>
         <div style="font-size:10px;color:var(--text-faint);">${c.desc}</div>
@@ -595,7 +606,7 @@ async function gerarRelatorio() {
     conteudo.innerHTML = '<div style="padding:24px;text-align:center;color:var(--danger);">Erro ao gerar relatório. Tente novamente.</div>'
   } finally {
     btn.disabled = false
-    btn.textContent = '✨ Gerar relatório'
+    btn.textContent = 'Gerar relatório'
   }
 }
 
@@ -634,7 +645,7 @@ function renderStreak(streak) {
   document.getElementById('streakCount').textContent = streak + (streak === 1 ? ' dia' : ' dias')
   document.getElementById('heroSequencia').textContent = streak
   if (streak >= 7) {
-    document.getElementById('streakTitle').textContent = '🔥 Sequência incrível!'
+    document.getElementById('streakTitle').textContent = 'Sequência incrível!'
     document.getElementById('streakSub').textContent = streak + ' dias seguidos praticando — você está on fire!'
   } else if (streak >= 3) {
     document.getElementById('streakTitle').textContent = 'Sequência ativa!'
@@ -716,7 +727,7 @@ function verificarAlertaInatividade() {
     if (diffDias < 7) return
   }
   localStorage.setItem(keyUltimoAlerta, hoje)
-  const msg = '⚠️ Olá! Faz ' + dias + ' dias que você não pratica no SENA. Que tal retomar hoje? Acesse: https://sena-ibsdh.netlify.app/dashboard.html'
+  const msg = 'Olá! Faz ' + dias + ' dias que você não pratica no SENA. Que tal retomar hoje? Acesse: https://sena-ibsdh.netlify.app/dashboard.html'
   enviarAlertaWpp(numSalvo, msg)
 }
 
@@ -738,7 +749,7 @@ async function buscarPosicaoRanking() {
     document.getElementById('heroPosicao').textContent = data.posicao + 'º'
     // "3º de 42" diz muito mais que "3º" — a mesma posição significa coisas
     // diferentes numa turma de 5 e numa de 500.
-    if (badge && data.total) badge.innerHTML = '🏆 Ranking ' + data.posicao + 'º de ' + data.total
+    if (badge && data.total) badge.innerHTML = 'Ranking ' + data.posicao + 'º de ' + data.total
   } catch (e) {
     if (badge) badge.style.display = 'none'
     console.warn('[SENA] posição no ranking indisponível:', e.message)
@@ -838,7 +849,7 @@ function renderDashboard() {
     const completo = aprovMod === totalMod
     const pctMod = Math.round((aprovMod / totalMod) * 100)
     let badgeClass, badgeText
-    if (bloqueado) { badgeClass = 'locked'; badgeText = '🔒 Bloqueado' }
+    if (bloqueado) { badgeClass = 'locked'; badgeText = 'Bloqueado' }
     else if (completo) { badgeClass = 'done'; badgeText = 'Completo ✓' }
     else if (aprovMod > 0) { badgeClass = 'partial'; badgeText = aprovMod + '/' + totalMod + ' aprovadas' }
     else { badgeClass = 'pending'; badgeText = 'Não iniciado' }
@@ -900,7 +911,8 @@ function renderJornada(bloqueados) {
     const totalMod = mod.aulas.length
     const completo = aprovMod === totalMod
     let estado = bloqueado ? 'locked' : completo ? 'done' : 'active'
-    let icone = completo ? '✓' : bloqueado ? '🔒' : (idx + 1)
+    const svgCadeado = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>'
+    let icone = completo ? '✓' : bloqueado ? svgCadeado : (idx + 1)
     const nomePartes = mod.nome.split('—')
     const nomeCompleto = nomePartes.length > 1 ? nomePartes[1].trim() : mod.nome
     if (idx > 0) {
