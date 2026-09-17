@@ -118,10 +118,12 @@ function buscarEvolucaoPerfis(email, curso) {
 // logo antes de `default:`
 // =============================================================================
 
+// O e-mail vem de emailAutenticado(payload) (ver appscript/autenticacao.gs),
+// nunca de payload.email — achado F1 da auditoria de segurança.
 /*
         case 'evolucao_perfis':
           try {
-            return jsonResponse(buscarEvolucaoPerfis(payload.email, payload.curso));
+            return jsonResponse(buscarEvolucaoPerfis(emailAutenticado(payload), payload.curso));
           } catch(err) {
             return jsonResponse({ erro: true, mensagem: err.message });
           }

@@ -11,6 +11,17 @@ incompleta do arquivo original virar a fonte da verdade.
 
 ## Arquivos
 
+- `autenticacao.gs` — **arquivo novo, leia primeiro.** Login por código de
+  uso único (OTP) por e-mail + token de sessão assinado (HMAC-SHA256). Fecha
+  os achados **F1** (nenhuma ação verificava se quem enviava um `email` era
+  realmente o dono dele) e parte do **F2** (certificado emitido/consultado só
+  com e-mail, nome e curso, sem prova de identidade) da auditoria de
+  segurança. Cole como arquivo separado, defina a propriedade de script
+  `SESSION_SECRET` (Configurações do projeto → Propriedades do script; gere
+  com `openssl rand -hex 32`), adicione os 2 casos novos no `switch` do
+  `doPost` (linhas no fim do arquivo) e siga a seção **Autenticação (F1/F2)**
+  abaixo para trocar `payload.email` por `emailAutenticado(payload)` em toda
+  ação existente que hoje confia nesse campo.
 - `funcoes-corrigidas.gs` — correções de funções que já existiam no `Codigo.gs`
   (ver "O que foi corrigido" abaixo).
 - `plantao.gs` — **arquivo novo**, do Modo Plantão. Cole como um arquivo
@@ -44,6 +55,77 @@ incompleta do arquivo original virar a fonte da verdade.
   (`node appscript/teste-groq-resiliente.mjs`).
 - `teste-posicao-ranking.mjs` — testes da posição no ranking
   (`node appscript/teste-posicao-ranking.mjs`).
+- `teste-autenticacao.mjs` — testes do OTP e do token de sessão: código
+  expira, força bruta no código é bloqueada, token adulterado ou assinado com
+  outro segredo é rejeitado (`node appscript/teste-autenticacao.mjs`).
+- `teste-plantao.mjs` — testes da neutralização de fórmula (F7) e da exigência
+  de token no plantão, incluindo o caso que prova o fim do IDOR: um payload
+  com `token` de um aluno e `email` de outro grava os dados sob o e-mail do
+  **token**, nunca o do campo forjado (`node appscript/teste-plantao.mjs`).
+
+## Autenticação (F1/F2 da auditoria de segurança)
+
+**O problema que isso resolve:** antes desta mudança, toda ação que lida com
+dados de um aluno específico (progresso, respostas, mentoria, certificado)
+recebia um campo `email` no corpo da requisição e confiava nele cegamente —
+sem senha, sem OTP, sem token. Qualquer pessoa que soubesse ou adivinhasse o
+e-mail de um aluno podia ver os dados dele, ou pior, **emitir certificado
+profissional em nome dele**. Depois de colar `autenticacao.gs` e configurar
+`SESSION_SECRET`, o cliente passa a provar quem é (via token assinado, obtido
+depois de confirmar um código enviado por e-mail) em vez de simplesmente
+dizer quem é.
+
+**O que fazer no `Codigo.gs`:** adicione os casos `solicitar_codigo` e
+`confirmar_codigo` (comentário no fim de `autenticacao.gs`) e troque, em
+**todo** caso do `switch` do `doPost` abaixo, o uso de `payload.email` (ou
+`payload.dados.email`) por `emailAutenticado(payload)` (ou, quando o e-mail
+vier dentro de `dados`, injete-o ali antes de chamar a função — veja o
+exemplo em `plantao.gs`, caso `plantao_avaliar`):
+
+| Action                  | Onde o e-mail está hoje      | Prioridade |
+|--------------------------|------------------------------|------------|
+| `emitir_certificado`     | `payload.email`              | **Crítica (F2)** — troque também o destinatário de `reenviar_certificado` para o e-mail do token, nunca um valor do payload |
+| `reenviar_certificado`   | `payload.email`              | **Crítica (F2)** |
+| `consultar_certificado`  | `payload.email`              | Crítica (F2) |
+| `verificar_acesso`       | `payload.email`              | Alta (F1) |
+| `progresso`              | `payload.email`              | Alta (F1) |
+| `buscar_mentor`          | `payload.email`              | Alta (F1) |
+| `submeter_mentor`        | `payload.email`              | Alta (F1) |
+| `historico`              | `payload.email`              | Alta (F1) |
+| `tentativa_anterior`     | `payload.email`              | Já ajustado em `tentativa-anterior.gs` |
+| `posicao_ranking`        | `payload.email`              | Já ajustado em `posicao-ranking.gs` |
+| `evolucao_perfis`        | `payload.email`              | Já ajustado em `evolucao-perfis.gs` |
+| `relatorio_evolucao`     | `payload.email`              | Alta (F1) |
+| `salvar_diario`          | `payload.email`              | Média (F1) |
+| `analise_diario`         | `payload.email`              | Média (F1) |
+| `buscar_diario`          | `payload.email`              | Média (F1) |
+| `avaliar`                | `payload.dados.email`        | Alta (F1) — mesmo padrão do `plantao_avaliar` |
+| `comparacao_anonima`     | `payload.email`              | Média (F1) |
+| `boas_vindas`            | `payload.email`              | Baixa (mensagem de boas-vindas, não é dado sensível) |
+| `prontuario`             | `payload.email`              | Alta (F1) |
+| `plantao_avaliar`        | `payload.dados.email`        | Já ajustado em `plantao.gs` |
+| `plantao_historico`      | `payload.email`              | Já ajustado em `plantao.gs` |
+
+Ações que **não** precisam mudar porque não identificam um aluno específico:
+`ranking_perfis`, `desafio_semanal`, `gerar_desafio`, `base_aula`,
+`estrutura_curso`, `replay`, `plantao_gerar`, `conversar` (turno de conversa
+com o paciente virtual — não lê nem grava dado por e-mail).
+
+**Não invento aqui uma versão nova de `emitir_certificado`/
+`consultar_certificado`/`reenviar_certificado`** porque a implementação atual
+delas não está neste repositório (só o `Codigo.gs` do editor do Apps Script
+tem esse código) — eu não tenho como saber os critérios de elegibilidade
+exatos sem arriscar quebrá-los. A troca é sempre a mesma, ponto a ponto: onde
+a função hoje lê `payload.email` para decidir de quem é o certificado, ler
+`emailAutenticado(payload)` em vez disso; e onde `reenviar_certificado` decide
+para qual endereço mandar o PDF, usar sempre esse mesmo e-mail autenticado —
+nunca um campo separado do payload que o cliente possa preencher com outro
+endereço.
+
+**No frontend** (dentro deste repositório): as telas Dashboard, Mentor,
+Simulador, Plantão e Certificado já foram adaptadas para pedir o código por
+e-mail e usar o token nas chamadas — ver `src/composables/useAuth.js` e
+`src/components/LoginModal.vue`.
 
 > O `plantao.gs` traz uma função `testarPlantao()`. Rode-a no editor (seletor
 > de função → **Executar**) e leia o **Registro de execução**: ela dispara as

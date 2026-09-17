@@ -1,28 +1,9 @@
 <template>
   <div class="page">
     <!-- Identificação -->
-    <div class="email-modal-overlay" :class="{ visible: mostrarModalEmail }">
-      <div class="email-modal" role="dialog" aria-modal="true" aria-labelledby="tituloPlantaoEmail">
-        <h2 id="tituloPlantaoEmail">Identificação</h2>
-        <p>Informe seu e-mail para iniciar o plantão.</p>
-        <label class="sr-only" for="plantaoEmail">Seu e-mail</label>
-        <input
-          id="plantaoEmail"
-          ref="emailInputRef"
-          class="email-input"
-          type="email"
-          autocomplete="email"
-          v-model="emailInput"
-          placeholder="seu@email.com"
-          aria-describedby="plantaoEmailErro"
-          @keydown.enter="confirmarEmail"
-        />
-        <div class="email-error" id="plantaoEmailErro" role="alert">{{ erroEmail }}</div>
-        <button type="button" class="email-btn" @click="confirmarEmail">Entrar</button>
-      </div>
-    </div>
+    <LoginModal v-if="!logado" @success="aoLogar" />
 
-    <div class="shell">
+    <div class="shell" v-else>
       <router-link class="btn-voltar" to="/dashboard.html">← Voltar ao painel</router-link>
 
       <!-- ── ABERTURA ─────────────────────────────────────────────── -->
@@ -218,6 +199,8 @@
 import { ref, computed, nextTick, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { callApi, TIMEOUT_IA_MS } from '../composables/useApi'
+import { estaAutenticado, getToken, limparSessao, pareceErroDeSessao } from '../composables/useAuth'
+import LoginModal from '../components/LoginModal.vue'
 
 const route = useRoute()
 
@@ -232,11 +215,7 @@ const erro = ref('')
 const erroDetalhe = ref('')
 const inicioPendente = ref(false)
 
-const email = ref('')
-const emailInput = ref('')
-const erroEmail = ref('')
-const mostrarModalEmail = ref(false)
-const emailInputRef = ref(null)
+const logado = ref(false)
 const respostaRef = ref(null)
 
 const idPlantao = ref('')
@@ -341,16 +320,9 @@ function pillClasse(nota) {
   return nota >= 7 ? 'ok' : 'baixa'
 }
 
-// ── E-mail ──────────────────────────────────────────────────────────
-async function confirmarEmail() {
-  const val = (emailInput.value || '').trim().toLowerCase()
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
-    erroEmail.value = 'E-mail inválido.'
-    return
-  }
-  email.value = val
-  localStorage.setItem('sena_email', val)
-  mostrarModalEmail.value = false
+// ── Login ───────────────────────────────────────────────────────────
+function aoLogar() {
+  logado.value = true
   carregarHistorico()
   // O modal interrompeu um "Iniciar plantão": retoma de onde parou, em vez de
   // devolver o aluno à tela inicial para clicar de novo.
@@ -360,14 +332,12 @@ async function confirmarEmail() {
   }
 }
 
-function garantirEmail() {
-  const salvo = localStorage.getItem('sena_email')
-  if (salvo && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(salvo)) {
-    email.value = salvo
+function garantirLogado() {
+  if (estaAutenticado()) {
+    logado.value = true
     return true
   }
-  mostrarModalEmail.value = true
-  nextTick(() => emailInputRef.value && emailInputRef.value.focus())
+  logado.value = false
   return false
 }
 
@@ -375,8 +345,13 @@ function garantirEmail() {
 async function carregarHistorico() {
   try {
     const data = await callApi({
-      action: 'plantao_historico', email: email.value, curso: cursoAtual()
+      action: 'plantao_historico', token: getToken(), curso: cursoAtual()
     })
+    if (data && data.erro && pareceErroDeSessao(data.mensagem)) {
+      limparSessao()
+      logado.value = false
+      return
+    }
     turnos.value = data.turnos || []
   } catch (e) { /* histórico é acessório: falhar aqui não bloqueia o plantão */ }
 }
@@ -384,7 +359,7 @@ async function carregarHistorico() {
 async function iniciarPlantao() {
   erro.value = ''
   erroDetalhe.value = ''
-  if (!garantirEmail()) {
+  if (!garantirLogado()) {
     inicioPendente.value = true
     return
   }
@@ -422,7 +397,7 @@ async function enviarCaso(expirou) {
     const data = await callApi({
       action: 'plantao_avaliar',
       dados: {
-        email: email.value,
+        token: getToken(),
         curso: cursoAtual(),
         id_plantao: idPlantao.value,
         numero: casoAtual.value + 1,
@@ -472,13 +447,10 @@ function reiniciar() {
   casoAtual.value = 0
 }
 
-// Carrega histórico logo de cara se o e-mail já estiver salvo
-if (typeof localStorage !== 'undefined') {
-  const salvo = localStorage.getItem('sena_email')
-  if (salvo && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(salvo)) {
-    email.value = salvo
-    carregarHistorico()
-  }
+// Carrega histórico logo de cara se já houver uma sessão válida
+if (estaAutenticado()) {
+  logado.value = true
+  carregarHistorico()
 }
 
 document.title = 'SENA | Modo Plantão'
@@ -642,30 +614,6 @@ h1 { font-size:clamp(24px,5vw,34px);font-weight:800;letter-spacing:-.03em;margin
 .turno-media { font-size:12px;color:var(--text-faint); }
 
 .footer { text-align:center;padding:22px 0;color:var(--text-faint);font-size:12px; }
-
-/* ── Modal de e-mail ────────────────────────────────────────────── */
-.email-modal-overlay {
-  display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);
-  z-index:9999;place-items:center;padding:24px;
-}
-.email-modal-overlay.visible { display:grid; }
-.email-modal {
-  width:100%;max-width:420px;background:linear-gradient(180deg,rgba(27,23,17,0.99),rgba(15,13,9,1));
-  border:1px solid var(--border);border-radius:22px;padding:32px 28px;text-align:center;
-}
-.email-modal h2 { font-size:18px;font-weight:800;margin-bottom:8px; }
-.email-modal p { color:var(--text-soft);font-size:13px;margin-bottom:18px; }
-.email-input {
-  width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.09);
-  background:rgba(16,14,10,0.6);color:var(--text);font-family:inherit;font-size:14px;
-  outline:none;text-align:center;margin-bottom:10px;
-}
-.email-error { color:var(--danger);font-size:12px;min-height:16px;margin-bottom:8px; }
-.email-btn {
-  width:100%;padding:13px;border-radius:11px;border:none;
-  background:linear-gradient(135deg,var(--danger),#eeb09e);color:#1a120c;
-  font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;
-}
 
 @media (max-width: 480px) {
   .shell { padding:16px 14px 32px; }

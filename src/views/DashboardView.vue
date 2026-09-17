@@ -6,24 +6,8 @@
     <div class="loader-text">Carregando</div>
   </div>
 
-  <!-- MODAL EMAIL -->
-  <div class="modal-overlay" id="modalOverlay">
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="tituloModalEmail">
-      <div class="modal-icon" aria-hidden="true">S</div>
-      <h2 id="tituloModalEmail">Identificação do Aluno</h2>
-      <p>Informe o e-mail da sua matrícula para acessar seu painel de progresso no SENA.</p>
-      <!-- O placeholder não é rótulo: ele desaparece quando o aluno começa a
-           digitar e não é lido como nome do campo por parte dos leitores de
-           tela. Nenhum campo do sistema tinha nome acessível. -->
-      <label class="sr-only" for="emailInput">E-mail da sua matrícula</label>
-      <input class="modal-input" type="email" id="emailInput" placeholder="seu@email.com" autocomplete="email" aria-describedby="emailError" />
-      <!-- role="alert" faz o leitor de tela anunciar o erro na hora. Antes a
-           mensagem aparecia só visualmente. -->
-      <div class="modal-error" id="emailError" role="alert"></div>
-      <button class="btn-primary" id="btnConfirmarEmail" @click="confirmarEmail">Acessar meu painel</button>
-      <div class="modal-note">IBSDH — Instituto Bruno Sena de Desenvolvimento Humano</div>
-    </div>
-  </div>
+  <!-- LOGIN (código por e-mail — ver appscript/autenticacao.gs) -->
+  <LoginModal v-if="mostrarLoginModal" :erro-inicial="erroAcesso" @success="aoLogar" />
 
   <!-- MODAL ONBOARDING -->
   <div class="modal-overlay" id="onboardingModal">
@@ -313,12 +297,14 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, nextTick } from 'vue'
 import { useAccessibility } from '../composables/useAccessibility'
 import { callApi } from '../composables/useApi'
+import { estaAutenticado, getToken, getEmailExibicao, limparSessao } from '../composables/useAuth'
 import GraficoEvolucao from '../components/GraficoEvolucao.vue'
 import Icone from '../components/Icone.vue'
 import DesempenhoPerfis from '../components/DesempenhoPerfis.vue'
+import LoginModal from '../components/LoginModal.vue'
 
 // ── ACESSIBILIDADE (composable compartilhado) ──────────────────────
 // Usa as mesmas chaves de localStorage que o dashboard.html original já usava.
@@ -355,6 +341,9 @@ let TOTAL_AULAS = 0
 let email = ''
 let progresso = {}
 let montado = true
+
+const mostrarLoginModal = ref(false)
+const erroAcesso = ref('')
 
 // Loader visibility
 function mostrarLoader() {
@@ -466,7 +455,7 @@ const notaMinimaPerfis = ref(7)
 
 async function carregarDesempenhoPerfis() {
   try {
-    const data = await callApi({ action: 'evolucao_perfis', email: email, curso: CURSO })
+    const data = await callApi({ action: 'evolucao_perfis', token: getToken(), curso: CURSO })
     if (!montado || !data || data.erro) return
     perfisDesempenho.value = data.perfis || []
     if (data.nota_minima) notaMinimaPerfis.value = Number(data.nota_minima)
@@ -514,57 +503,58 @@ function solicitarNotificacoes() {
   if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission()
 }
 
-async function verificarAcesso(emailCheck) {
+async function verificarAcesso() {
   const res = await fetch(APPS_SCRIPT_URL, {
     method: 'POST',
-    body: JSON.stringify({ action: 'verificar_acesso', email: emailCheck, curso: CURSO })
+    body: JSON.stringify({ action: 'verificar_acesso', token: getToken(), curso: CURSO })
   })
   if (!res.ok) throw new Error('Servidor indisponível')
   return await res.json()
 }
 
 function mostrarModal() {
-  document.getElementById('modalOverlay').classList.add('visible')
-  setTimeout(() => document.getElementById('emailInput').focus(), 100)
+  erroAcesso.value = ''
+  mostrarLoginModal.value = true
 }
 
-function onEmailInputKeydown(e) {
-  if (e.key === 'Enter') confirmarEmail()
+// Chamado pelo LoginModal depois que o código por e-mail foi confirmado
+// (ver appscript/autenticacao.gs). A partir daqui o cliente já provou quem é
+// — falta só checar se este curso está liberado para ele (verificar_acesso é
+// uma regra de negócio, não de identidade, por isso continua sendo um passo
+// separado, agora feito com o token em vez de um e-mail cru).
+// Fecha e reabre o modal para que a próxima montagem releia erroAcesso como
+// erro inicial — a prop só é lida uma vez, no setup() do componente.
+function reabrirLoginComErro(mensagem) {
+  erroAcesso.value = mensagem
+  mostrarLoginModal.value = false
+  nextTick(() => { mostrarLoginModal.value = true })
 }
 
-async function confirmarEmail() {
-  const val = (document.getElementById('emailInput').value || '').trim().toLowerCase()
-  const err = document.getElementById('emailError')
-  const btn = document.getElementById('btnConfirmarEmail')
-  if (!val) { err.textContent = 'Informe seu e-mail.'; return }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { err.textContent = 'E-mail inválido.'; return }
-  err.textContent = ''
-  btn.disabled = true
-  btn.textContent = 'Verificando acesso...'
+async function aoLogar(dados) {
+  mostrarLoader()
   let acesso = null
   try {
-    acesso = await verificarAcesso(val)
+    acesso = await verificarAcesso()
   } catch (e) {
-    btn.disabled = false
-    btn.textContent = 'Acessar meu painel'
-    err.textContent = 'Não foi possível verificar seu acesso. Tente novamente em instantes.'
+    if (!montado) return
+    ocultarLoader()
+    reabrirLoginComErro('Não foi possível verificar seu acesso. Tente novamente em instantes.')
     return
   }
-  btn.disabled = false
-  btn.textContent = 'Acessar meu painel'
+  if (!montado) return
   if (!acesso || !acesso.liberado) {
-    err.textContent = (acesso && acesso.mensagem) || 'Acesso não autorizado para este e-mail.'
+    limparSessao()
+    ocultarLoader()
+    reabrirLoginComErro((acesso && acesso.mensagem) || 'Acesso não autorizado para este e-mail.')
     return
   }
-  email = val
-  localStorage.setItem('sena_email', email)
-  document.getElementById('modalOverlay').classList.remove('visible')
-  mostrarLoader()
+  email = dados.email
+  mostrarLoginModal.value = false
   carregarProgresso()
 }
 
 function sair() {
-  localStorage.removeItem('sena_email')
+  limparSessao()
   location.reload()
 }
 
@@ -583,7 +573,7 @@ async function gerarRelatorio() {
   try {
     const res = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      body: JSON.stringify({ action: 'relatorio_evolucao', email: email, curso: CURSO })
+      body: JSON.stringify({ action: 'relatorio_evolucao', token: getToken(), curso: CURSO })
     })
     const data = await res.json()
     if (data.insuficiente) {
@@ -737,7 +727,7 @@ function verificarAlertaInatividade() {
 async function buscarPosicaoRanking() {
   const badge = document.getElementById('rankBadge')
   try {
-    const data = await callApi({ action: 'posicao_ranking', email: email, curso: CURSO })
+    const data = await callApi({ action: 'posicao_ranking', token: getToken(), curso: CURSO })
     if (!montado) return
     if (!data || data.erro || !data.posicao) {
       // Sem posição (aluno ainda sem registro no curso): o badge não faz
@@ -760,7 +750,7 @@ async function carregarProgresso() {
   try {
     const [resEst, resProg] = await Promise.all([
       fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'estrutura_curso', curso: CURSO }) }),
-      fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'progresso', email: email, curso: CURSO }) })
+      fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'progresso', token: getToken(), curso: CURSO }) })
     ])
     const estrutura = await resEst.json()
     if (!montado) return
@@ -1024,7 +1014,9 @@ function onModulesClick(e) {
 
 function abrirSimulador(codigoAula) {
   registrarPraticaHoje()
-  const url = '/index.html?email=' + encodeURIComponent(email) + '&curso=' + encodeURIComponent(CURSO) + '&aula=' + encodeURIComponent(codigoAula)
+  // O Simulador lê a sessão do próprio localStorage (mesma origem) — não
+  // precisa, e não deve, receber o e-mail do aluno como parâmetro na URL.
+  const url = '/index.html?curso=' + encodeURIComponent(CURSO) + '&aula=' + encodeURIComponent(codigoAula)
   window.open(url, '_blank')
 }
 
@@ -1065,7 +1057,7 @@ async function recarregarProgressoSilencioso() {
   try {
     const res = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      body: JSON.stringify({ action: 'progresso', email: email, curso: CURSO })
+      body: JSON.stringify({ action: 'progresso', token: getToken(), curso: CURSO })
     })
     const novoProg = await res.json()
     if (novoProg && !novoProg.erro) {
@@ -1087,22 +1079,22 @@ onMounted(async () => {
   onboardingSteps = document.querySelectorAll('.onboard-step')
 
   mostrarLoader()
-  const salvo = localStorage.getItem('sena_email')
-  if (salvo && !/\{\{/.test(salvo) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(salvo)) {
+  if (estaAutenticado()) {
+    const salvo = getEmailExibicao()
     try {
-      const acesso = await verificarAcesso(salvo)
+      const acesso = await verificarAcesso()
       if (!montado) return
       if (acesso && acesso.liberado) {
         email = salvo
         carregarProgresso()
       } else {
-        localStorage.removeItem('sena_email')
+        limparSessao()
         ocultarLoader()
         mostrarModal()
       }
     } catch (e) {
       if (!montado) return
-      localStorage.removeItem('sena_email')
+      limparSessao()
       ocultarLoader()
       mostrarModal()
     }
@@ -1111,7 +1103,6 @@ onMounted(async () => {
     mostrarModal()
   }
 
-  document.getElementById('emailInput').addEventListener('keydown', onEmailInputKeydown)
   document.getElementById('modulesContainer').addEventListener('click', onModulesClick)
 
   window.addEventListener('storage', onStorageEvent)
@@ -1119,7 +1110,6 @@ onMounted(async () => {
 
 onUnmounted(() => {
   montado = false
-  document.getElementById('emailInput')?.removeEventListener('keydown', onEmailInputKeydown)
   document.getElementById('modulesContainer')?.removeEventListener('click', onModulesClick)
   window.removeEventListener('storage', onStorageEvent)
   limparClasses()

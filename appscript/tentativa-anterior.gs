@@ -140,11 +140,14 @@ function buscarTextoDaResposta(ss, idResposta) {
 // logo antes de `default:`
 // =============================================================================
 
+// O e-mail vem de emailAutenticado(payload) (ver appscript/autenticacao.gs),
+// nunca de payload.email — sem isso, qualquer cliente podia pedir a
+// tentativa anterior "de" outro aluno só trocando esse campo (achado F1).
 /*
         case 'tentativa_anterior':
           try {
             return jsonResponse(buscarTentativaAnterior(
-              payload.email, payload.curso, payload.aula, payload.excluir_id));
+              emailAutenticado(payload), payload.curso, payload.aula, payload.excluir_id));
           } catch(err) {
             return jsonResponse({ erro: true, mensagem: err.message });
           }
