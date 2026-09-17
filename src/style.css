@@ -32,10 +32,10 @@ body {
      escura em vez do branco padrão do navegador. O tema claro do Dashboard
      e do Simulador (body.tema-claro) tem especificidade maior e continua
      sobrescrevendo isso normalmente. */
-  background-color: #06080c;
+  background-color: #12100c;
 }
 
-body.tema-claro { background-color: #f8fafc; }
+body.tema-claro { background-color: #f6f1e7; }
 body.alto-contraste { background-color: #000; }
 
 /* ─── Foco visível ───────────────────────────────────────────────────────
@@ -129,4 +129,17 @@ select:focus-visible {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* ─── Título de cada tela ────────────────────────────────────────────────
+   Cada view só tem UM <h1> (o título do hero). Antes, só o Dashboard
+   declarava 'Space Grotesk' nesse h1 — as outras cinco telas caíam no Inter
+   padrão, então a marca do produto mudava de fonte ao trocar de página.
+   Uma regra global, no lugar de repetir font-family em cada view, garante
+   que a mesma serifada apareça em todo lugar sem exigir que cada tela seja
+   tocada. */
+h1 {
+  font-family: var(--sena-fonte-titulo);
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
