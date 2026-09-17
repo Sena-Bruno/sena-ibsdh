@@ -587,7 +587,7 @@ async function gerarRelatorio() {
     })
     const data = await res.json()
     if (data.insuficiente) {
-      conteudo.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-soft);">' + data.mensagem + '</div>'
+      conteudo.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-soft);">' + esc(data.mensagem) + '</div>'
       return
     }
     if (data.erro) throw new Error(data.mensagem)

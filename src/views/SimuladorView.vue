@@ -775,13 +775,13 @@ async function carregarHistorico() {
       const data = t.timestamp ? new Date(t.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'
       return '<div class="tentativa-card ' + statusClass + '">' +
         '<div class="tentativa-header">' +
-          '<div class="tentativa-meta">Tentativa ' + (anteriores.length - idx) + ' &middot; ' + data + ' &middot; Perfil: ' + (t.perfil || '—') + '</div>' +
+          '<div class="tentativa-meta">Tentativa ' + (anteriores.length - idx) + ' &middot; ' + data + ' &middot; Perfil: ' + escaparHtml(t.perfil || '—') + '</div>' +
           '<span class="tentativa-nota ' + statusClass + '">' + Number(t.nota || 0).toFixed(1) + '/10</span>' +
         '</div>' +
         '<div class="tentativa-body">' +
-          (t.fortes ? '<div class="tentativa-label good">Pontos fortes</div><div>' + t.fortes + '</div><div class="tentativa-sep"></div>' : '') +
-          (t.atencao ? '<div class="tentativa-label bad">Pontos de atenção</div><div>' + t.atencao + '</div><div class="tentativa-sep"></div>' : '') +
-          (t.prescricao ? '<div class="tentativa-label mid">Prescrição</div><div>' + t.prescricao + '</div>' : '') +
+          (t.fortes ? '<div class="tentativa-label good">Pontos fortes</div><div>' + escaparHtml(t.fortes) + '</div><div class="tentativa-sep"></div>' : '') +
+          (t.atencao ? '<div class="tentativa-label bad">Pontos de atenção</div><div>' + escaparHtml(t.atencao) + '</div><div class="tentativa-sep"></div>' : '') +
+          (t.prescricao ? '<div class="tentativa-label mid">Prescrição</div><div>' + escaparHtml(t.prescricao) + '</div>' : '') +
         '</div>' +
       '</div>'
     }).join('')
