@@ -104,25 +104,25 @@ onMounted(() => {
    mesma divisão do ranking.html original. Se o fundo ficar no .shell, que é
    limitado a 760px, sobra o branco do body nas laterais da tela. */
 .page {
-  --text:#edf3f8;--text-soft:#9aa7b5;--text-faint:#8492a2;
-  --cyan:#59e1ff;--gold:#d6b36a;--success:#7ef0c2;--danger:#ff6b88;
-  --border:rgba(112,141,173,0.15);--shadow:0 20px 48px rgba(0,0,0,0.38);
-  font-family:'Inter',sans-serif;min-height:100vh;background:radial-gradient(ellipse at top left,rgba(89,225,255,0.07),transparent 30%),linear-gradient(180deg,#06080c,#090c11);color:var(--text);line-height:1.6; }
+  --text:#f4eee1;--text-soft:#b7ab98;--text-faint:#9c9080;
+  --cyan:#7fc9bb;--gold:#d3a24f;--success:#93bf78;--danger:#e0846a;
+  --border:rgba(168,150,120,0.15);--shadow:0 20px 48px rgba(0,0,0,0.38);
+  font-family:'Inter',sans-serif;min-height:100vh;background:radial-gradient(ellipse at top left,rgba(127,201,187,0.07),transparent 30%),linear-gradient(180deg,#12100c,#1a160f);color:var(--text);line-height:1.6; }
 .shell { max-width:760px;margin:0 auto;padding:28px 18px 48px; }
-.hero { background:linear-gradient(180deg,rgba(16,21,29,0.92),rgba(10,14,20,0.98));border:1px solid var(--border);border-radius:24px;padding:28px;margin-bottom:22px;box-shadow:var(--shadow); }
+.hero { background:linear-gradient(180deg,rgba(27,23,17,0.92),rgba(15,13,9,0.98));border:1px solid var(--border);border-radius:24px;padding:28px;margin-bottom:22px;box-shadow:var(--shadow); }
 .eyebrow { display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);color:var(--gold);font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:12px; }
-.eyebrow::before { content:'';width:6px;height:6px;border-radius:999px;background:var(--gold);box-shadow:0 0 8px rgba(214,179,106,0.55); }
+.eyebrow::before { content:'';width:6px;height:6px;border-radius:999px;background:var(--gold);box-shadow:0 0 8px rgba(211,162,79,0.55); }
 h1 { font-size:clamp(24px,5vw,36px);font-weight:800;letter-spacing:-.03em;margin-bottom:6px; }
 .sub { color:var(--text-soft);font-size:14px; }
 .curso-selector { display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap; }
 .curso-btn { padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:var(--text-soft);font-family:'Inter',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .18s; }
-.curso-btn.ativo { background:rgba(89,225,255,0.12);border-color:rgba(89,225,255,0.3);color:var(--cyan); }
+.curso-btn.ativo { background:rgba(127,201,187,0.12);border-color:rgba(127,201,187,0.3);color:var(--cyan); }
 .loading { text-align:center;padding:48px;color:var(--text-faint);font-size:14px; }
 .ranking-lista { display:grid;gap:12px; }
 .ranking-item { display:flex;align-items:center;gap:16px;padding:18px 20px;border-radius:18px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);transition:border-color .18s; }
-.ranking-item:hover { border-color:rgba(89,225,255,0.15); }
+.ranking-item:hover { border-color:rgba(127,201,187,0.15); }
 .rank-pos { flex-shrink:0;width:36px;height:36px;border-radius:11px;display:grid;place-items:center;font-size:14px;font-weight:800;background:rgba(255,255,255,0.05);color:var(--text-faint); }
-.rank-pos.top1 { background:rgba(245,193,99,0.15);color:#f5c163; }
+.rank-pos.top1 { background:rgba(211,162,79,0.15);color:#d3a24f; }
 .rank-pos.top2 { background:rgba(200,200,200,0.12);color:#d0d0d0; }
 .rank-pos.top3 { background:rgba(200,140,80,0.12);color:#cd8c50; }
 .rank-info { flex:1;min-width:0; }

@@ -130,17 +130,17 @@ const recomendacao = computed(() => {
 
   /* Cada tema tem seu próprio passo, validado contra a superfície daquele
      tema — inverter a cor do escuro automaticamente não funciona. */
-  --perf-barra: #2e9bb8;
+  --perf-barra: #2e7c70;
   --perf-trilho: rgba(255, 255, 255, 0.04);
   /* O tooltip flutua sobre texto, então precisa ser opaco. O token --panel é
      translúcido (0.7) e deixa o conteúdo de trás atravessar a leitura. */
-  --perf-tip-bg: #10151d;
+  --perf-tip-bg: #1b1711;
 }
 /* O trilho precisa escurecer no tema claro: branco a 4% sobre fundo claro
    some, e com ele some a régua de 0 a 10 que dá sentido ao tamanho da barra. */
 body.tema-claro .perf-card {
-  --perf-barra: #0891b2;
-  --perf-trilho: rgba(15, 23, 42, 0.07);
+  --perf-barra: #1f6b63;
+  --perf-trilho: rgba(44,36,24, 0.07);
   --perf-tip-bg: #ffffff;
 }
 /* No alto contraste quem manda é o token do tema, não a nossa escolha. */
@@ -190,7 +190,7 @@ body.alto-contraste .perf-card {
 }
 
 /* Barra: ponta arredondada, base quadrada — cresce de uma linha de base só.
-   O tom é um degrau mais escuro do cyan do tema: o #6ee7ff da interface tem
+   O tom é um degrau mais escuro do cyan do tema: o #7fc9bb da interface tem
    luminosidade alta demais para preencher áreas grandes no fundo escuro. */
 .perf-barra {
   position: absolute; left: 0; top: 0; bottom: 0;
