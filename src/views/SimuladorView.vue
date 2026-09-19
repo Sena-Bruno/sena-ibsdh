@@ -1,19 +1,8 @@
 <template>
 <div class="sim-page">
 
-  <!-- Modal email -->
-  <div class="modal-overlay" id="emailModalOverlay">
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="tituloModalEmailSim">
-      <div class="modal-icon" aria-hidden="true">S</div>
-      <h2 id="tituloModalEmailSim">Identificação do Aluno</h2>
-      <p>Informe o e-mail utilizado na sua matrícula para acessar o simulador clínico.</p>
-      <label class="sr-only" for="emailModalInput">E-mail da sua matrícula</label>
-      <input class="modal-input" type="email" id="emailModalInput" placeholder="seu@email.com" autocomplete="email" aria-describedby="emailModalError" />
-      <div class="modal-error" id="emailModalError" role="alert"></div>
-      <button class="btn-confirm" @click="confirmarEmailModal">Entrar no SENA</button>
-      <div class="modal-note">IBSDH — Instituto Bruno Sena de Desenvolvimento Humano</div>
-    </div>
-  </div>
+  <!-- Login (código por e-mail — ver appscript/autenticacao.gs) -->
+  <LoginModal v-if="mostrarLoginModal" @success="aoLogarSimulador" />
 
   <!-- Prontuário Modal -->
   <div class="prontuario-overlay" id="prontuarioOverlay">
@@ -347,7 +336,9 @@ Mínimo: 50 caracteres | Máximo: 5000 caracteres"></textarea>
 import { onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useAccessibility } from '../composables/useAccessibility'
 import { juntarSemDuplicar, montarTextoDaSessao } from '../composables/useTranscricao'
+import { estaAutenticado, getToken, getEmailExibicao } from '../composables/useAuth'
 import Icone from '../components/Icone.vue'
+import LoginModal from '../components/LoginModal.vue'
 
 // ── ACESSIBILIDADE (composable compartilhado) ──────────────────────
 // Usa as mesmas chaves de localStorage do Dashboard, para que o tema/alto
@@ -386,6 +377,7 @@ const aberto = reactive({
   contraste: false, replay: false, comparacao: false, diario: false, historico: false
 })
 const vozLigada = ref(false)
+const mostrarLoginModal = ref(false)
 
 const urlParams = new URLSearchParams(window.location.search)
 const SYSTEM = {
@@ -457,15 +449,13 @@ function sanitize(str) {
 }
 
 // ── EMAIL / ACESSO ──────────────────────────────────────────────────
-function confirmarEmailModal() {
-  const val = (document.getElementById('emailModalInput').value || '').trim().toLowerCase()
-  const err = document.getElementById('emailModalError')
-  if (!val) { err.textContent = 'Informe seu e-mail.'; return }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { err.textContent = 'E-mail inválido.'; return }
-  err.textContent = ''
-  SYSTEM.operator = val
-  localStorage.setItem('sena_email', val)
-  document.getElementById('emailModalOverlay').classList.remove('visible')
+// Chamado pelo LoginModal depois que o código por e-mail foi confirmado (ver
+// appscript/autenticacao.gs). SYSTEM.operator guarda o e-mail só para exibição
+// (saudação, chaves de localStorage por aluno) — toda chamada ao backend usa
+// o token, nunca este campo, para provar de quem são os dados pedidos.
+function aoLogarSimulador({ email }) {
+  SYSTEM.operator = email
+  mostrarLoginModal.value = false
   document.getElementById('gateLoading').style.display = 'grid'
   carregarDadosAula()
 }
@@ -590,7 +580,7 @@ async function submitAnalysis() {
   document.getElementById('clinicalInput').disabled = true
 
   const payload = {
-    email: SYSTEM.operator,
+    token: getToken(),
     curso: SYSTEM.protocol,
     aula: SYSTEM.module,
     resposta: input,
@@ -728,7 +718,7 @@ async function perguntarTutor() {
       method: 'POST',
       body: JSON.stringify({
         action: 'tutor',
-        dados: { email: SYSTEM.operator, curso: SYSTEM.protocol, aula: SYSTEM.module, pergunta }
+        dados: { token: getToken(), curso: SYSTEM.protocol, aula: SYSTEM.module, pergunta }
       })
     })
     const data = await res.json()
@@ -752,7 +742,7 @@ async function carregarHistorico() {
       method: 'POST',
       body: JSON.stringify({
         action: 'historico',
-        email: SYSTEM.operator,
+        token: getToken(),
         curso: SYSTEM.protocol,
         aula: SYSTEM.module
       })
@@ -775,13 +765,13 @@ async function carregarHistorico() {
       const data = t.timestamp ? new Date(t.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'
       return '<div class="tentativa-card ' + statusClass + '">' +
         '<div class="tentativa-header">' +
-          '<div class="tentativa-meta">Tentativa ' + (anteriores.length - idx) + ' &middot; ' + data + ' &middot; Perfil: ' + (t.perfil || '—') + '</div>' +
+          '<div class="tentativa-meta">Tentativa ' + (anteriores.length - idx) + ' &middot; ' + data + ' &middot; Perfil: ' + escaparHtml(t.perfil || '—') + '</div>' +
           '<span class="tentativa-nota ' + statusClass + '">' + Number(t.nota || 0).toFixed(1) + '/10</span>' +
         '</div>' +
         '<div class="tentativa-body">' +
-          (t.fortes ? '<div class="tentativa-label good">Pontos fortes</div><div>' + t.fortes + '</div><div class="tentativa-sep"></div>' : '') +
-          (t.atencao ? '<div class="tentativa-label bad">Pontos de atenção</div><div>' + t.atencao + '</div><div class="tentativa-sep"></div>' : '') +
-          (t.prescricao ? '<div class="tentativa-label mid">Prescrição</div><div>' + t.prescricao + '</div>' : '') +
+          (t.fortes ? '<div class="tentativa-label good">Pontos fortes</div><div>' + escaparHtml(t.fortes) + '</div><div class="tentativa-sep"></div>' : '') +
+          (t.atencao ? '<div class="tentativa-label bad">Pontos de atenção</div><div>' + escaparHtml(t.atencao) + '</div><div class="tentativa-sep"></div>' : '') +
+          (t.prescricao ? '<div class="tentativa-label mid">Prescrição</div><div>' + escaparHtml(t.prescricao) + '</div>' : '') +
         '</div>' +
       '</div>'
     }).join('')
@@ -832,7 +822,7 @@ async function carregarContraste() {
       method: 'POST',
       body: JSON.stringify({
         action: 'tentativa_anterior',
-        email: SYSTEM.operator, curso: SYSTEM.protocol, aula: SYSTEM.module,
+        token: getToken(), curso: SYSTEM.protocol, aula: SYSTEM.module,
         excluir_id: ultimoResultado && ultimoResultado.id_avaliacao ? ultimoResultado.id_avaliacao : ''
       })
     })
@@ -1247,7 +1237,7 @@ async function encerrarSessaoChat() {
   document.getElementById('chatEncerrarBtn').disabled = true
   document.getElementById('chatSendBtn').disabled = true
   const payload = {
-    email: SYSTEM.operator, curso: SYSTEM.protocol, aula: SYSTEM.module,
+    token: getToken(), curso: SYSTEM.protocol, aula: SYSTEM.module,
     resposta: transcricao, perfil: activeProfile.name, modo: 'conversa'
   }
   abrirSupervisor(payload)
@@ -1334,7 +1324,7 @@ async function carregarComparacao() {
       body: JSON.stringify({
         action: 'comparacao_anonima',
         curso: SYSTEM.protocol, aula: SYSTEM.module,
-        perfil: activeProfile ? activeProfile.name : '', email: SYSTEM.operator
+        perfil: activeProfile ? activeProfile.name : '', token: getToken()
       })
     })
     const data = await res.json()
@@ -1374,7 +1364,7 @@ async function salvarDiario() {
   try {
     const res = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      body: JSON.stringify({ action: 'salvar_diario', email: SYSTEM.operator, curso: SYSTEM.protocol, aula: SYSTEM.module, reflexao: texto })
+      body: JSON.stringify({ action: 'salvar_diario', token: getToken(), curso: SYSTEM.protocol, aula: SYSTEM.module, reflexao: texto })
     })
     const data = await res.json()
     if (data.sucesso) {
@@ -1395,7 +1385,7 @@ async function analisarDiario() {
   try {
     const res = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      body: JSON.stringify({ action: 'analise_diario', email: SYSTEM.operator, curso: SYSTEM.protocol })
+      body: JSON.stringify({ action: 'analise_diario', token: getToken(), curso: SYSTEM.protocol })
     })
     const data = await res.json()
     txt.textContent = data.analise || 'Sem análise disponível.'
@@ -1409,7 +1399,7 @@ async function carregarEntradasDiario() {
   try {
     const res = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      body: JSON.stringify({ action: 'buscar_diario', email: SYSTEM.operator, curso: SYSTEM.protocol, aula: SYSTEM.module })
+      body: JSON.stringify({ action: 'buscar_diario', token: getToken(), curso: SYSTEM.protocol, aula: SYSTEM.module })
     })
     const data = await res.json()
     if (!data.entradas || data.entradas.length === 0) { container.classList.remove('visible'); return }
@@ -1594,7 +1584,7 @@ async function carregarBoasVindas() {
       method: 'POST',
       body: JSON.stringify({
         action: 'boas_vindas',
-        email: SYSTEM.operator,
+        token: getToken(),
         curso: SYSTEM.protocol,
         aula: SYSTEM.module,
         nome: nomeExibir
@@ -1733,7 +1723,7 @@ async function gerarProntuarioAposSessao(resultado) {
       method: 'POST',
       body: JSON.stringify({
         action: 'prontuario',
-        email: SYSTEM.operator,
+        token: getToken(),
         curso: SYSTEM.protocol,
         aula: SYSTEM.module,
         historico: historico,
@@ -1752,9 +1742,6 @@ async function gerarProntuarioAposSessao(resultado) {
 window.fecharProntuario = fecharProntuario
 window.imprimirProntuario = imprimirProntuario
 
-function onEmailModalKeydown(e) {
-  if (e.key === 'Enter') confirmarEmailModal()
-}
 function onChatInputInput() {
   this.style.height = 'auto'
   this.style.height = Math.min(this.scrollHeight, 120) + 'px'
@@ -1771,19 +1758,13 @@ onMounted(() => {
   if (!SYSTEM.protocol || !SYSTEM.module) {
     document.getElementById('gateLoading').textContent =
       'Parâmetros incompletos. Use ?curso=Practitioner&aula=Aula_1'
+  } else if (estaAutenticado()) {
+    SYSTEM.operator = getEmailExibicao() || ''
+    carregarDadosAula()
   } else {
-    const salvo = localStorage.getItem('sena_email')
-    if (salvo && !/\{\{/.test(salvo) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(salvo)) {
-      SYSTEM.operator = salvo
-      carregarDadosAula()
-    } else {
-      document.getElementById('gateLoading').style.display = 'none'
-      document.getElementById('emailModalOverlay').classList.add('visible')
-      setTimeout(() => document.getElementById('emailModalInput').focus(), 100)
-    }
+    document.getElementById('gateLoading').style.display = 'none'
+    mostrarLoginModal.value = true
   }
-
-  document.getElementById('emailModalInput').addEventListener('keydown', onEmailModalKeydown)
 
   initSpeech()
 
@@ -2148,21 +2129,7 @@ body.alto-contraste .sim-page input:focus {
     .sim-page .result-block-text { color: var(--text-soft); font-size: 14px; line-height: 1.75; white-space: pre-line; }
     .sim-page .footer-note { text-align: center; padding: 20px; color: var(--text-faint); font-size: 12px; }
 
-    /* MODAL EMAIL */
-    .sim-page .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); z-index:9999; place-items:center; padding:24px; }
-    .sim-page .modal-overlay.visible { display:grid; }
-    .sim-page .modal-card { width:100%; max-width:440px; background:linear-gradient(180deg,rgba(27,23,17,0.99),rgba(15,13,9,1)); border:1px solid var(--border); border-radius:var(--radius-xl); box-shadow:var(--shadow-premium); padding:36px 30px 30px; text-align:center; animation:popIn .2s ease; }
     @keyframes popIn { from{opacity:0;transform:scale(.96) translateY(12px)} to{opacity:1;transform:scale(1) translateY(0)} }
-    .sim-page .modal-icon { width:52px;height:52px;margin:0 auto 18px;border-radius:16px;display:grid;place-items:center;background:var(--cyan-dim);border:1px solid rgba(127,201,187,0.2);font-size:20px;font-weight:800;color:var(--cyan); }
-    .sim-page .modal-card h2 { font-size:20px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px; }
-    .sim-page .modal-card p { color:var(--text-soft);font-size:14px;line-height:1.7;margin-bottom:22px; }
-    .sim-page .modal-input { width:100%;padding:13px 16px;border-radius:var(--radius-md);border:1px solid rgba(255,255,255,0.09);background:rgba(16,14,10,0.6);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;outline:none;text-align:center;transition:border-color .18s,box-shadow .18s;margin-bottom:10px; }
-    .sim-page .modal-input:focus { border-color:rgba(127,201,187,0.32);box-shadow:0 0 0 3px rgba(127,201,187,0.07); }
-    .sim-page .modal-input::placeholder { color:#5a6470; }
-    .sim-page .modal-error { color:var(--danger);font-size:13px;min-height:18px;margin-bottom:10px; }
-    .sim-page .btn-confirm { width:100%;padding:14px 20px;border:none;border-radius:var(--radius-md);background:linear-gradient(135deg,var(--cyan),#b7ded4);color:#12100c;font-family:'Inter',sans-serif;font-size:13px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;transition:transform .18s,box-shadow .18s; }
-    .sim-page .btn-confirm:hover { transform:translateY(-1px);box-shadow:0 12px 24px rgba(127,201,187,0.2); }
-    .sim-page .modal-note { margin-top:14px;color:var(--text-faint);font-size:11px; }
     .sim-page .gate-loading { min-height:70vh;display:grid;place-items:center;color:var(--text-soft);font-size:14px; }
 
     /* ÁUDIO */

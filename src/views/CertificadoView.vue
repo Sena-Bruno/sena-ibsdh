@@ -1,6 +1,8 @@
 <template>
   <div class="wrap">
-    <div class="card">
+    <LoginModal v-if="!logado" @success="aoLogar" />
+
+    <div class="card" v-else>
       <div class="header">
         <div class="eyebrow">Certificação SENA</div>
         <h1>Certificado de Proficiência Clínica</h1>
@@ -13,9 +15,13 @@
         <div class="alert error" :class="{ visible: alertaErro }" role="alert">{{ alertaErro }}</div>
         <div class="alert success" :class="{ visible: alertaSucesso }" role="status">{{ alertaSucesso }}</div>
 
+        <!-- O e-mail não é mais digitável aqui: ele vem da sessão autenticada
+             (token do login por código), nunca de um campo que o próprio
+             cliente preenche — era assim que qualquer pessoa podia consultar
+             ou emitir certificado em nome de outro aluno (achado F2). -->
         <div class="field">
-          <label for="emailInput">E-mail</label>
-          <input id="emailInput" type="email" autocomplete="email" placeholder="seuemail@exemplo.com" v-model="form.email">
+          <label>Conta</label>
+          <div class="value-static">{{ emailLogado }} <button type="button" class="btn-trocar" @click="trocarConta">trocar</button></div>
         </div>
 
         <div class="field">
@@ -81,14 +87,41 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { callApi } from '../composables/useApi'
+import { estaAutenticado, getToken, getEmailExibicao, limparSessao, pareceErroDeSessao } from '../composables/useAuth'
+import LoginModal from '../components/LoginModal.vue'
 
-const form = ref({ email: '', curso: '', nome: '' })
+const logado = ref(false)
+const emailLogado = ref('')
+const form = ref({ curso: '', nome: '' })
 const status = ref(null)
 const alertaErro = ref('')
 const alertaSucesso = ref('')
 const consultando = ref(false)
 const emitindo = ref(false)
 const reenviando = ref(false)
+
+function aoLogar({ email }) {
+  logado.value = true
+  emailLogado.value = email
+}
+
+function trocarConta() {
+  limparSessao()
+  logado.value = false
+  status.value = null
+}
+
+// Chame depois de qualquer resposta de erro do backend: se o token expirou
+// ou é inválido, força novo login em vez de deixar o aluno preso num estado
+// de "erro ao consultar" sem entender por quê.
+function tratarPossivelSessaoExpirada(mensagem) {
+  if (pareceErroDeSessao(mensagem)) {
+    limparSessao()
+    logado.value = false
+    return true
+  }
+  return false
+}
 
 const statusTexto = computed(() => {
   if (!status.value) return ''
@@ -103,20 +136,22 @@ function limparAlertas() {
 }
 
 async function consultarStatus() {
-  const email = form.value.email.trim()
   const curso = form.value.curso.trim()
-  if (!email || !curso) {
+  if (!curso) {
     limparAlertas()
-    alertaErro.value = 'Informe o e-mail e o curso.'
+    alertaErro.value = 'Informe o curso.'
     return
   }
   limparAlertas()
   status.value = null
   consultando.value = true
   try {
-    const data = await callApi({ action: 'consultar_certificado', email, curso })
+    const data = await callApi({ action: 'consultar_certificado', token: getToken(), curso })
     if (!data) { alertaErro.value = 'Resposta vazia do servidor.'; return }
-    if (data.erro) { alertaErro.value = data.mensagem || 'Erro ao consultar status.'; return }
+    if (data.erro) {
+      if (!tratarPossivelSessaoExpirada(data.mensagem)) alertaErro.value = data.mensagem || 'Erro ao consultar status.'
+      return
+    }
     status.value = data
     if (data.mensagem) {
       if (data.status === 'emitido' || data.status === 'elegivel') alertaSucesso.value = data.mensagem
@@ -130,19 +165,21 @@ async function consultarStatus() {
 }
 
 async function emitirCertificado() {
-  const email = form.value.email.trim()
   const curso = form.value.curso.trim()
   const nome = form.value.nome.trim()
-  if (!email || !curso || !nome) {
-    alertaErro.value = 'Informe e-mail, curso e nome completo para emitir.'
+  if (!curso || !nome) {
+    alertaErro.value = 'Informe curso e nome completo para emitir.'
     return
   }
   limparAlertas()
   emitindo.value = true
   try {
-    const data = await callApi({ action: 'emitir_certificado', email, curso, nome })
+    const data = await callApi({ action: 'emitir_certificado', token: getToken(), curso, nome })
     if (!data) { alertaErro.value = 'Resposta vazia do servidor.'; return }
-    if (data.erro) { alertaErro.value = data.mensagem || 'Erro ao emitir certificado.'; return }
+    if (data.erro) {
+      if (!tratarPossivelSessaoExpirada(data.mensagem)) alertaErro.value = data.mensagem || 'Erro ao emitir certificado.'
+      return
+    }
     status.value = data
     alertaSucesso.value = data.mensagem || 'Certificado emitido com sucesso.'
   } catch (err) {
@@ -153,18 +190,20 @@ async function emitirCertificado() {
 }
 
 async function reenviarCertificado() {
-  const email = form.value.email.trim()
   const curso = form.value.curso.trim()
-  if (!email || !curso) {
-    alertaErro.value = 'Informe e-mail e curso.'
+  if (!curso) {
+    alertaErro.value = 'Informe o curso.'
     return
   }
   limparAlertas()
   reenviando.value = true
   try {
-    const data = await callApi({ action: 'reenviar_certificado', email, curso })
+    const data = await callApi({ action: 'reenviar_certificado', token: getToken(), curso })
     if (!data) { alertaErro.value = 'Resposta vazia do servidor.'; return }
-    if (data.erro) { alertaErro.value = data.mensagem || 'Erro ao reenviar certificado.'; return }
+    if (data.erro) {
+      if (!tratarPossivelSessaoExpirada(data.mensagem)) alertaErro.value = data.mensagem || 'Erro ao reenviar certificado.'
+      return
+    }
     alertaSucesso.value = data.mensagem || 'Certificado reenviado com sucesso.'
   } catch (err) {
     alertaErro.value = (err && err.message) || 'Falha de conexão.'
@@ -175,12 +214,10 @@ async function reenviarCertificado() {
 
 onMounted(() => {
   document.title = 'Certificação SENA | IBSDH'
-  try {
-    const salvo = localStorage.getItem('sena_email')
-    if (salvo && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(salvo)) {
-      form.value.email = salvo
-    }
-  } catch (e) {}
+  if (estaAutenticado()) {
+    logado.value = true
+    emailLogado.value = getEmailExibicao() || ''
+  }
 })
 </script>
 
@@ -231,6 +268,15 @@ h1 { font-size: 34px; line-height: 1.05; font-weight: 800; letter-spacing: -0.03
 .body { padding: 24px 28px 28px; display: grid; gap: 16px; }
 .field { display: grid; gap: 8px; }
 label { color: var(--text-soft); font-size: 12px; font-weight: 700; letter-spacing: .10em; text-transform: uppercase; }
+.value-static {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03); color: var(--text); font-size: 15px;
+}
+.btn-trocar {
+  background: none; border: none; color: var(--cyan); font-size: 12px;
+  text-decoration: underline; cursor: pointer; padding: 0; white-space: nowrap;
+}
 input {
   width: 100%; padding: 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08);
   background: rgba(255,255,255,0.03); color: var(--text); font-size: 15px; outline: none;

@@ -102,10 +102,12 @@ function buscarPosicaoRanking(email, curso) {
 // logo antes de `default:`
 // =============================================================================
 
+// O e-mail vem de emailAutenticado(payload) (ver appscript/autenticacao.gs),
+// nunca de payload.email — achado F1 da auditoria de segurança.
 /*
         case 'posicao_ranking':
           try {
-            return jsonResponse(buscarPosicaoRanking(payload.email, payload.curso));
+            return jsonResponse(buscarPosicaoRanking(emailAutenticado(payload), payload.curso));
           } catch(err) {
             return jsonResponse({ erro: true, mensagem: err.message });
           }

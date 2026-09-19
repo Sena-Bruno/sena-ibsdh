@@ -1,27 +1,8 @@
 <template>
   <div class="page">
-    <div class="email-modal-overlay" :class="{ visible: mostrarModalEmail }">
-      <div class="email-modal" role="dialog" aria-modal="true" aria-labelledby="tituloMentorEmail">
-        <h2 id="tituloMentorEmail">Identificação do Mentor</h2>
-        <p>Informe seu e-mail para acessar o modo mentor.</p>
-        <label class="sr-only" for="mentorEmail">Seu e-mail</label>
-        <input
-          id="mentorEmail"
-          ref="emailInputRef"
-          class="email-input"
-          type="email"
-          autocomplete="email"
-          v-model="emailInput"
-          placeholder="seu@email.com"
-          aria-describedby="mentorEmailErro"
-          @keydown.enter="confirmarEmail"
-        />
-        <div class="email-error" id="mentorEmailErro" role="alert">{{ erroEmail }}</div>
-        <button type="button" class="email-btn" @click="confirmarEmail">Entrar como mentor</button>
-      </div>
-    </div>
+    <LoginModal v-if="!logado" @success="aoLogar" />
 
-    <div class="shell">
+    <div class="shell" v-else>
       <router-link class="btn-voltar" to="/dashboard.html">← Voltar ao painel</router-link>
       <div class="hero">
         <div class="eyebrow">Comunidade de prática</div>
@@ -77,17 +58,15 @@
 </template>
 
 <script setup>
-import { ref, reactive, nextTick, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { callApi } from '../composables/useApi'
+import { estaAutenticado, getToken, limparSessao, pareceErroDeSessao } from '../composables/useAuth'
+import LoginModal from '../components/LoginModal.vue'
 
 const route = useRoute()
 
-const email = ref('')
-const emailInput = ref('')
-const erroEmail = ref('')
-const mostrarModalEmail = ref(false)
-const emailInputRef = ref(null)
+const logado = ref(false)
 
 const carregando = ref(true)
 const erro = ref(false)
@@ -104,15 +83,8 @@ function trechoLimitado(trecho) {
   return t.substring(0, 500) + (t.length >= 500 ? '...' : '"')
 }
 
-async function confirmarEmail() {
-  const val = (emailInput.value || '').trim().toLowerCase()
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
-    erroEmail.value = 'E-mail inválido.'
-    return
-  }
-  email.value = val
-  localStorage.setItem('sena_email', val)
-  mostrarModalEmail.value = false
+function aoLogar() {
+  logado.value = true
   carregarItens()
 }
 
@@ -122,7 +94,12 @@ async function carregarItens() {
   try {
     const curso = route.query.curso || 'Practitioner'
     const aula = route.query.aula || ''
-    const data = await callApi({ action: 'buscar_mentor', email: email.value, curso, aula })
+    const data = await callApi({ action: 'buscar_mentor', token: getToken(), curso, aula })
+    if (data && data.erro && pareceErroDeSessao(data.mensagem)) {
+      limparSessao()
+      logado.value = false
+      return
+    }
     itens.value = data.itens || []
   } catch (e) {
     erro.value = true
@@ -142,7 +119,7 @@ async function enviarFeedback(idAvaliacao) {
   statusTexto[idAvaliacao] = ''
   statusClasse[idAvaliacao] = ''
   try {
-    const data = await callApi({ action: 'submeter_mentor', email: email.value, id_avaliacao: idAvaliacao, feedback })
+    const data = await callApi({ action: 'submeter_mentor', token: getToken(), id_avaliacao: idAvaliacao, feedback })
     if (data.sucesso) {
       statusTexto[idAvaliacao] = '✓ Feedback enviado. Obrigado!'
       statusClasse[idAvaliacao] = 'ok'
@@ -158,16 +135,11 @@ async function enviarFeedback(idAvaliacao) {
   }
 }
 
-onMounted(async () => {
+onMounted(() => {
   document.title = 'SENA | Modo Mentor'
-  const salvo = localStorage.getItem('sena_email')
-  if (salvo && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(salvo)) {
-    email.value = salvo
+  if (estaAutenticado()) {
+    logado.value = true
     carregarItens()
-  } else {
-    mostrarModalEmail.value = true
-    await nextTick()
-    emailInputRef.value && emailInputRef.value.focus()
   }
 })
 </script>
@@ -210,14 +182,6 @@ h1 { font-size:clamp(24px,5vw,36px);font-weight:800;letter-spacing:-.03em;margin
 .mentor-btn-enviar:disabled { opacity:.5;cursor:not-allowed;transform:none; }
 .vazio { padding:32px;text-align:center;color:var(--text-faint);font-size:14px;border:1px solid rgba(255,255,255,0.05);border-radius:16px; }
 .footer { text-align:center;padding:20px 0;color:var(--text-faint);font-size:12px; }
-.email-modal-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);z-index:9999;place-items:center;padding:24px; }
-.email-modal-overlay.visible { display:grid; }
-.email-modal { width:100%;max-width:420px;background:linear-gradient(180deg,rgba(27,23,17,0.99),rgba(15,13,9,1));border:1px solid var(--border);border-radius:22px;padding:32px 28px;text-align:center; }
-.email-modal h2 { font-size:18px;font-weight:800;margin-bottom:8px; }
-.email-modal p { color:var(--text-soft);font-size:13px;margin-bottom:18px; }
-.email-input { width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.09);background:rgba(16,14,10,0.6);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;outline:none;text-align:center;margin-bottom:10px; }
-.email-error { color:var(--danger);font-size:12px;min-height:16px;margin-bottom:8px; }
-.email-btn { width:100%;padding:13px;border-radius:11px;border:none;background:linear-gradient(135deg,var(--cyan),#b7ded4);color:#17130c;font-family:'Inter',sans-serif;font-size:13px;font-weight:800;cursor:pointer; }
 
 @media (max-width: 768px) {
   .shell { padding: 16px 14px 32px; }

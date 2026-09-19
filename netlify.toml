@@ -9,7 +9,21 @@
   [headers.values]
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "microphone=(*)"
+    # Só a própria origem pode pedir o microfone (o simulador usa
+    # reconhecimento de voz). "(*)" antes liberava a permissão para
+    # QUALQUER site que colocasse esta página num <iframe>.
+    Permissions-Policy = "microphone=(self)"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    # script-src sem 'unsafe-inline'/'unsafe-eval': o app não usa <script>
+    # inline nem eval, só os bundles do Vite — isso já barra a execução de
+    # HTML/JS injetado via innerHTML (ver achado XSS no relatório).
+    # style-src precisa de 'unsafe-inline': várias telas montam trechos com
+    # style="..." fora do template do Vue.
+    # frame-ancestors NÃO está fixado aqui de propósito: o app é embutido de
+    # propósito num iframe do Hotmart Club (ver src/router/index.js). Defina
+    # frame-ancestors 'self' https://dominio-exato-do-hotmart.com; assim que
+    # esse domínio for confirmado, em vez de deixar sem restrição.
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.callmebot.com; base-uri 'self'; form-action 'self'; object-src 'none'"
 
 # Proxy: /api/* → Apps Script (resolve o CORS)
 # O Netlify faz a chamada server-side, sem restrição de CORS
