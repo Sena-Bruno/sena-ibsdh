@@ -53,14 +53,47 @@ class TestIntegridadeDaFisica(unittest.TestCase):
             with self.subTest(perfil=perfil.nome):
                 self.assertFalse(set(perfil.indicadas) & set(perfil.contraindicadas))
 
-    def test_deriva_usa_dimensoes_reais(self):
-        """A deriva é aplicada com `com(**deriva)`, que valida — mas só em
-        tempo de execução, dentro da semana. Aqui a checagem é estática."""
-        from sena_nucleo.estado import DIMENSOES
+    def test_taxa_de_retorno_na_faixa_da_literatura(self):
+        """Sem tratamento, os sintomas caem 10–15% ao longo de ~10 semanas.
 
+        Uma taxa muito alta faria o tempo curar mais do que a terapia, que
+        é a pior lição que um simulador de formação clínica poderia dar.
+        """
         for perfil in PERFIS.values():
             with self.subTest(perfil=perfil.nome):
-                self.assertLessEqual(set(perfil.deriva), set(DIMENSOES))
+                self.assertTrue(0.0 < perfil.taxa_de_retorno <= 0.02)
+
+    def test_equilibrio_alivia_o_sofrimento_da_chegada(self):
+        """Ninguém chega no próprio nível habitual — chega na crise.
+
+        Se o equilíbrio tivesse sofrimento igual ou maior que o basal, o
+        perfil perderia o mecanismo de regressão à média que a literatura
+        de lista de espera descreve.
+        """
+        for perfil in PERFIS.values():
+            with self.subTest(perfil=perfil.nome):
+                self.assertLess(perfil.equilibrio.sofrimento, perfil.basal.sofrimento)
+
+    def test_equilibrio_nao_e_saude(self):
+        """O Depressivo regride para um estado ainda deprimido.
+
+        O tempo resolve a distância entre a crise e o fundo habitual. Tudo
+        abaixo disso é o que só o tratamento alcança — e um equilíbrio
+        saudável faria o simulador ensinar que basta esperar.
+        """
+        dep = PERFIS["Depressivo"].equilibrio
+        self.assertLess(dep.esperanca, 0.45)
+        self.assertLess(dep.energia, 0.45)
+        self.assertGreater(dep.sofrimento, 0.45)
+
+    def test_tres_perfis_pioram_numa_dimensao_nomeada(self):
+        """Onde mora o "não fazer nada custa", perfil a perfil."""
+        self.assertLess(PERFIS["Cético"].equilibrio.alianca,
+                        PERFIS["Cético"].basal.alianca)
+        self.assertLess(PERFIS["Evitativo"].equilibrio.abertura,
+                        PERFIS["Evitativo"].basal.abertura)
+        self.assertLess(PERFIS["Histriônico"].equilibrio.adesao,
+                        PERFIS["Histriônico"].basal.adesao)
 
     def test_carga_tolerada_na_faixa(self):
         for perfil in PERFIS.values():

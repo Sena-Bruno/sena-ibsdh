@@ -10,23 +10,33 @@ Os oito perfis clínicos — agora com física própria.
 │  seria o aluno treinando contra um paciente e sendo avaliado contra   │
 │  outro.                                                               │
 │                                                                       │
-│  O que é NOVO neste arquivo são os três últimos campos — `basal`,     │
-│  `deriva` e as listas de prescrição. Eles não existem no front porque │
-│  descrevem o que o paciente faz SOZINHO, entre as sessões, que é      │
+│  O que é NOVO aqui são `basal`, `equilibrio`, `taxa_de_retorno`,      │
+│  `carga_tolerada` e as listas de prescrição. Não existem no front     │
+│  porque descrevem o que o paciente faz SOZINHO, entre as sessões —    │
 │  justamente o que o simulador não tinha.                              │
 └───────────────────────────────────────────────────────────────────────┘
 
-## O que é `deriva`
+## O que são `equilibrio` e `taxa_de_retorno`
 
-Quanto cada dimensão anda por dia **na ausência de qualquer intervenção**.
-É a linha de base contra a qual o trabalho do aluno é medido: sem ela, toda
-melhora pareceria mérito da condução, e um Depressivo que piora sozinho na
-semana seria lido como erro do aluno.
+Onde o paciente se assenta **sem nenhuma intervenção**, e com que rapidez
+ele chega lá. Todo dia o estado anda uma fração do caminho até esse ponto.
 
-A deriva é o que torna alguns perfis urgentes. O Depressivo perde esperança
-e energia todo dia que passa; o Ansioso oscila muito mas não afunda; o
-Intelectualizador é quase estável — ele não piora, só não melhora, que é
-exatamente a armadilha clínica dele.
+Por que não uma queda constante, que era o modelo anterior: a literatura de
+grupos de lista de espera — a medição empírica de "sem tratamento" — mostra
+melhora leve, não colapso (g = 0,37 pré-pós em depressão; sintomas caem
+10–15%; 12,5% remitem sozinhos em 12 semanas; quem piora de verdade é
+12–13%, não 90%). Quem procura ajuda procura no pior momento, e o pior
+momento é atípico: o que se segue é retorno ao nível habitual.
+
+**O equilíbrio não é saúde.** O Depressivo regride para um estado ainda
+deprimido — só não em queda livre. A diferença entre `basal` (a crise que
+trouxe a pessoa) e `equilibrio` (o fundo habitual dela) é o que o tempo
+resolve sozinho; tudo abaixo do equilíbrio é o que só o tratamento alcança.
+
+**Três perfis pioram em uma dimensão específica**, e é aí que mora o "não
+fazer nada custa": a aliança do Cético decai sem prova, a abertura do
+Evitativo fecha sozinha, a adesão do Histriônico não sobrevive à semana.
+São decaimentos pontuais e nomeados — não um desabamento geral.
 
 ## Por que `carga_tolerada`
 
@@ -54,13 +64,23 @@ class PerfilClinico:
     resistencias: tuple[str, ...]
     abordagem_ideal: str
 
-    #: Onde este perfil normalmente começa.
+    #: Onde este perfil chega à primeira sessão — a crise, não o hábito.
     basal: EstadoPaciente
 
-    #: Movimento diário espontâneo, como FRAÇÃO do caminho que resta
-    #: naquela direção — não como quantidade absoluta. Ver
-    #: `EstadoPaciente.derivar`. Ausente = estável.
-    deriva: dict[str, float] = field(default_factory=dict)
+    #: Onde ele se assenta sem nenhuma intervenção. NÃO é saúde: é o fundo
+    #: habitual desta pessoa, do qual só o tratamento tira.
+    equilibrio: EstadoPaciente
+
+    #: Fração do caminho até o equilíbrio percorrida por dia.
+    #:
+    #: 0,006 fecha ~4% da distância por semana. Ao longo de dez a doze
+    #: semanas isso soma a redução de 10–15% dos sintomas que a literatura
+    #: mede em lista de espera.
+    #:
+    #: A primeira tentativa usou 0,012 e produzia 33% em dez semanas — o
+    #: tempo curando mais do que a terapia, que é a pior coisa que um
+    #: simulador de formação clínica poderia ensinar.
+    taxa_de_retorno: float = 0.006
 
     #: Teto de exigência semanal. Ver o cabeçalho do módulo.
     carga_tolerada: float = 0.6
@@ -100,9 +120,14 @@ PERFIS: dict[str, PerfilClinico] = {
             alianca=0.45, sofrimento=0.75, abertura=0.50,
             esperanca=0.40, adesao=0.65, risco=0.20, energia=0.65,
         ),
-        # Não afunda sozinho; oscila. A deriva quase nula em esperança é
-        # o retrato disso: o ansioso não desiste, ele gira.
-        deriva={"sofrimento": +0.035, "energia": -0.015},
+        # O pico de ansiedade cede sozinho — é o que faz tanta gente
+        # desmarcar a segunda sessão dizendo "melhorei". O fundo habitual
+        # ainda é ansioso; só não é a crise que trouxe.
+        equilibrio=EstadoPaciente(
+            alianca=0.45, sofrimento=0.58, abertura=0.52,
+            esperanca=0.47, adesao=0.60, risco=0.15, energia=0.68,
+        ),
+        taxa_de_retorno=0.007,
         carga_tolerada=0.70,
         indicadas=("RESPIRATORIA", "ANCORAGEM", "PSICOEDUCACAO"),
         contraindicadas=("EXPOSICAO_GRADUAL",),
@@ -125,9 +150,14 @@ PERFIS: dict[str, PerfilClinico] = {
             alianca=0.25, sofrimento=0.50, abertura=0.30,
             esperanca=0.30, adesao=0.40, risco=0.15, energia=0.60,
         ),
-        # A aliança do cético DECAI sozinha. Não fazer nada já é perder:
-        # cada dia sem prova é mais um dia de hipótese não confirmada.
-        deriva={"alianca": -0.070, "esperanca": -0.040},
+        # O único perfil cujo EQUILÍBRIO tem aliança ABAIXO da chegada:
+        # cada dia sem prova é mais um dia de hipótese não confirmada, e o
+        # repouso dele é a desconfiança. Sofrimento cede como em todos.
+        equilibrio=EstadoPaciente(
+            alianca=0.15, sofrimento=0.44, abertura=0.30,
+            esperanca=0.28, adesao=0.38, risco=0.12, energia=0.62,
+        ),
+        taxa_de_retorno=0.009,
         carga_tolerada=0.55,
         indicadas=("PSICOEDUCACAO", "REGISTRO"),
         contraindicadas=("ANCORAGEM",),
@@ -148,9 +178,14 @@ PERFIS: dict[str, PerfilClinico] = {
             alianca=0.35, sofrimento=0.55, abertura=0.20,
             esperanca=0.35, adesao=0.35, risco=0.25, energia=0.45,
         ),
-        # A abertura fecha sozinha. O evitativo não precisa de um motivo
-        # para se afastar — o afastamento é o estado de repouso dele.
-        deriva={"abertura": -0.070, "alianca": -0.035},
+        # A abertura fecha sozinha: o evitativo não precisa de motivo para
+        # se afastar, o afastamento É o repouso dele. É a esquiva como fator
+        # de manutenção — o alívio de hoje compra o fechamento de amanhã.
+        equilibrio=EstadoPaciente(
+            alianca=0.28, sofrimento=0.49, abertura=0.16,
+            esperanca=0.36, adesao=0.33, risco=0.22, energia=0.47,
+        ),
+        taxa_de_retorno=0.0075,
         carga_tolerada=0.45,
         indicadas=("REGISTRO", "ANCORAGEM"),
         contraindicadas=("EXPOSICAO_GRADUAL", "CONTENCAO"),
@@ -175,9 +210,14 @@ PERFIS: dict[str, PerfilClinico] = {
             alianca=0.50, sofrimento=0.45, abertura=0.25,
             esperanca=0.45, adesao=0.55, risco=0.10, energia=0.55,
         ),
-        # Praticamente estável — e essa é a armadilha. Ele não piora, então
-        # não dispara alarme; só não melhora, ano após ano.
-        deriva={"abertura": -0.020},
+        # O equilíbrio mais próximo da chegada de toda a tabela — e essa é
+        # a armadilha. Ele não piora, então não dispara alarme; só não
+        # melhora, ano após ano. A taxa mais lenta é parte do retrato.
+        equilibrio=EstadoPaciente(
+            alianca=0.48, sofrimento=0.42, abertura=0.23,
+            esperanca=0.45, adesao=0.53, risco=0.09, energia=0.56,
+        ),
+        taxa_de_retorno=0.005,
         carga_tolerada=0.65,
         indicadas=("ANCORAGEM", "EXPOSICAO_GRADUAL"),
         contraindicadas=("PSICOEDUCACAO",),
@@ -201,9 +241,14 @@ PERFIS: dict[str, PerfilClinico] = {
             alianca=0.30, sofrimento=0.60, abertura=0.20,
             esperanca=0.30, adesao=0.25, risco=0.40, energia=0.35,
         ),
-        # Tolera muito pouco: qualquer tarefa que exija continuidade falha,
-        # porque continuidade é exatamente o que falta.
-        deriva={"risco": +0.050, "abertura": -0.050},
+        # O risco cede devagar e não some: dissociação não escala sozinha
+        # como eu havia modelado, mas também não se resolve. A abertura
+        # fecha um pouco, como no Evitativo.
+        equilibrio=EstadoPaciente(
+            alianca=0.30, sofrimento=0.52, abertura=0.18,
+            esperanca=0.33, adesao=0.25, risco=0.34, energia=0.38,
+        ),
+        taxa_de_retorno=0.006,
         carga_tolerada=0.30,
         indicadas=("ANCORAGEM", "CONTENCAO"),
         contraindicadas=("EXPOSICAO_GRADUAL", "REGISTRO"),
@@ -224,10 +269,20 @@ PERFIS: dict[str, PerfilClinico] = {
             alianca=0.35, sofrimento=0.70, abertura=0.30,
             esperanca=0.25, adesao=0.30, risco=0.45, energia=0.20,
         ),
-        # O único perfil que afunda em três dimensões ao mesmo tempo. É o
-        # que torna a semana entre sessões clinicamente urgente: sete dias
-        # sem nada é uma queda mensurável, não uma pausa.
-        deriva={"esperanca": -0.100, "energia": -0.080, "risco": +0.060},
+        # O equilíbrio continua deprimido — esperança 0,33, energia 0,28,
+        # risco 0,36 — mas NÃO é queda livre. A versão anterior deste perfil
+        # perdia 0,15 de esperança e ganhava 0,22 de risco por semana, o que
+        # contraria frontalmente a literatura de lista de espera.
+        #
+        # O que o tempo resolve é a distância daqui até a crise da chegada.
+        # Tudo abaixo deste ponto é o que só o tratamento alcança — e é por
+        # isso que o Depressivo continua sendo o perfil que mais precisa de
+        # intervenção, mesmo sem despencar.
+        equilibrio=EstadoPaciente(
+            alianca=0.35, sofrimento=0.58, abertura=0.33,
+            esperanca=0.33, adesao=0.33, risco=0.36, energia=0.28,
+        ),
+        taxa_de_retorno=0.006,
         # O teto mais baixo da tabela. Prescrever "corra 30 minutos por dia"
         # a quem tem energia 0,20 é a iatrogenia de manual: ele não corre,
         # e agora tem prova de que é incapaz.
@@ -250,10 +305,15 @@ PERFIS: dict[str, PerfilClinico] = {
             alianca=0.60, sofrimento=0.60, abertura=0.70,
             esperanca=0.50, adesao=0.25, risco=0.30, energia=0.70,
         ),
-        # Aliança alta e adesão baixa: o perfil que adora a sessão e não
-        # faz nada entre elas. A adesão cai sozinha — o entusiasmo da
-        # sexta-feira não sobrevive ao domingo.
-        deriva={"adesao": -0.070, "sofrimento": +0.030},
+        # Adesão em queda no equilíbrio: o perfil que adora a sessão e não
+        # faz nada entre elas — o entusiasmo da sexta não sobrevive ao
+        # domingo. O sofrimento cede como nos outros; a intensidade dele é
+        # alta e volátil, não progressiva.
+        equilibrio=EstadoPaciente(
+            alianca=0.58, sofrimento=0.50, abertura=0.68,
+            esperanca=0.50, adesao=0.20, risco=0.26, energia=0.68,
+        ),
+        taxa_de_retorno=0.008,
         carga_tolerada=0.40,
         indicadas=("CONTENCAO", "REGISTRO"),
         contraindicadas=("PSICOEDUCACAO",),
@@ -279,8 +339,14 @@ PERFIS: dict[str, PerfilClinico] = {
         ),
         # Adesão altíssima — ele CUMPRE. O risco aqui é o oposto do
         # histriônico: ele cumpre até a prescrição errada, com rigor, e
-        # transforma a tarefa em mais um ritual de controle.
-        deriva={"sofrimento": +0.025},
+        # transforma a tarefa em mais um ritual de controle. O equilíbrio
+        # mexe pouco porque a rigidez é justamente o que não cede com o
+        # tempo.
+        equilibrio=EstadoPaciente(
+            alianca=0.50, sofrimento=0.50, abertura=0.29,
+            esperanca=0.41, adesao=0.72, risco=0.13, energia=0.55,
+        ),
+        taxa_de_retorno=0.006,
         carga_tolerada=0.75,
         indicadas=("EXPOSICAO_GRADUAL", "ANCORAGEM"),
         contraindicadas=("REGISTRO",),

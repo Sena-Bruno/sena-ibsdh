@@ -194,27 +194,119 @@ class TestLicaoDeTitulacao(unittest.TestCase):
         self.assertFalse(leve.houve_sobrecarga)
 
 
-class TestDeriva(unittest.TestCase):
-    def test_depressivo_afunda_sozinho(self):
-        """Sete dias sem nada é uma queda mensurável, não uma pausa."""
-        dep = obter("Depressivo")
-        semana = simular_semana(dep.basal, dep, NADA, semente=4)
-        self.assertLess(semana.estado_final.esperanca, dep.basal.esperanca)
-        self.assertGreater(semana.estado_final.risco, dep.basal.risco)
+class TestCursoNaturalContraALiteratura(unittest.TestCase):
+    """O que o paciente faz sozinho, aferido contra a pesquisa publicada.
+
+    Estes são os testes que substituíram a primeira versão do motor, em que
+    o paciente desabava sem intervenção: o Depressivo perdia 0,15 de
+    esperança e ganhava 0,22 de risco por semana, e 85% a 100% das semanas
+    terminavam piores. A literatura de grupos de lista de espera mede o
+    contrário — melhora leve — e é ela que estes testes travam.
+
+    As fontes de cada número estão em `nucleo/FUNDAMENTACAO.md`.
+    """
+
+    #: Grande o bastante para a média parar de oscilar. Com 400 o teste
+    #: passava ou falhava conforme o perfil, porque a semana tem variância
+    #: alta de propósito — um teste que afirma uma MÉDIA precisa de amostra
+    #: à altura, ou vira alarme intermitente que ninguém mais leva a sério.
+    AMOSTRA = 1500
+
+    def _sem_intervencao(self, perfil, semente):
+        return simular_semana(perfil.basal, perfil, NADA, semente)
+
+    def test_sintoma_cede_sozinho_em_vez_de_piorar(self):
+        """Lista de espera melhora (g = 0,37 pré-pós em depressão)."""
+        for perfil in PERFIS.values():
+            media = sum(
+                self._sem_intervencao(perfil, s).estado_final.sofrimento
+                - perfil.basal.sofrimento
+                for s in range(self.AMOSTRA)
+            ) / self.AMOSTRA
+            with self.subTest(perfil=perfil.nome):
+                self.assertLessEqual(media, 0.002, "o sintoma não pode subir sozinho")
+
+    def test_queda_de_sintoma_em_dez_semanas_bate_com_a_literatura(self):
+        """10–15% de redução sem tratamento, ao longo de ~10 semanas.
+
+        Afirmado sobre dez semanas encadeadas porque é assim que os estudos
+        medem — uma semana isolada é ruído.
+        """
+        quedas = []
+        for perfil in PERFIS.values():
+            for semente in range(40):
+                estado = perfil.basal
+                for passo in range(10):
+                    estado = simular_semana(
+                        estado, perfil, NADA, semente * 100 + passo
+                    ).estado_final
+                quedas.append(
+                    (estado.sofrimento - perfil.basal.sofrimento) / perfil.basal.sofrimento
+                )
+        media = 100 * sum(quedas) / len(quedas)
+        self.assertTrue(
+            -16.0 <= media <= -8.0,
+            f"redução de {media:.1f}% em 10 semanas; esperado entre -8% e -16%",
+        )
+
+    def test_deterioracao_fica_na_faixa_dos_controles(self):
+        """12–13% dos casos deterioram em grupos de controle. Não 90%."""
+        total = piorados = 0
+        for perfil in PERFIS.values():
+            for semente in range(self.AMOSTRA):
+                total += 1
+                if self._sem_intervencao(perfil, semente).deterioracao_clinica:
+                    piorados += 1
+        pct = 100 * piorados / total
+        self.assertTrue(
+            8.0 <= pct <= 17.0, f"{pct:.1f}% deterioraram; esperado entre 8% e 17%"
+        )
+
+    def test_risco_nao_escala_sozinho(self):
+        """A versão anterior subia o risco do Depressivo 0,22 por semana.
+
+        Nada na literatura sustenta escalada de risco nessa velocidade em
+        alguém apenas aguardando atendimento, e num produto de formação
+        clínica esse era o número mais perigoso do motor.
+        """
+        for perfil in PERFIS.values():
+            media = sum(
+                self._sem_intervencao(perfil, s).estado_final.risco - perfil.basal.risco
+                for s in range(self.AMOSTRA)
+            ) / self.AMOSTRA
+            with self.subTest(perfil=perfil.nome):
+                self.assertLess(media, 0.02)
 
     def test_alianca_do_cetico_decai_sem_intervencao(self):
-        """Não fazer nada com um cético já é perder."""
+        """Não fazer nada com um cético já é perder — o custo nomeado dele."""
         cet = obter("Cético")
-        semana = simular_semana(cet.basal, cet, NADA, semente=4)
-        self.assertLess(semana.estado_final.alianca, cet.basal.alianca)
+        media = sum(
+            self._sem_intervencao(cet, s).estado_final.alianca - cet.basal.alianca
+            for s in range(self.AMOSTRA)
+        ) / self.AMOSTRA
+        self.assertLess(media, 0)
 
-    def test_intelectualizador_e_quase_estavel(self):
-        """Ele não piora — só não melhora. Essa é a armadilha dele."""
-        intel = obter("Intelectualizador")
-        semana = simular_semana(
-            EstadoPaciente(**intel.basal.como_dicionario()), intel, NADA, semente=4
-        )
-        self.assertLess(abs(semana.estado_final.esperanca - intel.basal.esperanca), 0.12)
+    def test_eventos_de_vida_nao_sao_viciados(self):
+        """O repertório tem de ser neutro: a tendência é da regressão.
+
+        A primeira versão tinha 6,5 de peso positivo contra 10,0 de
+        negativo, e todo perfil afundava mesmo sem deriva nenhuma — o acaso
+        estava puxando para um lado só. Com o repertório viciado, nenhuma
+        calibração da regressão consegue acertar a tendência.
+        """
+        from sena_nucleo.estado import DIMENSOES
+        from sena_nucleo.eventos import repertorio
+
+        for perfil in PERFIS.values():
+            eventos = repertorio(perfil.nome)
+            peso_total = sum(e.peso for e in eventos)
+            saldo = {d: 0.0 for d in DIMENSOES}
+            for evento in eventos:
+                for dimensao, valor in evento.efeitos.items():
+                    saldo[dimensao] += valor * evento.peso / peso_total
+            pior = max(abs(v) for v in saldo.values())
+            with self.subTest(perfil=perfil.nome):
+                self.assertLess(pior, 0.015, f"repertório viciado: {saldo}")
 
 
 class TestReserva(unittest.TestCase):

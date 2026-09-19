@@ -51,6 +51,14 @@ DIAS = 7
 #: debaixo do ruído dramático.
 CHANCE_DE_EVENTO_POR_DIA = 0.35
 
+#: Saldo clínico abaixo do qual a semana conta como deterioração de verdade.
+#:
+#: Escolhido para que a fração de semanas deterioradas caia na faixa de
+#: 12–13% que a literatura mede em grupos de controle. É calibração contra
+#: um alvo publicado, não um número colhido diretamente de um artigo — a
+#: distinção está registrada em `FUNDAMENTACAO.md`.
+LIMIAR_DE_DETERIORACAO = -0.15
+
 
 @dataclass(frozen=True)
 class Dia:
@@ -84,9 +92,37 @@ class Semana:
     eventos: tuple[Evento, ...] = field(default_factory=tuple)
 
     @property
+    def saldo(self) -> float:
+        """Quanto a semana rendeu, somando as sete dimensões pela valência."""
+        return self.estado_inicial.saldo_clinico(self.estado_final)
+
+    @property
     def piorou(self) -> bool:
-        """Se o paciente chega à próxima sessão pior do que saiu desta."""
-        return not self.estado_inicial.melhorou(self.estado_final)
+        """Saldo negativo de qualquer tamanho — inclusive ruído.
+
+        NÃO é a "deterioração" da literatura. Como a semana é ruidosa por
+        construção, algo perto de metade das semanas fecha ligeiramente
+        negativa, e isso é o esperado de um processo com variância em torno
+        de uma tendência fraca. Para a medida que se compara com a pesquisa,
+        use `deterioracao_clinica`.
+        """
+        return self.saldo < 0
+
+    @property
+    def deterioracao_clinica(self) -> bool:
+        """Piora grande o bastante para um clínico chamar de piora.
+
+        A literatura de desfecho conta deterioração por índice de mudança
+        confiável — a queda tem de superar o erro de medida do instrumento,
+        não apenas ser negativa. Em grupos de controle isso acontece em
+        12–13% dos casos (4–5% em quem está em terapia).
+
+        `LIMIAR_DE_DETERIORACAO` é o análogo aqui: o corte abaixo do qual a
+        variação é indistinguível de uma semana comum. É uma escolha de
+        modelagem, não um valor colhido da literatura — está declarada em
+        `FUNDAMENTACAO.md` como tal.
+        """
+        return self.saldo <= LIMIAR_DE_DETERIORACAO
 
     @property
     def taxa_de_adesao(self) -> float:
@@ -106,7 +142,7 @@ def simular_semana(
 
     A ordem dentro de um dia importa e é esta:
 
-        1. deriva espontânea do perfil
+        1. regressão espontânea ao equilíbrio do perfil
         2. tentativa (ou não) de cumprir a prescrição
         3. evento de vida, amortecido pela reserva
 
@@ -136,8 +172,12 @@ def simular_semana(
     cumpridos = 0
 
     for numero in range(1, DIAS + 1):
-        # 1 · deriva (proporcional ao que resta — ver `EstadoPaciente.derivar`)
-        atual = atual.derivar(perfil.deriva)
+        # 1 · regressão ao equilíbrio do perfil
+        #
+        # Onde antes havia uma queda diária constante. Ver
+        # `EstadoPaciente.regredir_para` para por que mudou: sem
+        # intervenção, a literatura mede melhora leve, não colapso.
+        atual = atual.regredir_para(perfil.equilibrio, perfil.taxa_de_retorno)
 
         # 2 · prescrição
         #

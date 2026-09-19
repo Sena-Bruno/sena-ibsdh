@@ -146,6 +146,21 @@ class EstadoPaciente:
             if abs(getattr(outro, nome) - getattr(self, nome)) >= LIMIAR_RELEVANCIA
         }
 
+    def saldo_clinico(self, outro: "EstadoPaciente") -> float:
+        """Soma das variações com o sinal corrigido pela valência.
+
+        Cair o sofrimento conta como ganho; subir o risco conta como perda.
+        Deliberadamente sem pesos — qualquer peso aqui seria uma opinião
+        clínica embutida na física do motor, e essa opinião pertence ao
+        avaliador, não ao simulador.
+        """
+        return sum(
+            (getattr(self, nome) - getattr(outro, nome))
+            if nome in DIMENSOES_INVERTIDAS
+            else (getattr(outro, nome) - getattr(self, nome))
+            for nome in DIMENSOES
+        )
+
     def melhorou(self, outro: "EstadoPaciente") -> bool:
         """Se a transição de `self` para `outro` foi clinicamente positiva.
 
@@ -155,46 +170,53 @@ class EstadoPaciente:
         seria uma opinião clínica embutida no motor, e essa opinião pertence
         ao avaliador (a régua do instituto), não à física do simulador.
         """
-        saldo = 0.0
-        for nome in DIMENSOES:
-            delta = getattr(outro, nome) - getattr(self, nome)
-            saldo += -delta if nome in DIMENSOES_INVERTIDAS else delta
-        return saldo > 0
+        return self.saldo_clinico(outro) > 0
 
-    def derivar(self, taxas: dict[str, float]) -> "EstadoPaciente":
-        """Aplica a deriva espontânea de um dia, PROPORCIONAL ao que resta.
+    def regredir_para(
+        self, equilibrio: "EstadoPaciente", taxa: float
+    ) -> "EstadoPaciente":
+        """Move cada dimensão uma fração `taxa` do caminho até o equilíbrio.
 
-        As taxas são frações do caminho que ainda existe naquela direção,
-        não quantidades absolutas:
+        ┌───────────────────────────────────────────────────────────────┐
+        │  REGRESSÃO À MÉDIA — a correção mais importante do motor      │
+        │                                                               │
+        │  A primeira versão deste arquivo tinha `derivar()`: cada      │
+        │  perfil perdia terreno todo dia, para sempre. O Depressivo    │
+        │  caía 0,15 de esperança por semana e ganhava 0,22 de risco,   │
+        │  e em 85% a 100% das semanas simuladas o paciente terminava   │
+        │  pior do que começou.                                         │
+        │                                                               │
+        │  A literatura descreve o contrário. Grupos de lista de espera │
+        │  — que são a medição empírica de "sem intervenção" — MELHORAM │
+        │  em média (g = 0,37 pré-pós em depressão), os sintomas caem   │
+        │  10–15% sozinhos, e 12,5% das pessoas remitem sem tratamento  │
+        │  em 12 semanas. Quem piora de verdade é 12–13%, não 90%.      │
+        │                                                               │
+        │  O mecanismo é este: pessoas procuram ajuda no pior momento,  │
+        │  e o pior momento é, por definição, atípico. O que se segue   │
+        │  é retorno ao nível habitual — não cura, e não colapso.       │
+        └───────────────────────────────────────────────────────────────┘
 
-            taxa negativa → delta = -taxa × (valor atual)
-            taxa positiva → delta = +taxa × (1 - valor atual)
+        Por que isto é MELHOR para o produto, e não uma perda: se o
+        paciente melhora um pouco sozinho, o aluno não pode mais creditar
+        toda melhora à própria técnica. Ele passa a ter de perguntar "fui
+        eu ou foi o tempo?", que é das perguntas mais difíceis da clínica
+        — e que o modelo anterior tornava impossível de ensinar, porque
+        nele melhora espontânea nunca acontecia.
 
-        Por que não absoluta. Numa escala fechada em [0, 1], uma deriva
-        constante marcha para o extremo e encosta nele. O Depressivo, que
-        começa com esperança baixa justamente por ser o perfil mais grave,
-        chegava a zero antes do quarto dia — e a partir dali toda condução
-        dava no mesmo resultado, porque o limite apagava a diferença. O
-        perfil que mais precisa de resolução era o que tinha menos.
-
-        Proporcional, a deriva vira aproximação assintótica: o paciente
-        piora rápido enquanto há o que perder e devagar perto do fundo,
-        sem nunca encostar. Isso é o que a clínica descreve, e de quebra
-        preserva a faixa onde a diferença entre uma condução e outra ainda
-        pode ser lida.
+        A aproximação é assintótica por construção: o passo encolhe
+        conforme a distância diminui, e o estado nunca ultrapassa o
+        equilíbrio nem encosta nos limites da escala.
         """
-        if not taxas:
-            return self
+        if not 0.0 <= taxa <= 1.0:
+            raise ValueError(f"taxa de retorno deve estar em [0, 1], recebida {taxa!r}")
 
-        deltas = {}
-        for dimensao, taxa in taxas.items():
-            if dimensao not in DIMENSOES:
-                raise ValueError(f"dimensão inexistente na deriva: {dimensao!r}")
-            atual = getattr(self, dimensao)
-            distancia = atual if taxa < 0 else (1.0 - atual)
-            deltas[dimensao] = taxa * distancia
-
-        return self.com(**deltas)
+        return self.com(
+            **{
+                dimensao: (getattr(equilibrio, dimensao) - getattr(self, dimensao)) * taxa
+                for dimensao in DIMENSOES
+            }
+        )
 
     def como_dicionario(self) -> dict[str, float]:
         """Serialização estável para o front, o histórico e os testes."""

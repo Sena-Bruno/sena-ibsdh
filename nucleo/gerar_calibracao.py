@@ -35,7 +35,7 @@ SEMANAS_AGREGADAS = 400
 def agregar(perfil) -> dict:
     """Como este perfil costuma evoluir em 7 dias, sozinho."""
     coletado = {dimensao: [] for dimensao in DIMENSOES}
-    piorou = 0
+    piorou = deteriorou = 0
 
     for semente in range(SEMANAS_AGREGADAS):
         semana = simular_semana(perfil.basal, perfil, SEM_PRESCRICAO, semente)
@@ -44,6 +44,7 @@ def agregar(perfil) -> dict:
                 getattr(semana.estado_final, dimensao) - getattr(perfil.basal, dimensao)
             )
         piorou += 1 if semana.piorou else 0
+        deteriorou += 1 if semana.deterioracao_clinica else 0
 
     resumo = {}
     for dimensao, valores in coletado.items():
@@ -55,6 +56,7 @@ def agregar(perfil) -> dict:
         }
 
     resumo["_piorou_pct"] = round(100.0 * piorou / SEMANAS_AGREGADAS, 1)
+    resumo["_deteriorou_pct"] = round(100.0 * deteriorou / SEMANAS_AGREGADAS, 1)
     return resumo
 
 
@@ -80,6 +82,8 @@ def exportar_semana(perfil, semente: int) -> dict:
         "estado_final": semana.estado_final.como_dicionario(),
         "variacoes": ficha["variacoes"],
         "piorou": semana.piorou,
+        "deterioracao": semana.deterioracao_clinica,
+        "saldo": round(semana.saldo, 4),
         "fala": list(abertura["fala"]),
         "corpo": list(abertura["corpo"]),
         "sinais": abertura["sinais"],
@@ -98,8 +102,9 @@ def main() -> None:
                 "abordagem_ideal": perfil.abordagem_ideal,
                 "basal": perfil.basal.como_dicionario(),
                 "corpo_inicial": ler_corpo(perfil.basal, perfil).como_dicionario(),
+                "equilibrio": perfil.equilibrio.como_dicionario(),
+                "taxa_de_retorno": perfil.taxa_de_retorno,
                 "carga_tolerada": perfil.carga_tolerada,
-                "deriva": perfil.deriva,
                 "agregado": agregar(perfil),
                 "semanas": [
                     exportar_semana(perfil, semente)
@@ -110,7 +115,7 @@ def main() -> None:
 
     json.dump(
         {
-            "etapa": "1 — calibração da deriva (sem prescrição)",
+            "etapa": "1 — curso natural sem prescrição, ancorado na literatura",
             "dimensoes": list(DIMENSOES),
             "semanas_agregadas": SEMANAS_AGREGADAS,
             "perfis": perfis,
