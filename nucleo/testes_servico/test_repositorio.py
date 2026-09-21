@@ -5,7 +5,7 @@ import unittest
 from sena_nucleo.estado import EstadoPaciente
 from sena_nucleo.perfis import obter
 from sena_nucleo.prescricao import Prescricao, TipoPrescricao
-from sena_servico.banco import banco_temporario, conectar
+from sena_servico.banco import motor_de_teste
 from sena_servico.repositorio import (
     PacienteNaoEncontrado,
     criar_ou_obter_paciente,
@@ -23,10 +23,9 @@ NADA = Prescricao(TipoPrescricao.NENHUMA)
 
 class ComBanco(unittest.TestCase):
     def setUp(self):
-        self._ctx = banco_temporario()
-        caminho = self._ctx.__enter__()
-        self.addCleanup(self._ctx.__exit__, None, None, None)
-        self.conexao = conectar(caminho)
+        self.engine = motor_de_teste()
+        self.conexao = self.engine.connect()
+        self.addCleanup(self.conexao.close)
 
 
 class TestGerarSemente(unittest.TestCase):

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Demonstração da etapa 3: o paciente com memória de verdade.
+Demonstração da persistência do Paciente Vivo (etapas 3-4).
 
 Rode com: python3 demo_servico.py
 
@@ -10,16 +10,24 @@ seguidas, e mostra que a segunda parte de onde a primeira deixou — porque
 o estado agora vive num banco, não numa variável Python que morre quando
 o processo termina.
 
-Usa um banco temporário, apagado ao final. Para ver o mesmo fluxo por
-HTTP de verdade:
+Usa um banco SQLite em memória (`banco.motor_de_teste`) — o mesmo motor
+que os testes usam, nunca toca disco. Em produção (etapa 4), o banco é
+Postgres (Neon), via `SENA_BANCO_URL`; ver o cabeçalho de `sena_servico/banco.py`
+para o porquê.
+
+Para ver o mesmo fluxo por HTTP de verdade, com autenticação:
 
     pip install -r requirements-servico.txt
+    export SENA_SESSION_SECRET=...        # o mesmo valor do Apps Script
+    export SENA_EMAILS_PILOTO=voce@ibsdh.com.br
     uvicorn sena_servico.api:app --reload
-    # depois: curl, ou http://127.0.0.1:8000/docs
+    # depois: http://127.0.0.1:8000/docs (Swagger — cole "Bearer <token>"
+    # em Authorize; um token de teste sai de
+    # sena_servico.autenticacao._emitir_token_para_teste)
 """
 
 from sena_nucleo.prescricao import Prescricao, TipoPrescricao
-from sena_servico.banco import banco_temporario, conectar
+from sena_servico.banco import motor_de_teste
 from sena_servico.repositorio import criar_ou_obter_paciente, historico, registrar_semana
 
 LARGURA = 72
@@ -31,12 +39,11 @@ def titulo(texto: str) -> None:
 
 def main() -> None:
     print("\n" + "═" * LARGURA)
-    print("  SENA · PACIENTE VIVO — memória entre sessões reais (etapa 3)")
+    print("  SENA · PACIENTE VIVO — memória entre sessões reais (etapas 3-4)")
     print("═" * LARGURA)
 
-    with banco_temporario() as caminho:
-        conexao = conectar(caminho)
-
+    engine = motor_de_teste()
+    with engine.connect() as conexao:
         titulo("Aluno faz login pela primeira vez")
         paciente, criado = criar_ou_obter_paciente(
             conexao, "bruno@ibsdh.com", "Practitioner", "Ansioso"

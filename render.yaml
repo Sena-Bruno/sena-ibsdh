@@ -1,0 +1,55 @@
+# Blueprint do Render — configuração do serviço do Paciente Vivo como
+# código, não como cliques no painel.
+#
+# Por que isto existe: com "Blueprint" (este arquivo), o Render lê a
+# configuração inteira do repositório na hora de conectar. Sem ele, seria
+# preciso configurar build command, start command e a lista de variáveis
+# de ambiente manualmente no painel — mais chance de esquecer um passo,
+# e nada disso fica documentado em lugar nenhum além da memória de quem
+# configurou.
+#
+# Como usar (uma vez só): no painel do Render, "New +" → "Blueprint" →
+# conecte este repositório. O Render lê este arquivo, cria o serviço
+# sozinho, e só pede as variáveis marcadas `sync: false` abaixo — nunca
+# escreva um segredo AQUI, elas ficam só no painel do Render.
+#
+# Plano "free": zero custo, mas o disco é efêmero (por isso o banco é
+# Postgres externo via SENA_BANCO_URL, não SQLite local — ver o cabeçalho
+# de nucleo/sena_servico/banco.py) e o processo hiberna após 15 minutos
+# sem requisição, acordando em 30-60s na chamada seguinte. Aceitável para
+# o piloto interno (só instrutores, uso esporádico); reconsidere se o uso
+# crescer.
+
+services:
+  - type: web
+    name: sena-paciente-vivo
+    runtime: python
+    plan: free
+    rootDir: nucleo
+    buildCommand: "pip install -r requirements-servico.txt"
+    startCommand: "uvicorn sena_servico.api:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /saude
+    envVars:
+      # O MESMO valor de SESSION_SECRET já configurado no Apps Script
+      # (Configurações do projeto → Propriedades do script). Copie de lá —
+      # gerar um novo aqui faria este serviço rejeitar todo token válido.
+      - key: SENA_SESSION_SECRET
+        sync: false
+      # E-mails autorizados a usar o Paciente Vivo no piloto, separados
+      # por vírgula, sem espaço. Ex.: voce@ibsdh.com.br,instrutor@ibsdh.com.br
+      - key: SENA_EMAILS_PILOTO
+        sync: false
+      # A "Connection string" do Neon (postgresql+psycopg://...) — copie
+      # do painel do Neon, do jeito que ele mostra. Sem esta variável, o
+      # serviço cai para um SQLite local, que o plano free do Render APAGA
+      # a cada hibernação.
+      - key: SENA_BANCO_URL
+        sync: false
+      # Opcionais — narração por IA (etapa 2). Sem elas, o serviço usa o
+      # texto fixo automaticamente; não são obrigatórias para o piloto.
+      - key: SENA_IA_URL
+        sync: false
+      - key: SENA_IA_CHAVE
+        sync: false
+      - key: SENA_IA_MODELOS
+        sync: false

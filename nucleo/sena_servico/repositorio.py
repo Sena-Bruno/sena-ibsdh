@@ -4,10 +4,11 @@ O repositório: a ponte entre linhas de banco e os objetos do motor.
 ┌───────────────────────────────────────────────────────────────────────┐
 │  A REGRA DESTE ARQUIVO                                                │
 │                                                                       │
-│  Toda função aqui recebe a conexão como primeiro argumento — nunca    │
-│  um global, nunca um singleton de módulo. É o que torna testável sem  │
-│  servidor: um teste abre um banco temporário, chama a função direto,  │
-│  confere a linha. A API (`api.py`) é só mais um chamador.              │
+│  Toda função aqui recebe a conexão (`sqlalchemy.engine.Connection`)   │
+│  como primeiro argumento — nunca um global, nunca um singleton de     │
+│  módulo. É o que torna testável sem servidor: um teste abre           │
+│  `banco.motor_de_teste()`, chama a função direto, confere a linha.    │
+│  A API (`api.py`) é só mais um chamador.                              │
 │                                                                       │
 │  E toda função que DECIDE algo clínico reconstrói o objeto `Semana`   │
 │  do motor a partir de `estado_inicial` + `prescricao` + `semente` —   │
@@ -21,19 +22,22 @@ from __future__ import annotations
 
 import json
 import secrets
-import sqlite3
 import uuid
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
+
+from sqlalchemy import select, update
+from sqlalchemy.engine import Connection
 
 from sena_nucleo.estado import EstadoPaciente
 from sena_nucleo.perfis import PerfilClinico, obter
 from sena_nucleo.prescricao import Prescricao, TipoPrescricao
 from sena_nucleo.semana import Semana, simular_semana
 
-#: Teto do gerador de semente. 31 bits cabe inteiro no INTEGER do SQLite
-#: (que é 64-bit assinado) sem risco de estourar, com folga enorme contra
-#: repetição: mais de 2 bilhões de valores possíveis por chamada.
+from .banco import pacientes, semanas
+
+#: Teto do gerador de semente. 31 bits cabe folgado no `Integer` de
+#: qualquer um dos dois dialetos, com margem enorme contra repetição.
 TETO_DA_SEMENTE = 2**31
 
 
@@ -69,16 +73,16 @@ class PacienteRegistro:
     atualizado_em: str
 
     @classmethod
-    def _de_linha(cls, linha: sqlite3.Row) -> "PacienteRegistro":
+    def _de_linha(cls, linha) -> "PacienteRegistro":
         return cls(
-            id=linha["id"],
-            aluno_email=linha["aluno_email"],
-            curso=linha["curso"],
-            perfil=linha["perfil"],
-            numero_sessao=linha["numero_sessao"],
-            estado_atual=EstadoPaciente(**json.loads(linha["estado_atual"])),
-            criado_em=linha["criado_em"],
-            atualizado_em=linha["atualizado_em"],
+            id=linha.id,
+            aluno_email=linha.aluno_email,
+            curso=linha.curso,
+            perfil=linha.perfil,
+            numero_sessao=linha.numero_sessao,
+            estado_atual=EstadoPaciente(**json.loads(linha.estado_atual)),
+            criado_em=linha.criado_em,
+            atualizado_em=linha.atualizado_em,
         )
 
 
@@ -103,25 +107,25 @@ class SemanaRegistro:
     criado_em: str
 
     @classmethod
-    def _de_linha(cls, linha: sqlite3.Row) -> "SemanaRegistro":
-        p = json.loads(linha["prescricao"])
+    def _de_linha(cls, linha) -> "SemanaRegistro":
+        p = json.loads(linha.prescricao)
         return cls(
-            id=linha["id"],
-            paciente_id=linha["paciente_id"],
-            numero_sessao=linha["numero_sessao"],
-            semente=linha["semente"],
+            id=linha.id,
+            paciente_id=linha.paciente_id,
+            numero_sessao=linha.numero_sessao,
+            semente=linha.semente,
             prescricao=Prescricao(
                 tipo=TipoPrescricao(p["tipo"]),
                 especificidade=p["especificidade"],
                 carga=p["carga"],
                 plano_de_seguranca=p["plano_de_seguranca"],
             ),
-            estado_inicial=EstadoPaciente(**json.loads(linha["estado_inicial"])),
-            estado_final=EstadoPaciente(**json.loads(linha["estado_final"])),
-            dias_cumpridos=linha["dias_cumpridos"],
-            houve_sobrecarga=bool(linha["houve_sobrecarga"]),
-            deterioracao_clinica=bool(linha["deterioracao_clinica"]),
-            criado_em=linha["criado_em"],
+            estado_inicial=EstadoPaciente(**json.loads(linha.estado_inicial)),
+            estado_final=EstadoPaciente(**json.loads(linha.estado_final)),
+            dias_cumpridos=linha.dias_cumpridos,
+            houve_sobrecarga=bool(linha.houve_sobrecarga),
+            deterioracao_clinica=bool(linha.deterioracao_clinica),
+            criado_em=linha.criado_em,
         )
 
 
@@ -136,11 +140,21 @@ def _serializar_prescricao(p: Prescricao) -> str:
     )
 
 
+def _serializar_estado(estado: EstadoPaciente) -> str:
+    # asdict(), NUNCA como_dicionario(): aquele método arredonda para 4
+    # casas — certo para exibição, errado para persistir. Ver o aviso em
+    # sena_nucleo/estado.py. Precisão perdida a cada sessão salva divergiria
+    # de uma simulação contínua equivalente, e a divergência cresce
+    # justamente perto dos limiares (carga_tolerada, LIMIAR_DE_DETERIORACAO)
+    # onde ela mais importa.
+    return json.dumps(asdict(estado))
+
+
 # ── pacientes ──────────────────────────────────────────────────────────
 
 
 def criar_ou_obter_paciente(
-    conexao: sqlite3.Connection, aluno_email: str, curso: str, perfil: str
+    conexao: Connection, aluno_email: str, curso: str, perfil: str
 ) -> tuple[PacienteRegistro, bool]:
     """Garante um paciente vivo para este aluno+curso. Idempotente.
 
@@ -150,6 +164,15 @@ def criar_ou_obter_paciente(
     (o front chamando duas vezes por causa de um clique duplo, ou um timeout
     seguido de nova tentativa) não pode gerar um segundo caso clínico
     silenciosamente por baixo do aluno.
+
+    Há uma janela de corrida pequena entre o SELECT e o INSERT (duas
+    requisições simultâneas para o mesmo aluno+curso, na primeira vez,
+    poderiam ambas ver "não existe" e ambas tentar inserir — a segunda
+    falharia na restrição UNIQUE do banco). Aceitável no volume do piloto
+    (só instrutores, uso manual, nunca duas abas simultâneas no mesmo
+    caso); resolver isso com um upsert nativo do banco reintroduziria a
+    divergência de dialeto entre SQLite e Postgres que SQLAlchemy existe
+    para evitar aqui — ver o cabeçalho de `banco.py`.
 
     Escolher QUAL perfil este aluno recebe é decisão pedagógica — de quem
     chama, não deste repositório. Aqui é sempre explícito.
@@ -163,42 +186,40 @@ def criar_ou_obter_paciente(
     agora = _agora()
     id_novo = str(uuid.uuid4())
     conexao.execute(
-        """INSERT INTO pacientes
-           (id, aluno_email, curso, perfil, numero_sessao, estado_atual,
-            criado_em, atualizado_em)
-           VALUES (?, ?, ?, ?, 1, ?, ?, ?)""",
-        (
-            id_novo,
-            aluno_email,
-            curso,
-            perfil,
-            json.dumps(asdict(perfil_obj.basal)),
-            agora,
-            agora,
-        ),
+        pacientes.insert().values(
+            id=id_novo,
+            aluno_email=aluno_email,
+            curso=curso,
+            perfil=perfil,
+            numero_sessao=1,
+            estado_atual=_serializar_estado(perfil_obj.basal),
+            criado_em=agora,
+            atualizado_em=agora,
+        )
     )
     conexao.commit()
     return obter_paciente(conexao, id_novo), True  # type: ignore[return-value]
 
 
-def obter_paciente(conexao: sqlite3.Connection, id: str) -> PacienteRegistro | None:
+def obter_paciente(conexao: Connection, id: str) -> PacienteRegistro | None:
     linha = conexao.execute(
-        "SELECT * FROM pacientes WHERE id = ?", (id,)
+        select(pacientes).where(pacientes.c.id == id)
     ).fetchone()
     return PacienteRegistro._de_linha(linha) if linha else None
 
 
 def obter_paciente_por_aluno(
-    conexao: sqlite3.Connection, aluno_email: str, curso: str
+    conexao: Connection, aluno_email: str, curso: str
 ) -> PacienteRegistro | None:
     linha = conexao.execute(
-        "SELECT * FROM pacientes WHERE aluno_email = ? AND curso = ?",
-        (aluno_email, curso),
+        select(pacientes).where(
+            pacientes.c.aluno_email == aluno_email, pacientes.c.curso == curso
+        )
     ).fetchone()
     return PacienteRegistro._de_linha(linha) if linha else None
 
 
-def exigir_paciente(conexao: sqlite3.Connection, id: str) -> PacienteRegistro:
+def exigir_paciente(conexao: Connection, id: str) -> PacienteRegistro:
     registro = obter_paciente(conexao, id)
     if registro is None:
         raise PacienteNaoEncontrado(id)
@@ -209,7 +230,7 @@ def exigir_paciente(conexao: sqlite3.Connection, id: str) -> PacienteRegistro:
 
 
 def registrar_semana(
-    conexao: sqlite3.Connection,
+    conexao: Connection,
     paciente_id: str,
     prescricao: Prescricao,
     semente: int | None = None,
@@ -220,10 +241,6 @@ def registrar_semana(
     objeto `Semana` é o do motor — não um DTO próprio — porque é ele que
     `briefing.abertura_completa` e `briefing.ficha_do_supervisor` já sabem
     consumir. O repositório não reinventa essa forma.
-
-    O terceiro valor da tupla evita quem chama precisar ler o paciente de
-    novo só para saber que sessão acabou de virar — o número já estava em
-    mãos aqui dentro, antes do `UPDATE` avançar `numero_sessao`.
 
     `semente` é parâmetro só para TESTE (reproduzir um cenário exato). Em
     uso normal, deixe `None`: uma semente nova é gerada e persistida.
@@ -236,36 +253,33 @@ def registrar_semana(
 
     agora = _agora()
     conexao.execute(
-        """INSERT INTO semanas
-           (paciente_id, numero_sessao, semente, prescricao,
-            estado_inicial, estado_final, dias_cumpridos, houve_sobrecarga,
-            deterioracao_clinica, criado_em)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-        (
-            paciente_id,
-            registro.numero_sessao,
-            semente_final,
-            _serializar_prescricao(prescricao),
-            json.dumps(asdict(semana.estado_inicial)),
-            json.dumps(asdict(semana.estado_final)),
-            semana.dias_cumpridos,
-            int(semana.houve_sobrecarga),
-            int(semana.deterioracao_clinica),
-            agora,
-        ),
+        semanas.insert().values(
+            paciente_id=paciente_id,
+            numero_sessao=registro.numero_sessao,
+            semente=semente_final,
+            prescricao=_serializar_prescricao(prescricao),
+            estado_inicial=_serializar_estado(semana.estado_inicial),
+            estado_final=_serializar_estado(semana.estado_final),
+            dias_cumpridos=semana.dias_cumpridos,
+            houve_sobrecarga=semana.houve_sobrecarga,
+            deterioracao_clinica=semana.deterioracao_clinica,
+            criado_em=agora,
+        )
     )
     conexao.execute(
-        """UPDATE pacientes
-           SET estado_atual = ?, numero_sessao = numero_sessao + 1,
-               atualizado_em = ?
-           WHERE id = ?""",
-        (json.dumps(asdict(semana.estado_final)), agora, paciente_id),
+        update(pacientes)
+        .where(pacientes.c.id == paciente_id)
+        .values(
+            estado_atual=_serializar_estado(semana.estado_final),
+            numero_sessao=registro.numero_sessao + 1,
+            atualizado_em=agora,
+        )
     )
     conexao.commit()
     return semana, perfil, registro.numero_sessao
 
 
-def historico(conexao: sqlite3.Connection, paciente_id: str) -> list[SemanaRegistro]:
+def historico(conexao: Connection, paciente_id: str) -> list[SemanaRegistro]:
     """As semanas já vividas, mais recente por último. Para LISTAGEM.
 
     Devolve os registros desnormalizados — rápido, sem tocar o motor. Quem
@@ -273,9 +287,9 @@ def historico(conexao: sqlite3.Connection, paciente_id: str) -> list[SemanaRegis
     deve passar o registro para `reconstruir_semana`.
     """
     linhas = conexao.execute(
-        """SELECT * FROM semanas WHERE paciente_id = ?
-           ORDER BY numero_sessao ASC, id ASC""",
-        (paciente_id,),
+        select(semanas)
+        .where(semanas.c.paciente_id == paciente_id)
+        .order_by(semanas.c.numero_sessao.asc(), semanas.c.id.asc())
     ).fetchall()
     return [SemanaRegistro._de_linha(linha) for linha in linhas]
 
@@ -293,9 +307,7 @@ def reconstruir_semana(registro: SemanaRegistro, perfil: PerfilClinico) -> Seman
     `perfil` é OBRIGATÓRIO e não tem valor padrão: `SemanaRegistro` não
     guarda o nome do perfil — ele pertence ao paciente, não à semana — e
     não há como adivinhá-lo aqui. Quem chama já tem o `PacienteRegistro`
-    em mãos (foi ele que devolveu a lista de semanas); o custo de exigir
-    o argumento é uma linha a mais no chamador, e a alternativa seria
-    inventar um valor, que é sempre pior que recusar.
+    em mãos (foi ele que devolveu a lista de semanas).
     """
     return simular_semana(
         registro.estado_inicial, perfil, registro.prescricao, registro.semente
