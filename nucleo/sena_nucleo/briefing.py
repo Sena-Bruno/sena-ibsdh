@@ -24,30 +24,34 @@ from __future__ import annotations
 
 from .corpo import descrever, ler_corpo, sinais_de_alerta
 from .estado import DIMENSOES_INVERTIDAS
+from .narrativa import faixa_de_adesao
 from .perfis import PerfilClinico
 from .prescricao import TipoPrescricao
 from .semana import Semana
 
-#: Como o paciente comenta a própria adesão, por faixa.
+#: A frase de cada faixa de cumprimento.
 #:
-#: Note que nenhuma frase dá o número. Pacientes não dizem "cumpri 3 dos 7
+#: As FAIXAS vivem em `narrativa.FAIXAS_DE_ADESAO`; aqui só mora a redação
+#: de cada uma. Este arquivo já teve os próprios limites, copiados, e
+#: quando os de `narrativa` foram corrigidos para sétimos os dois
+#: divergiram: a mesma semana virava "fez algumas vezes" no prompt do
+#: narrador e "tentei uma vez" na fala do narrador fixo. Uma cópia de
+#: regra é uma divergência agendada.
+#:
+#: Nenhuma frase dá o número. Pacientes não dizem "cumpri três dos sete
 #: dias" — dizem "fiz umas vezes", e cabe ao aluno perguntar. A imprecisão
 #: aqui é fidelidade, não preguiça.
-COMENTARIOS_DE_ADESAO: tuple[tuple[float, str], ...] = (
-    (0.0, "Não consegui fazer aquilo que a gente combinou."),
-    (0.15, "Tentei uma vez, no começo da semana. Depois não deu."),
-    (0.45, "Fiz umas vezes. Não todo dia, mas fiz."),
-    (0.75, "Fiz quase todos os dias."),
-    (0.95, "Fiz todos os dias, sem falhar."),
-)
+FRASES_DE_CUMPRIMENTO: dict[str, str] = {
+    "nao_fez": "Não consegui fazer aquilo que a gente combinou.",
+    "tentou_uma_vez": "Tentei uma vez, no começo da semana. Depois não deu.",
+    "fez_algumas_vezes": "Fiz umas vezes. Não todo dia, mas fiz.",
+    "fez_quase_sempre": "Fiz quase todos os dias.",
+    "fez_todos_os_dias": "Fiz todos os dias, sem falhar.",
+}
 
 
 def _comentario_de_adesao(taxa: float) -> str:
-    escolhido = COMENTARIOS_DE_ADESAO[0][1]
-    for limite, frase in COMENTARIOS_DE_ADESAO:
-        if taxa >= limite:
-            escolhido = frase
-    return escolhido
+    return FRASES_DE_CUMPRIMENTO[faixa_de_adesao(taxa)]
 
 
 def fala_de_abertura(semana: Semana, perfil: PerfilClinico) -> tuple[str, ...]:

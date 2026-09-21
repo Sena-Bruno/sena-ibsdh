@@ -62,6 +62,50 @@ Mesma técnica. Mesma clareza. A dose era a clínica.
 | `semana.py` | O motor dos 7 dias |
 | `corpo.py` | O estado traduzido em sinais observáveis |
 | `briefing.py` | A semana virando abertura de sessão e ficha de supervisor |
+| `narrativa.py` | A semana decidida virando a voz do paciente (etapa 2) |
+| `narrador_http.py` | O plugue para qualquer API de chat no formato OpenAI |
+
+### A narração: o motor decide, a IA narra
+
+`narrativa.py` entrega ao modelo de linguagem um objeto `Fatos` que **não
+contém número nenhum** — nenhuma das sete dimensões, nenhuma leitura
+clínica, nenhuma fração de adesão. Só o que aconteceu, o quadro do
+paciente e a faixa de cumprimento em palavra ("fez_algumas_vezes").
+
+Isso não é uma instrução no prompt, que seria promessa. É estrutura: o
+narrador não pode vazar a aliança porque nunca a recebeu, e não pode
+contradizer a prescrição porque não decide nada. Um prompt mal escrito
+degrada o texto; não consegue vazar o que não foi entregue.
+
+Três defesas em volta:
+
+- **Validação por linha.** Número, jargão clínico ou redação de 400
+  caracteres derrubam aquela fala, não a sessão inteira.
+- **Queda automática.** Sem narrador, com narrador que explode, com
+  resposta vazia ou com tudo inválido, a fala volta a ser o texto fixo de
+  `eventos.py`. Uma sessão com fala menos viva é um problema; uma sessão
+  que não abre é um aluno perdido.
+- **Fila de modelos e repetição** em `narrador_http.py`, trazidas do
+  `appscript/groq-resiliente.gs` — inclusive tratar resposta vazia com
+  status 200 como falha, que é o modo em que a IA deste sistema já caiu
+  em silêncio uma vez.
+
+Para ligar o modelo de verdade:
+
+```bash
+export SENA_IA_URL=https://api.groq.com/openai/v1/chat/completions
+export SENA_IA_CHAVE=...
+export SENA_IA_MODELOS=modelo-preferido,modelo-reserva
+```
+
+```python
+from sena_nucleo.narrativa import narrar
+from sena_nucleo.narrador_http import narrador_http
+
+falas = narrar(semana, perfil, narrador_http())
+```
+
+Nenhum teste toca a rede: o núcleo é testado com narradores de três linhas.
 
 ### Duas regras que não podem ser quebradas
 

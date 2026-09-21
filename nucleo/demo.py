@@ -9,6 +9,7 @@ se a condução tivesse sido outra.
 """
 
 from sena_nucleo.briefing import abertura_completa, ficha_do_supervisor
+from sena_nucleo.narrativa import extrair_fatos, montar_instrucoes, narrar
 from sena_nucleo.perfis import obter
 from sena_nucleo.prescricao import Prescricao, TipoPrescricao
 from sena_nucleo.semana import simular_alternativa, simular_semana
@@ -116,6 +117,23 @@ def main() -> None:
 
     print("\n    O aluno fez tudo 'certo' — técnica indicada, prescrição")
     print("    específica. Errou a dose, e a dose era a clínica.")
+
+    # ── Etapa 2 · a narração ────────────────────────────────────────────
+    titulo("NARRAÇÃO — o que a IA recebe, e o que ela NÃO recebe")
+    fatos = extrair_fatos(semana, perfil)
+    print("\n    Campos entregues ao narrador:")
+    print(f"      {', '.join(fatos.__dataclass_fields__)}")
+    print("\n    Nenhuma das sete dimensões está aí. O narrador não pode")
+    print("    vazar a aliança porque nunca viu a aliança — a garantia é")
+    print("    estrutural, não uma promessa escrita no prompt.")
+    print("\n    O prompt montado a partir disso:\n")
+    for linha in montar_instrucoes(fatos).splitlines():
+        print(f"      {linha}" if linha else "")
+
+    print("\n    Sem narrador configurado, a fala cai para o texto fixo —")
+    print("    e o aluno entra na sessão do mesmo jeito:\n")
+    for fala in narrar(semana, perfil):
+        print(f'      — "{fala}"')
     print()
 
 
