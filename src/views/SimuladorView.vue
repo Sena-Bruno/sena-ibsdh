@@ -68,6 +68,13 @@
           <div class="alert" id="alertBox" role="alert"></div>
           <div class="patient-shell">
             <div class="patient-hero" id="patientCard">
+              <AvatarPaciente
+                v-if="pacienteAtivo"
+                :estado="estadoAvatar"
+                :falando="falandoAvatar"
+                :reduzir-movimento="prefs.movimento"
+                class="patient-avatar"
+              />
               <div class="patient-id" id="patientId">Patient ID: NULL</div>
               <div class="patient-name" id="patientType">Standby</div>
               <div class="patient-desc" id="patientDesc">Gere um paciente virtual para receber o perfil clínico, as resistências predominantes e a abordagem recomendada para esta aula.</div>
@@ -339,6 +346,7 @@ import { juntarSemDuplicar, montarTextoDaSessao } from '../composables/useTransc
 import { estaAutenticado, getToken, getEmailExibicao } from '../composables/useAuth'
 import Icone from '../components/Icone.vue'
 import LoginModal from '../components/LoginModal.vue'
+import AvatarPaciente from '../components/AvatarPaciente.vue'
 
 // ── ACESSIBILIDADE (composable compartilhado) ──────────────────────
 // Usa as mesmas chaves de localStorage do Dashboard, para que o tema/alto
@@ -442,6 +450,15 @@ const PERFIS_CLINICOS = {
 let activeProfile = null
 let processing = false
 
+// ── AVATAR DO PACIENTE (presença visual, não fonte de verdade) ──────
+// Espelhos reativos de coisas que já existiam como DOM/variável solta,
+// só para o AvatarPaciente.vue ter o que consumir via prop. Não
+// substituem `activeProfile` nem a manipulação de #estadoIcone/#estadoBarra
+// abaixo — só somam a leitura visual ao que já existe.
+const pacienteAtivo = ref(false) // vira true na primeira geração, nunca volta a false
+const estadoAvatar = ref('neutro') // mesmo vocabulário de ESTADOS_EMOCIONAIS
+const falandoAvatar = ref(false) // true entre utter.onstart e utter.onend
+
 // Utilitário de Segurança (Proteção XSS)
 function sanitize(str) {
   if (!str) return ''
@@ -534,6 +551,7 @@ function initializeSimulation() {
       const selectedKey = profiles[Math.floor(Math.random() * profiles.length)]
       const p = PERFIS_CLINICOS[selectedKey]
       activeProfile = { name: p.nome, desc: p.descricao, resistances: p.resistencias, approach: p.abordagem_ideal, type: 'PF-0' + (profiles.indexOf(selectedKey) + 1) }
+      pacienteAtivo.value = true
 
       document.getElementById('statusDot').classList.add('active')
       document.getElementById('patientId').textContent = 'Patient ID: ' + activeProfile.type
@@ -1442,6 +1460,7 @@ async function gerarDesafio(nivel) {
       desc: data.descricao, resistances: data.resistencias || [],
       approach: data.abordagem_ideal, type: 'DESAFIO'
     }
+    pacienteAtivo.value = true
     document.getElementById('statusDot').classList.add('active')
     document.getElementById('patientId').textContent = data.nivel
     document.getElementById('patientType').textContent = data.nome.toUpperCase()
@@ -1495,6 +1514,10 @@ function toggleVozPaciente() {
     toggle.classList.remove('ativo')
     label.textContent = 'Voz do paciente'
     if (synth) synth.cancel()
+    // cancel() nem sempre dispara onend de forma confiável entre
+    // navegadores — sem isto, desligar a voz no meio de uma fala podia
+    // deixar a boca do avatar travada aberta.
+    falandoAvatar.value = false
   }
 }
 
@@ -1510,17 +1533,23 @@ function falarTexto(texto) {
   if (vozPT) utter.voice = vozPT
   vozAtual = utter
   utter.onstart = function () {
+    falandoAvatar.value = true
     const msgs = document.getElementById('chatMessages')
     const bubbles = msgs.querySelectorAll('.chat-msg.paciente')
     const ultima = bubbles[bubbles.length - 1]
     if (ultima) ultima.classList.add('chat-speaking')
   }
   utter.onend = function () {
+    falandoAvatar.value = false
     const msgs = document.getElementById('chatMessages')
     msgs.querySelectorAll('.chat-speaking').forEach(function (el) {
       el.classList.remove('chat-speaking')
     })
   }
+  // Alguns navegadores disparam 'error' (não 'end') quando a fala é
+  // interrompida por outra chamada de speak() ou por falha da engine de
+  // voz — sem este handler, esses casos deixariam a boca aberta.
+  utter.onerror = function () { falandoAvatar.value = false }
   synth.speak(utter)
 }
 
@@ -1549,6 +1578,7 @@ function inferirEstadoPaciente(texto) {
 
 function atualizarEstadoPaciente(texto) {
   const estado = inferirEstadoPaciente(texto)
+  estadoAvatar.value = estado // alimenta AvatarPaciente.vue via sinaisCorporais.js
   const def = ESTADOS_EMOCIONAIS[estado]
   const wrap = document.getElementById('estadoPaciente')
   wrap.classList.add('visible')
@@ -2067,6 +2097,7 @@ body.alto-contraste .sim-page input:focus {
     .sim-page .alert.visible { display: block; }
     .sim-page .patient-shell { display: grid; gap: 16px; }
     .sim-page .patient-hero { position: relative; padding: 22px; border-radius: 22px; border: 1px solid rgba(255,255,255,0.06); background: linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.01)),linear-gradient(135deg,rgba(127,201,187,0.05),rgba(211,162,79,0.02)); overflow: hidden; }
+    .sim-page .patient-avatar { margin-bottom: 16px; }
     .sim-page .patient-id { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 14px; padding: 7px 12px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-soft); background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); }
     .sim-page .patient-id::before { content: ''; width: 8px; height: 8px; border-radius: 999px; background: var(--danger); box-shadow: 0 0 10px rgba(224,132,106,0.45); }
     .sim-page .patient-name { font-size: 30px; line-height: 1.05; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 10px; }
