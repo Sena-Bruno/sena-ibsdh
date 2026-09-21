@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Python (nucleo/)
+__pycache__/
+*.py[cod]
+
+# Etapa 3 — banco local do serviço (nunca versionar dados de paciente)
+nucleo/sena_servico/*.sqlite3
+nucleo/sena_servico.sqlite3
