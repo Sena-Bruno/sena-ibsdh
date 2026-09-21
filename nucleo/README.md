@@ -4,17 +4,28 @@ Primeira peça do SENA fora do Apps Script. Não substitui nada que esteja
 no ar: é uma biblioteca nova, isolada, que o backend passa a chamar quando
 a integração for feita.
 
-**Rodar:**
+**Rodar o motor** (zero dependência — só biblioteca padrão):
 
 ```bash
 cd nucleo
 python3 demo.py                              # a demonstração
-python3 -m unittest discover -s testes -t .  # os 79 testes
+python3 -m unittest discover -s testes -t .  # os testes do motor
 ```
 
-Sem dependências. Só a biblioteca padrão do Python 3.11+. Isso é
-deliberado: a primeira coisa que se pede a alguém para instalar é a que
-decide se a peça vai ser usada ou esquecida.
+**Rodar o serviço** (etapa 3 — precisa de FastAPI):
+
+```bash
+cd nucleo
+pip install -r requirements-servico.txt
+python3 demo_servico.py                                  # a demonstração
+python3 -m unittest discover -s testes_servico -t . -q   # os testes do serviço
+uvicorn sena_servico.api:app --reload                    # o servidor, com /docs
+```
+
+O motor continua zero-dependência de propósito: a primeira coisa que se
+pede a alguém para instalar é a que decide se a peça vai ser usada ou
+esquecida. O serviço (`sena_servico/`) é uma camada separada por cima —
+quem só quer simular uma semana nunca precisa instalar FastAPI.
 
 ## O que isto resolve
 
@@ -172,11 +183,54 @@ o Bruno rodar casos conhecidos e dizer onde o motor discorda da clínica.
 Cada discordância vira um teste em `testes/`, e a constante muda depois
 disso, nunca antes.
 
+## Etapa 3 — persistência e API (`sena_servico/`)
+
+Onde o paciente passa a ter memória de verdade: SQLite guardando
+`estado_atual` por (aluno, curso), e uma API FastAPI por cima.
+
+| Arquivo | O que faz |
+|---|---|
+| `sena_servico/banco.py` | Esquema SQLite + conexão |
+| `sena_servico/repositorio.py` | Ponte entre linhas de banco e objetos do motor |
+| `sena_servico/narrador.py` | Monta o narrador HTTP a partir do ambiente, uma vez |
+| `sena_servico/api.py` | FastAPI — as rotas |
+
+**A decisão central desta camada**: como o motor é determinístico por
+semente (invariante desde a etapa 0), o banco NUNCA guarda o dia-a-dia de
+uma semana. Guarda `estado_inicial` + `prescrição` + `semente`, e
+`sena_nucleo.semana.simular_semana` reproduz a semana inteira a qualquer
+momento — com o código de HOJE, não o de quando a semana foi vivida. É
+por isso que `repositorio.reconstruir_semana` existe: os três campos
+denormalizados na tabela `semanas` (`dias_cumpridos`, `houve_sobrecarga`,
+`deterioracao_clinica`) são instantâneo para listagem rápida, e ficam
+desatualizados se a lógica de avaliação mudar de novo — o que já
+aconteceu uma vez, na etapa 1. Código que DECIDE algo reconstrói; código
+que só LISTA usa os campos denormalizados.
+
+**Idempotência.** `criar_ou_obter_paciente` nunca duplica um caso clínico
+por causa de um retry de rede: um paciente vivo por (aluno_email, curso),
+sempre.
+
+**Onde as etapas 2 e 3 se encontram.** A narração por IA não tinha onde
+acontecer de verdade até existir estado persistente para narrar a
+evolução de. `POST /pacientes/{id}/sessoes` é esse lugar: chama
+`narrar()` com o narrador HTTP se `SENA_IA_URL`/`SENA_IA_CHAVE`/
+`SENA_IA_MODELOS` estiverem configuradas, e cai para o texto fixo do
+motor se não estiverem — mesma garantia estrutural da etapa 2.
+
+**Esta API ainda não é para o aluno acessar diretamente.** As respostas
+incluem `estado_atual` e `ficha_do_supervisor` — leitura interna, nunca
+segura para o navegador de um aluno. Separar "o que é seguro mostrar" (a
+`abertura`, sem número, sem termo técnico) de "o que é leitura de
+supervisor" é trabalho da etapa 4, que decide como isto chega ao SENA de
+verdade (proxy do Netlify, autenticação por token).
+
 ## Ainda não existe
 
-- Integração com o Apps Script / backend. A biblioteca é pura.
-- Persistência. Quem guarda o estado entre sessões é a camada de cima.
-- Narração por IA. A semana é simulada, não escrita — os relatos dos
-  eventos são texto fixo. Ligar um modelo para narrar o que o motor
-  decidiu é o passo seguinte, e nessa ordem: o motor decide, a IA narra.
-  O contrário devolveria o problema de hoje, em que nada tem consequência.
+- Integração com o Apps Script / backend real do SENA — isso é a etapa 4.
+- Separação entre resposta segura para aluno e leitura de supervisor na
+  API (ver aviso acima). A etapa 3 prova que a persistência funciona; não
+  decide o contrato final com o front.
+- Autenticação na API do serviço. `sena_servico/api.py` confia em quem
+  chama — está correto para uma prova isolada rodando localmente, e teria
+  de mudar antes de qualquer exposição pública.

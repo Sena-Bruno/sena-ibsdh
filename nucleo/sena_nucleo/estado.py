@@ -219,5 +219,16 @@ class EstadoPaciente:
         )
 
     def como_dicionario(self) -> dict[str, float]:
-        """Serialização estável para o front, o histórico e os testes."""
+        """Serialização para EXIBIÇÃO — front, histórico legível, teste.
+
+        Arredonda para 4 casas de propósito, e é exatamente por isso que
+        este método NÃO SERVE para persistir o estado de um paciente entre
+        sessões reais. `sena_servico.repositorio` usa
+        `dataclasses.asdict(estado)` para guardar no banco, sem
+        arredondar — perder precisão a cada sessão salva significaria o
+        paciente persistido divergir, sessão a sessão, de uma simulação
+        contínua equivalente, e a divergência cresce justamente perto dos
+        limiares (`carga_tolerada`, `LIMIAR_DE_DETERIORACAO`) onde ela
+        mais importa.
+        """
         return {nome: round(getattr(self, nome), 4) for nome in DIMENSOES}

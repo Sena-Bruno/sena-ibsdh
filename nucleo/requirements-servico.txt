@@ -1,0 +1,11 @@
+# Dependências da camada de serviço (nucleo/sena_servico/), NÃO do motor.
+#
+# sena_nucleo/ continua zero-dependência de propósito — é o que faz os 109
+# testes do motor rodarem em qualquer lugar sem instalar nada. Este arquivo
+# só existe para a API e a persistência, que são infraestrutura nova e
+# ainda não estão em produção.
+#
+# Instalar:  pip install -r nucleo/requirements-servico.txt
+fastapi==0.141.1
+uvicorn==0.53.0
+httpx==0.28.1
