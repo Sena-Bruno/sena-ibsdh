@@ -17,20 +17,27 @@
 //
 // ── Por que isto existe como adaptador, e não como o motor de verdade ──
 //
-// O simulador ao vivo (este arquivo) não roda o motor Python — ele infere
-// um estado aproximado (aberto/engajado/neutro/resistente/fechado, com um
-// `pct`) por palavra-chave sobre o texto que a Groq gera, em
-// `inferirEstadoPaciente` (SimuladorView.vue). É bem mais pobre que as
-// sete dimensões contínuas de `nucleo/sena_nucleo/estado.py`.
+// O simulador ao vivo do texto-livre (SimuladorView.vue, /index.html) não
+// roda o motor Python — ele infere um estado aproximado
+// (aberto/engajado/neutro/resistente/fechado, com um `pct`) por
+// palavra-chave sobre o texto que a Groq gera, em `inferirEstadoPaciente`.
+// É bem mais pobre que as sete dimensões contínuas de
+// `nucleo/sena_nucleo/estado.py`.
 //
 // `inferirSinaisCorporais` aqui é a ponte HONESTA entre os dois mundos: um
 // preset por estado, escolhido por coerência (não extraído de dado
 // nenhum — mesmo status de "hipótese pedagógica" que várias constantes do
-// motor Python, ver nucleo/FUNDAMENTACAO.md). Quando a etapa 4 conectar o
-// backend real (`sena_servico`), troque a CHAMADA a esta função pela
-// leitura de `abertura_completa(...).sinais` — o formato de saída já é o
-// mesmo (respiracaoPorMinuto, contatoVisual, microTensao, presenca,
-// velocidadeDaFala), então `AvatarPaciente.vue` não muda nada.
+// motor Python, ver nucleo/FUNDAMENTACAO.md).
+//
+// O Paciente Vivo (PacienteVivoView.vue, etapa 4) NÃO usa este adaptador —
+// ele já tem os números de verdade, saídos do motor via
+// `AberturaSaida.sinais` (ver `sena_servico/api.py`). Para esse caso, use
+// `sinaisReaisParaAvatar` logo abaixo, que só traduz nome de campo
+// (snake_case do Python → camelCase daqui) — o mesmo formato de saída
+// (respiracaoPorMinuto, contatoVisual, microTensao, presenca,
+// velocidadeDaFala) que `inferirSinaisCorporais` já produzia, então
+// `AvatarPaciente.vue` e `calcularEstilosAvatar` não mudam nada com a
+// troca de origem.
 
 /** As cinco leituras que `inferirEstadoPaciente` (SimuladorView.vue) produz. */
 export const ESTADOS_CONHECIDOS = ['aberto', 'engajado', 'neutro', 'resistente', 'fechado']
@@ -58,6 +65,33 @@ const PRESETS = Object.freeze({
 export function inferirSinaisCorporais(estado) {
   const preset = PRESETS[estado] || PRESETS.neutro
   return { ...preset }
+}
+
+/**
+ * Traduz `AberturaSaida.sinais` (o dicionário snake_case que
+ * `SinaisCorporais.como_dicionario()` — nucleo/sena_nucleo/corpo.py —
+ * devolve pela API do Paciente Vivo) para o formato camelCase que
+ * `calcularEstilosAvatar` espera.
+ *
+ * `latencia_de_resposta` e `variabilidade_respiratoria` não têm
+ * equivalente visual no avatar ainda — ficam de fora do retorno de
+ * propósito, não por esquecimento (ver o cabeçalho deste arquivo).
+ *
+ * Nunca lança erro: entrada ausente ou malformada cai no preset "neutro",
+ * pela mesma razão de `inferirSinaisCorporais` — um dado ruim não pode
+ * travar o avatar, só deixá-lo neutro até a causa ser corrigida.
+ */
+export function sinaisReaisParaAvatar(sinaisDoBackend) {
+  if (!sinaisDoBackend || typeof sinaisDoBackend !== 'object') {
+    return { ...PRESETS.neutro }
+  }
+  return {
+    respiracaoPorMinuto: sinaisDoBackend.respiracao_por_minuto,
+    contatoVisual: sinaisDoBackend.contato_visual,
+    microTensao: sinaisDoBackend.micro_tensao,
+    presenca: sinaisDoBackend.presenca,
+    velocidadeDaFala: sinaisDoBackend.velocidade_da_fala,
+  }
 }
 
 const clamp01 = (v) => Math.max(0, Math.min(1, v))

@@ -203,13 +203,25 @@ class PacienteSaida(BaseModel):
 
 class AberturaSaida(BaseModel):
     """A resposta de POST /pacientes/{id}/sessoes — segura para qualquer
-    cliente. Fala e corpo, sem número, sem termo técnico."""
+    cliente. Fala e corpo, sem número, sem termo técnico.
+
+    `sinais` é a única exceção numérica, e é deliberada: são os mesmos 7
+    valores de `SinaisCorporais.como_dicionario()` (corpo.py) que já
+    viram as frases de `corpo` — respiração, contato visual, tensão,
+    presença, velocidade da fala. Não são leitura clínica (não têm
+    "aliança", "sofrimento", nenhuma das 7 dimensões de `estado.py`) — são
+    o MESMO sinal observável de `corpo`, só que em número em vez de
+    frase, para o avatar (ideia #2: "o paciente tem corpo") animar o
+    sinal em vez de só descrevê-lo em texto. Ainda é "o sinal é exibido,
+    a leitura nunca é": o aluno vê o corpo respirar mais rápido, não lê
+    "respiracao_por_minuto: 22.3" em lugar nenhum da tela."""
 
     numero_sessao_concluida: int
     narrador: Literal["http", "fixo"]
     perfil: str
     fala: list[str]
     corpo: list[str]
+    sinais: dict[str, float]
 
 
 class HistoricoItem(BaseModel):
@@ -373,6 +385,7 @@ def registrar_sessao(
         perfil=perfil.nome,
         fala=fala,
         corpo=list(abertura["corpo"]),
+        sinais=dict(abertura["sinais"]),
     )
 
 

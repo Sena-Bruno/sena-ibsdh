@@ -121,7 +121,7 @@
 
         <div class="sessao-grid">
           <div class="painel-paciente">
-            <AvatarPaciente estado="neutro" :falando="falandoAvatar" :reduzir-movimento="prefs.movimento" />
+            <AvatarPaciente :sinais="sinaisAvatar" :falando="falandoAvatar" :reduzir-movimento="prefs.movimento" />
             <label class="voz-toggle">
               <input type="checkbox" v-model="vozAtiva" @change="aoMudarVoz" />
               Ouvir o paciente (voz do navegador)
@@ -201,11 +201,12 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, reactive, ref } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { estaAutenticado, getToken, limparSessao } from '../composables/useAuth'
 import { useAccessibility } from '../composables/useAccessibility'
 import { usePacienteVivo, ErroPacienteVivo } from '../composables/usePacienteVivo'
+import { sinaisReaisParaAvatar } from '../composables/sinaisCorporais.js'
 import LoginModal from '../components/LoginModal.vue'
 import AvatarPaciente from '../components/AvatarPaciente.vue'
 import FichaSupervisor from '../components/FichaSupervisor.vue'
@@ -263,6 +264,12 @@ const avancando = ref(false)
 const erroSemana = ref('')
 const ultimaAbertura = ref(null)
 const ultimaFicha = ref(null)
+// Sinais REAIS do motor (ideia #2 — o avatar anima o sinal, não só
+// descreve em texto). `null` até a primeira semana rodar — o avatar cai
+// no preset "neutro" nesse meio-tempo (ver AvatarPaciente.vue).
+const sinaisAvatar = computed(() =>
+  ultimaAbertura.value ? sinaisReaisParaAvatar(ultimaAbertura.value.sinais) : null
+)
 
 const historico = ref([])
 const numeroHistoricoAberto = ref(null)

@@ -17,6 +17,7 @@ import {
   ESTADOS_CONHECIDOS,
   inferirSinaisCorporais,
   calcularEstilosAvatar,
+  sinaisReaisParaAvatar,
 } from './sinaisCorporais.js'
 
 describe('inferirSinaisCorporais', () => {
@@ -53,6 +54,47 @@ describe('inferirSinaisCorporais', () => {
     a.contatoVisual = 999
     const b = inferirSinaisCorporais('aberto')
     assert.notEqual(b.contatoVisual, 999)
+  })
+})
+
+describe('sinaisReaisParaAvatar', () => {
+  const SINAIS_DO_BACKEND = {
+    respiracao_por_minuto: 21.4,
+    variabilidade_respiratoria: 0.42,
+    latencia_de_resposta: 1.8,
+    velocidade_da_fala: 132.5,
+    contato_visual: 0.31,
+    micro_tensao: 0.58,
+    presenca: 0.4,
+  }
+
+  test('traduz snake_case do backend para o camelCase do avatar', () => {
+    assert.deepEqual(sinaisReaisParaAvatar(SINAIS_DO_BACKEND), {
+      respiracaoPorMinuto: 21.4,
+      contatoVisual: 0.31,
+      microTensao: 0.58,
+      presenca: 0.4,
+      velocidadeDaFala: 132.5,
+    })
+  })
+
+  test('latencia_de_resposta e variabilidade_respiratoria ficam de fora de propósito', () => {
+    const traduzido = sinaisReaisParaAvatar(SINAIS_DO_BACKEND)
+    assert.ok(!('latenciaDeResposta' in traduzido))
+    assert.ok(!('variabilidadeRespiratoria' in traduzido))
+  })
+
+  test('entrada ausente ou malformada cai no preset neutro, sem lançar erro', () => {
+    assert.deepEqual(sinaisReaisParaAvatar(undefined), inferirSinaisCorporais('neutro'))
+    assert.deepEqual(sinaisReaisParaAvatar(null), inferirSinaisCorporais('neutro'))
+    assert.deepEqual(sinaisReaisParaAvatar('não é um objeto'), inferirSinaisCorporais('neutro'))
+  })
+
+  test('a saída alimenta calcularEstilosAvatar sem produzir CSS quebrado', () => {
+    const estilos = calcularEstilosAvatar(sinaisReaisParaAvatar(SINAIS_DO_BACKEND))
+    for (const valor of Object.values(estilos)) {
+      assert.doesNotMatch(valor, /NaN|undefined|null/)
+    }
   })
 })
 
