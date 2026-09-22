@@ -23,10 +23,21 @@
     # propósito num iframe do Hotmart Club (ver src/router/index.js). Defina
     # frame-ancestors 'self' https://dominio-exato-do-hotmart.com; assim que
     # esse domínio for confirmado, em vez de deixar sem restrição.
-    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.callmebot.com; base-uri 'self'; form-action 'self'; object-src 'none'"
+    # connect-src precisa de script.googleusercontent.com, e não só de 'self':
+    # o proxy /api abaixo é uma regra de rewrite do Netlify, que NÃO segue o
+    # redirecionamento do lado do servidor. Todo /exec do Apps Script responde
+    # 302 para https://script.googleusercontent.com/macros/echo?... — é o
+    # NAVEGADOR que segue esse salto, então ele passa pelo connect-src desta
+    # página. Sem este domínio na lista, todo fetch('/api') morre com
+    # "Failed to fetch" (o CSP bloqueia o segundo salto), e com ele vai o app
+    # inteiro: login por código, dashboard, simulador, ranking, certificado.
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://script.googleusercontent.com https://api.callmebot.com; base-uri 'self'; form-action 'self'; object-src 'none'"
 
-# Proxy: /api/* → Apps Script (resolve o CORS)
-# O Netlify faz a chamada server-side, sem restrição de CORS
+# Proxy: /api/* → Apps Script (mantém a chamada na mesma origem do site)
+# Atenção: este rewrite NÃO segue redirecionamentos. O Apps Script sempre
+# responde 302 para script.googleusercontent.com e o Netlify repassa esse 302
+# cru para o navegador, que é quem faz o segundo salto — por isso o domínio
+# precisa estar no connect-src do CSP acima.
 [[redirects]]
   from = "/api/*"
   to = "https://script.google.com/macros/s/AKfycbyFELrRRh3l_NnPr3Yk8jCJ3A11Cs27pxP7HWneh5EgPamilMf4eRQ8e7tCiaYWzzIq/exec"

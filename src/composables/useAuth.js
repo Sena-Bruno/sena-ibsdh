@@ -7,6 +7,8 @@
 // recebido por e-mail por um token assinado pelo servidor, e é esse token —
 // nunca mais um e-mail cru — que acompanha toda chamada ao backend.
 
+import { MSG_FALHA_REDE, ehFalhaDeRede } from './useApi.js'
+
 const APPS_SCRIPT_URL = '/api'
 const CHAVE_TOKEN = 'sena_token'
 const CHAVE_EMAIL = 'sena_email' // só para exibição na tela; o backend nunca confia nele
@@ -41,7 +43,16 @@ export function limparSessao() {
 }
 
 async function post(payload) {
-  const res = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+  let res
+  try {
+    res = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+  } catch (e) {
+    // Sem este try, o TypeError cru do fetch subia até o LoginModal e virava
+    // um "Failed to fetch" em inglês embaixo do campo de e-mail — foi assim
+    // que o CSP bloqueando o salto do proxy apareceu para o aluno.
+    if (ehFalhaDeRede(e)) throw new Error(MSG_FALHA_REDE)
+    throw e
+  }
   if (!res.ok) throw new Error('Servidor indisponível. Tente novamente.')
   return await res.json()
 }
