@@ -1,0 +1,13 @@
+# Ambiente virtual e cache do Python
+.venv/
+__pycache__/
+*.pyc
+
+# Modelos baixados na primeira execução (vários GB — nunca versionar)
+.cache/
+
+# Gravações e resultados de teste local — nunca versionar áudio de
+# ninguém, nem por engano
+*.wav
+*.mp3
+*.m4a
