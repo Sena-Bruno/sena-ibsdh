@@ -229,6 +229,30 @@ class TestRegistrarSessaoEFicha(ComCliente):
         for fala in corpo["fala"]:
             self.assertFalse(any(c.isdigit() for c in fala), fala)
 
+    def test_sinais_tem_so_os_7_campos_de_corpo_nunca_dimensao_clinica(self):
+        """`sinais` (ideia #2 — o avatar anima o sinal em vez de só
+        descrevê-lo) é a única exceção numérica em AberturaSaida, e só pode
+        ser os campos de `SinaisCorporais` — nunca uma das 7 dimensões de
+        `EstadoPaciente` (alianca, sofrimento, etc.). Se esse limite vazar
+        um dia, é aqui que quebra."""
+        paciente = self._criar()
+        corpo = self.cliente.post(
+            f"/pacientes/{paciente['id']}/sessoes",
+            json={"tipo": "NENHUMA"},
+            headers=self.cabecalho_de(ALUNO),
+        ).json()
+
+        self.assertEqual(
+            set(corpo["sinais"]),
+            {
+                "respiracao_por_minuto", "variabilidade_respiratoria",
+                "latencia_de_resposta", "velocidade_da_fala",
+                "contato_visual", "micro_tensao", "presenca",
+            },
+        )
+        dimensoes_clinicas = {"alianca", "sofrimento", "abertura", "esperanca", "adesao", "risco", "energia"}
+        self.assertFalse(dimensoes_clinicas & set(corpo["sinais"]))
+
     def test_ficha_fica_numa_rota_separada(self):
         paciente = self._criar()
         registrado = self.cliente.post(

@@ -22,12 +22,14 @@
      │  poderia ser confundido com uma pessoa real.                     │
      └─────────────────────────────────────────────────────────────────┘
 
-     Fonte dos sinais: hoje, `sinaisCorporais.inferirSinaisCorporais()`,
-     um adaptador a partir do estado aproximado que o simulador já infere
-     por palavra-chave (ver o cabeçalho daquele arquivo). Quando a etapa 4
-     do Paciente Vivo conectar o backend Python de verdade, troque a
-     ORIGEM dos sinais — este componente não muda: ele só espera o mesmo
-     formato que `corpo.SinaisCorporais.como_dicionario()` já produz. -->
+     Fonte dos sinais: duas, pela prop `sinais` vs. `estado` (ver abaixo).
+     No Simulador de texto-livre (SimuladorView.vue), ainda é
+     `sinaisCorporais.inferirSinaisCorporais()`, um adaptador por
+     palavra-chave (ver o cabeçalho daquele arquivo). No Paciente Vivo
+     (PacienteVivoView.vue, etapa 4), já são os números de verdade do
+     motor Python, via `sinaisCorporais.sinaisReaisParaAvatar()` sobre
+     `AberturaSaida.sinais`. Este componente não sabe a diferença — as
+     duas chegam no mesmo formato de `calcularEstilosAvatar`. -->
 
 <template>
   <div
@@ -83,8 +85,15 @@ import { inferirSinaisCorporais, calcularEstilosAvatar } from '../composables/si
 
 const props = defineProps({
   // Um dos ESTADOS_CONHECIDOS de sinaisCorporais.js. Qualquer outra coisa
-  // cai em "neutro" — ver inferirSinaisCorporais.
+  // cai em "neutro" — ver inferirSinaisCorporais. Ignorado quando `sinais`
+  // (abaixo) é passado.
   estado: { type: String, default: 'neutro' },
+  // Sinais REAIS já traduzidos (ver sinaisCorporais.sinaisReaisParaAvatar)
+  // — usado pelo Paciente Vivo, que tem os números de verdade do motor
+  // Python em vez de um preset por palavra-chave. Quando presente, tem
+  // prioridade sobre `estado`. `null` (padrão) mantém o comportamento
+  // antigo — nenhuma tela existente quebra com esta prop nova.
+  sinais: { type: Object, default: null },
   // true enquanto speechSynthesis está falando esta fala (ver
   // SimuladorView.vue: falarTexto/utter.onstart/onend). A boca só se move
   // aqui dentro — nunca por causa do `estado`.
@@ -106,7 +115,7 @@ const LEGENDAS = {
 const legendaEstado = computed(() => LEGENDAS[props.estado] || 'Neutro')
 
 const estiloRaiz = computed(() => {
-  const sinais = inferirSinaisCorporais(props.estado)
+  const sinais = props.sinais || inferirSinaisCorporais(props.estado)
   const c = calcularEstilosAvatar(sinais)
   return {
     '--avatar-dur-respiracao': c.duracaoRespiracao,
