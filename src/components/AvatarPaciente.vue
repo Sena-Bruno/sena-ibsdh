@@ -167,7 +167,10 @@ const estiloRaiz = computed(() => {
    franzida), rotacionar o grupo inteiro giraria os dois traços na MESMA
    direção angular, o que lê como "cabeça inclinada", não como tensão. */
 .avatar-sobrancelhas {
-  transform: translateY(calc(var(--avatar-tensao, 0.3) * 3px));
+  /* 6px (não 3px): ver GANHO_AMPLIFICACAO em sinaisCorporais.js — sem
+     isso, uma sessão real de tensão moderada (não no extremo 0 ou 1)
+     movia a sobrancelha menos de 1px, imperceptível na prática. */
+  transform: translateY(calc(var(--avatar-tensao, 0.3) * 6px));
   transition: transform 900ms var(--sena-ease, ease);
 }
 

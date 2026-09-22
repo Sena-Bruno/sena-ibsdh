@@ -98,6 +98,54 @@ describe('sinaisReaisParaAvatar', () => {
   })
 })
 
+describe('calcularEstilosAvatar — amplificação em torno do neutro', () => {
+  // Achado ao vivo (Paciente Vivo, sessão real): sinais reais raramente
+  // ficam perto de 0 ou 1 — variam perto do neutro — e numa escala linear
+  // direta isso virava 1-2px de diferença, invisível na prática. Estes
+  // testes travam que a amplificação resolve isso sem quebrar os
+  // extremos nem o piso de legibilidade.
+
+  test('sinais EXATAMENTE no neutro não sofrem efeito nenhum da amplificação', () => {
+    const doPreset = calcularEstilosAvatar(inferirSinaisCorporais('neutro'))
+    const doMesmoValorNaoAmplificavel = calcularEstilosAvatar({
+      contatoVisual: 0.55, microTensao: 0.30, presenca: 0.65,
+      respiracaoPorMinuto: 16, velocidadeDaFala: 150,
+    })
+    assert.deepEqual(doPreset, doMesmoValorNaoAmplificavel)
+  })
+
+  test('um desvio moderado do neutro (não extremo) produz uma diferença visível, não só teórica', () => {
+    // O caso que motivou o ajuste: um paciente com contato visual só um
+    // pouco abaixo do neutro (0.55 → 0.40) — bem longe de qualquer
+    // extremo, mas um desvio real, do tipo que uma sessão comum produz.
+    const neutro = calcularEstilosAvatar({ contatoVisual: 0.55 })
+    const desvioModerado = calcularEstilosAvatar({ contatoVisual: 0.40 })
+    const pxNeutro = parseFloat(neutro.desvioOlhar)
+    const pxDesviado = parseFloat(desvioModerado.desvioOlhar)
+    // Sem amplificação (ganho 1x), 0.15 de diferença em 10px de faixa
+    // daria só 1-2px — o achado original. Com amplificação, tem que
+    // passar disso.
+    assert.ok(pxDesviado - pxNeutro >= 3, `diferença de só ${pxDesviado - pxNeutro}px — ainda sutil demais`)
+  })
+
+  test('extremos (0 e 1) continuam clampados nos mesmos limites de sempre — amplificação não estoura', () => {
+    const contatoZero = calcularEstilosAvatar({ contatoVisual: 0 })
+    const contatoUm = calcularEstilosAvatar({ contatoVisual: 1 })
+    assert.equal(parseFloat(contatoZero.desvioOlhar), 10) // teto: (1-0)*10
+    assert.equal(parseFloat(contatoUm.desvioOlhar), 0)    // piso: (1-1)*10
+
+    const presencaZero = calcularEstilosAvatar({ presenca: 0 })
+    assert.ok(parseFloat(presencaZero.opacidadePresenca) >= 0.6, 'piso de opacidade não pode furar')
+  })
+
+  test('tensão moderada (não travada) já produz sobrancelha visivelmente diferente do neutro', () => {
+    const neutro = calcularEstilosAvatar({ microTensao: 0.30 })
+    const moderada = calcularEstilosAvatar({ microTensao: 0.45 })
+    assert.notEqual(neutro.tensao, moderada.tensao)
+    assert.ok(parseFloat(moderada.tensao) - parseFloat(neutro.tensao) >= 0.3)
+  })
+})
+
 describe('calcularEstilosAvatar — nunca produz CSS quebrado', () => {
   test('todos os estados conhecidos produzem valores finitos e válidos', () => {
     for (const estado of ESTADOS_CONHECIDOS) {
