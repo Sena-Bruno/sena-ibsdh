@@ -72,7 +72,20 @@ class TestCORS(ComCliente):
     comentário de CORSMiddleware em api.py). Sem o cabeçalho certo, o
     navegador bloqueia a resposta antes de ela chegar ao componente."""
 
-    def test_producao_e_liberada(self):
+    def test_dominio_proprio_de_producao_e_liberado(self):
+        """O site aponta para o domínio próprio, não para o *.netlify.app
+        cru — foi isto que quebrou em produção antes deste teste existir:
+        o CORS liberava só o subdomínio padrão do Netlify, e o navegador
+        bloqueava toda chamada feita a partir do domínio de verdade."""
+        resposta = self.cliente.get(
+            "/saude", headers={"Origin": "https://simulador.institutobrunosena.com.br"}
+        )
+        self.assertEqual(
+            resposta.headers.get("access-control-allow-origin"),
+            "https://simulador.institutobrunosena.com.br",
+        )
+
+    def test_subdominio_padrao_do_netlify_tambem_e_liberado(self):
         resposta = self.cliente.get(
             "/saude", headers={"Origin": "https://sena-ibsdh.netlify.app"}
         )
