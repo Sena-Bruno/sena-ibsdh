@@ -1,0 +1,11 @@
+# faster-whisper: transcrição local, CPU-friendly (ctranslate2, não torch).
+faster-whisper>=1.0,<2.0
+
+# TTS (Coqui) — clonagem de voz por XTTS-v2. Pinado na última versão
+# amplamente testada com XTTS-v2; puxa torch/torchaudio sozinho.
+# Exige Python 3.10 ou 3.11 (3.12+ costuma falhar a instalar esta versão —
+# ver README, seção "Pré-requisitos").
+TTS==0.22.0
+
+# Interface local no navegador.
+gradio>=4.0,<5.0
