@@ -14,6 +14,12 @@
     # QUALQUER site que colocasse esta página num <iframe>.
     Permissions-Policy = "microphone=(self)"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    # connect-src precisa listar script.google.com e script.googleusercontent.com:
+    # o proxy /api entrega a resposta do Apps Script como um 302 para
+    # script.googleusercontent.com, e o navegador segue esse redirecionamento
+    # dentro do MESMO fetch. O CSP é aplicado a cada salto do redirecionamento,
+    # então sem esses dois domínios TODA chamada ao backend (login por código
+    # incluído) morre com "Failed to fetch", sem nem chegar ao servidor.
     # script-src sem 'unsafe-inline'/'unsafe-eval': o app não usa <script>
     # inline nem eval, só os bundles do Vite — isso já barra a execução de
     # HTML/JS injetado via innerHTML (ver achado XSS no relatório).
@@ -23,7 +29,7 @@
     # propósito num iframe do Hotmart Club (ver src/router/index.js). Defina
     # frame-ancestors 'self' https://dominio-exato-do-hotmart.com; assim que
     # esse domínio for confirmado, em vez de deixar sem restrição.
-    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.callmebot.com; base-uri 'self'; form-action 'self'; object-src 'none'"
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.callmebot.com https://script.google.com https://script.googleusercontent.com; base-uri 'self'; form-action 'self'; object-src 'none'"
 
 # Proxy: /api/* → Apps Script (resolve o CORS)
 # O Netlify faz a chamada server-side, sem restrição de CORS
