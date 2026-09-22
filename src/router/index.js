@@ -52,6 +52,16 @@ const routes = [
     alias: '/plantao',
     name: 'plantao',
     component: () => import('../views/PlantaoView.vue')
+  },
+  {
+    // Piloto interno (etapa 4) — de propósito SEM link em nenhuma outra
+    // tela (ver o cabeçalho de PacienteVivoView.vue e o gate do lado do
+    // servidor em nucleo/sena_servico/api.py, exigir_piloto). Alcançável
+    // só por quem já sabe a URL, enquanto o piloto for fechado.
+    path: '/paciente-vivo.html',
+    alias: '/paciente-vivo',
+    name: 'paciente-vivo',
+    component: () => import('../views/PacienteVivoView.vue')
   }
 ]
 

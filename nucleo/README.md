@@ -292,14 +292,41 @@ sem perder dado), configurado via `SENA_BANCO_URL`.
    ou parecido). Teste com `GET /saude` (sem token) e depois `/docs`
    (Swagger — cole `Bearer <token>` em Authorize; um token de teste sai
    de `sena_servico.autenticacao._emitir_token_para_teste`).
+5. No painel do **Netlify** (não do Render), Site configuration →
+   Environment variables, adicione `VITE_PACIENTE_VIVO_URL` com a URL do
+   passo 4 (sem barra no final) e faça um novo deploy — é uma variável de
+   *build* do Vite, então só entra no site depois de um build novo. Sem
+   ela, a tela em `/paciente-vivo` mostra um aviso em vez de tentar
+   chamar um host vazio.
+
+   Se a URL do seu serviço no Render NÃO for `sena-paciente-vivo`
+   (você renomeou o serviço, ou o Render escolheu outro subdomínio por já
+   existir um com esse nome), atualize também `connect-src` em
+   `netlify.toml` e o `allow_origin_regex` de `CORSMiddleware` em
+   `sena_servico/api.py` — os dois têm o domínio do Render fixado, e o
+   navegador bloqueia silenciosamente qualquer chamada para um host fora
+   dessas duas listas (CSP e CORS são permissões independentes; as duas
+   precisam concordar).
+
+### A tela do instrutor
+
+`/paciente-vivo` (Vue, `src/views/PacienteVivoView.vue`) é a interface —
+login (mesmo OTP do resto do SENA), escolha de curso e perfil, prescrição
+semana a semana, e a leitura de supervisor de cada sessão
+(`src/components/FichaSupervisor.vue`). De propósito **sem link em
+nenhuma outra tela** (ver `src/router/index.js`): alcançável só por quem
+já sabe a URL, enquanto o piloto for fechado — o gate de verdade continua
+sendo o servidor (`SENA_EMAILS_PILOTO`), isto aqui só evita descoberta
+acidental por quem não devia nem tentar.
+
+Fala com o serviço do Render diretamente do navegador (não pelo proxy
+`/api` do Netlify, que é só para o Apps Script) — por isso o serviço
+Python precisa de CORS (`CORSMiddleware` em `api.py`, restrito por regex
+ao domínio do site) e o `netlify.toml` precisa liberar esse host em
+`connect-src` da CSP.
 
 ## Ainda não existe
 
-- Tela no SENA (Vue) para um instrutor usar o Paciente Vivo sem abrir o
-  Swagger — a rota HTTP está completa e testada; falta a interface.
-- Rota do Netlify (`/api-pv/*` → o serviço no Render) e link no Dashboard
-  — intencionalmente ainda não linkado a lugar nenhum, dado o gate do
-  piloto: só quem tem a URL direta do Render usa, por enquanto.
 - Abrir para aluno de verdade. Isso não é uma linha de configuração — é
   uma decisão que espera o responsável técnico da etapa 1 e uma escolha
   de produto sobre quem entra primeiro.

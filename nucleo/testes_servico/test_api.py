@@ -67,6 +67,39 @@ class TestSaudePublica(ComCliente):
         self.assertEqual(set(resposta), {"ok"})
 
 
+class TestCORS(ComCliente):
+    """O Vue chama este serviço de outro host (Render, não Netlify — ver o
+    comentário de CORSMiddleware em api.py). Sem o cabeçalho certo, o
+    navegador bloqueia a resposta antes de ela chegar ao componente."""
+
+    def test_producao_e_liberada(self):
+        resposta = self.cliente.get(
+            "/saude", headers={"Origin": "https://sena-ibsdh.netlify.app"}
+        )
+        self.assertEqual(
+            resposta.headers.get("access-control-allow-origin"),
+            "https://sena-ibsdh.netlify.app",
+        )
+
+    def test_deploy_preview_e_liberado(self):
+        resposta = self.cliente.get(
+            "/saude", headers={"Origin": "https://deploy-preview-32--sena-ibsdh.netlify.app"}
+        )
+        self.assertEqual(
+            resposta.headers.get("access-control-allow-origin"),
+            "https://deploy-preview-32--sena-ibsdh.netlify.app",
+        )
+
+    def test_origem_arbitraria_nao_e_liberada(self):
+        """Um site qualquer forjando o cabeçalho Origin não pode ganhar o
+        header de CORS — sem isto, um token roubado valeria de qualquer
+        lugar que embutisse uma chamada a este serviço."""
+        resposta = self.cliente.get(
+            "/saude", headers={"Origin": "https://site-malicioso.example"}
+        )
+        self.assertNotIn("access-control-allow-origin", resposta.headers)
+
+
 class TestAutenticacao(ComCliente):
     def test_sem_cabecalho_e_401(self):
         resposta = self.cliente.get("/perfis")

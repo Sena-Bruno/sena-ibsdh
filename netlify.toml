@@ -23,7 +23,12 @@
     # propósito num iframe do Hotmart Club (ver src/router/index.js). Defina
     # frame-ancestors 'self' https://dominio-exato-do-hotmart.com; assim que
     # esse domínio for confirmado, em vez de deixar sem restrição.
-    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.callmebot.com; base-uri 'self'; form-action 'self'; object-src 'none'"
+    # connect-src inclui o host do Paciente Vivo (Render — ver render.yaml,
+    # `name: sena-paciente-vivo`, que fixa o subdomínio padrão do Render).
+    # Sem esta origem aqui, o navegador bloquearia a chamada do
+    # usePacienteVivo.js mesmo com o CORS do próprio serviço liberado — CSP
+    # e CORS são duas permissões independentes, e as duas precisam concordar.
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.callmebot.com https://sena-paciente-vivo.onrender.com; base-uri 'self'; form-action 'self'; object-src 'none'"
 
 # Proxy: /api/* → Apps Script (resolve o CORS)
 # O Netlify faz a chamada server-side, sem restrição de CORS

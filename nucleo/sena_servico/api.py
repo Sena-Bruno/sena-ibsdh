@@ -47,6 +47,7 @@ from pathlib import Path
 from typing import Literal
 
 from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from sena_nucleo.briefing import abertura_completa, ficha_do_supervisor
@@ -131,6 +132,25 @@ app = FastAPI(
 
 #: Instanciado uma vez, no processo — não por requisição.
 _NARRADOR = obter_narrador()
+
+# ── CORS ─────────────────────────────────────────────────────────────────
+#
+# Este serviço roda num host separado do site (Render, não Netlify — ver
+# render.yaml), então uma chamada do Vue sai do domínio do site e o
+# navegador exige CORS. A allowlist é por REGEX, não "*": liberar qualquer
+# origem devolveria dado autenticado (a ficha de um paciente) para um site
+# arbitrário que soubesse forjar o cabeçalho Origin. O gate de verdade
+# continua sendo o token (autenticacao.py) + o e-mail no piloto
+# (exigir_piloto) — CORS aqui é a segunda camada, não a primeira.
+#
+# Cobre: a produção (sena-ibsdh.netlify.app), cada deploy preview de PR
+# (deploy-preview-123--sena-ibsdh.netlify.app) e o dev local do Vite.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex=r"^(https://([a-z0-9-]+--)?sena-ibsdh\.netlify\.app|http://localhost:\d+)$",
+    allow_methods=["GET", "POST"],
+    allow_headers=["Authorization", "Content-Type"],
+)
 
 
 # ── modelos HTTP ─────────────────────────────────────────────────────────
