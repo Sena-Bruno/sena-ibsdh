@@ -33,6 +33,12 @@ export async function callApi(payload, opcoes) {
     if (e.name === 'AbortError') {
       throw new Error('O servidor demorou demais para responder. Tente novamente.')
     }
+    // TypeError = o fetch falhou antes de qualquer resposta (rede caída,
+    // proxy /api fora do ar, requisição barrada pelo navegador/CSP). Sem isto
+    // o aluno vê o "Failed to fetch" cru do navegador.
+    if (e instanceof TypeError) {
+      throw new Error('Não foi possível falar com o servidor. Verifique sua conexão e tente novamente.')
+    }
     throw e
   } finally {
     clearTimeout(timeoutId)
