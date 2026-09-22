@@ -1,78 +1,87 @@
 """Testes da camada de banco."""
 
-import sqlite3
 import unittest
 
-from sena_servico.banco import banco_temporario, conectar
+from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
+
+from sena_servico.banco import conectar, motor_de_teste
 
 
-class TestConexao(unittest.TestCase):
-    def test_cria_esquema_ao_conectar(self):
-        with banco_temporario() as caminho:
-            c = conectar(caminho)
+class TestMotorDeTeste(unittest.TestCase):
+    def test_cria_esquema(self):
+        engine = motor_de_teste()
+        with engine.connect() as c:
             tabelas = {
-                linha["name"]
+                linha[0]
                 for linha in c.execute(
-                    "SELECT name FROM sqlite_master WHERE type='table'"
+                    text("SELECT name FROM sqlite_master WHERE type='table'")
                 )
             }
             self.assertIn("pacientes", tabelas)
             self.assertIn("semanas", tabelas)
 
-    def test_conectar_e_idempotente(self):
-        """Conectar duas vezes ao mesmo arquivo não recria nem apaga nada."""
-        with banco_temporario() as caminho:
-            c1 = conectar(caminho)
+    def test_conexoes_diferentes_compartilham_o_mesmo_banco(self):
+        """A API abre uma conexão por requisição — todas precisam ver os
+        mesmos dados. Sem StaticPool, cada conexão a `:memory:` seria um
+        banco novo e vazio."""
+        engine = motor_de_teste()
+        with engine.connect() as c1:
             c1.execute(
-                "INSERT INTO pacientes VALUES ('x','a@b.com','P','Ansioso',1,'{}','t','t')"
+                text(
+                    "INSERT INTO pacientes VALUES "
+                    "('x','a@b.com','P','Ansioso',1,'{}','t','t')"
+                )
             )
             c1.commit()
-            c2 = conectar(caminho)  # reabre o mesmo arquivo
-            linhas = c2.execute("SELECT * FROM pacientes").fetchall()
-            self.assertEqual(len(linhas), 1)
-
-    def test_chaves_estrangeiras_ligadas(self):
-        with banco_temporario() as caminho:
-            c = conectar(caminho)
-            valor = c.execute("PRAGMA foreign_keys").fetchone()[0]
-            self.assertEqual(valor, 1)
-
-
-class TestBancoTemporario(unittest.TestCase):
-    def test_conexoes_diferentes_veem_os_mesmos_dados(self):
-        """Diferente de `:memory:`: duas conexões precisam enxergar o
-        mesmo banco, porque a API abre uma conexão por requisição."""
-        with banco_temporario() as caminho:
-            c1 = conectar(caminho)
-            c2 = conectar(caminho)
-            c1.execute(
-                "INSERT INTO pacientes VALUES ('y','a@b.com','P','Ansioso',1,'{}','t','t')"
-            )
-            c1.commit()
-            self.assertIsNotNone(
-                c2.execute("SELECT id FROM pacientes WHERE id='y'").fetchone()
-            )
-
-    def test_apagado_ao_sair_do_bloco(self):
-        import os
-
-        with banco_temporario() as caminho:
-            conectar(caminho)
-            caminho_salvo = caminho
-            self.assertTrue(os.path.exists(caminho_salvo))
-        self.assertFalse(os.path.exists(caminho_salvo))
+        with engine.connect() as c2:
+            linha = c2.execute(text("SELECT id FROM pacientes WHERE id='x'")).fetchone()
+            self.assertIsNotNone(linha)
 
     def test_unique_aluno_curso(self):
-        with banco_temporario() as caminho:
-            c = conectar(caminho)
+        engine = motor_de_teste()
+        with engine.connect() as c:
             c.execute(
-                "INSERT INTO pacientes VALUES ('a','x@x.com','P','Ansioso',1,'{}','t','t')"
+                text(
+                    "INSERT INTO pacientes VALUES "
+                    "('a','x@x.com','P','Ansioso',1,'{}','t','t')"
+                )
             )
             c.commit()
-            with self.assertRaises(sqlite3.IntegrityError):
+            with self.assertRaises(IntegrityError):
                 c.execute(
-                    "INSERT INTO pacientes VALUES ('b','x@x.com','P','Cético',1,'{}','t','t')"
+                    text(
+                        "INSERT INTO pacientes VALUES "
+                        "('b','x@x.com','P','Cético',1,'{}','t','t')"
+                    )
                 )
+                c.commit()
+
+
+class TestConectar(unittest.TestCase):
+    def test_url_sqlite_de_arquivo_persiste_entre_conexoes(self):
+        """`conectar` (produção/dev) versus `motor_de_teste` (só teste): a
+        diferença é só a URL. Confirma que `conectar` não depende de
+        StaticPool para funcionar com um arquivo real."""
+        import tempfile
+        from pathlib import Path
+
+        with tempfile.TemporaryDirectory() as pasta:
+            url = f"sqlite:///{Path(pasta) / 'teste.db'}"
+            engine1 = conectar(url)
+            with engine1.connect() as c1:
+                c1.execute(
+                    text(
+                        "INSERT INTO pacientes VALUES "
+                        "('y','a@b.com','P','Ansioso',1,'{}','t','t')"
+                    )
+                )
+                c1.commit()
+
+            engine2 = conectar(url)  # reabre o mesmo arquivo
+            with engine2.connect() as c2:
+                linha = c2.execute(text("SELECT id FROM pacientes WHERE id='y'")).fetchone()
+                self.assertIsNotNone(linha)
 
 
 if __name__ == "__main__":

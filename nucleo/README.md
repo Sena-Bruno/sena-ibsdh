@@ -12,14 +12,19 @@ python3 demo.py                              # a demonstração
 python3 -m unittest discover -s testes -t .  # os testes do motor
 ```
 
-**Rodar o serviço** (etapa 3 — precisa de FastAPI):
+**Rodar o serviço** (etapas 3-4 — precisa de FastAPI + SQLAlchemy):
 
 ```bash
 cd nucleo
 pip install -r requirements-servico.txt
 python3 demo_servico.py                                  # a demonstração
 python3 -m unittest discover -s testes_servico -t . -q   # os testes do serviço
-uvicorn sena_servico.api:app --reload                    # o servidor, com /docs
+
+# O servidor de verdade exige as variáveis abaixo — sem elas, toda rota
+# (exceto /saude) responde 401/503. Ver "Etapa 4" mais abaixo.
+export SENA_SESSION_SECRET=qualquer-valor-para-testar-localmente
+export SENA_EMAILS_PILOTO=voce@exemplo.com
+uvicorn sena_servico.api:app --reload                    # /docs tem o Swagger
 ```
 
 O motor continua zero-dependência de propósito: a primeira coisa que se
@@ -183,15 +188,19 @@ o Bruno rodar casos conhecidos e dizer onde o motor discorda da clínica.
 Cada discordância vira um teste em `testes/`, e a constante muda depois
 disso, nunca antes.
 
-## Etapa 3 — persistência e API (`sena_servico/`)
+## Etapa 3 — persistência (`sena_servico/`)
 
-Onde o paciente passa a ter memória de verdade: SQLite guardando
-`estado_atual` por (aluno, curso), e uma API FastAPI por cima.
+Onde o paciente passa a ter memória de verdade: um banco guardando
+`estado_atual` por (aluno, curso), acessado via SQLAlchemy Core — o mesmo
+código Python fala `sqlite:///...` (desenvolvimento e teste, zero
+infraestrutura) e `postgresql+psycopg://...` (produção, via Neon — ver
+etapa 4 abaixo, que é onde e por que essa segunda opção passou a existir).
 
 | Arquivo | O que faz |
 |---|---|
-| `sena_servico/banco.py` | Esquema SQLite + conexão |
+| `sena_servico/banco.py` | Esquema (SQLAlchemy `Table`) + conexão, dois dialetos |
 | `sena_servico/repositorio.py` | Ponte entre linhas de banco e objetos do motor |
+| `sena_servico/autenticacao.py` | Verifica o MESMO token que o Apps Script já emite |
 | `sena_servico/narrador.py` | Monta o narrador HTTP a partir do ambiente, uma vez |
 | `sena_servico/api.py` | FastAPI — as rotas |
 
@@ -211,26 +220,113 @@ que só LISTA usa os campos denormalizados.
 por causa de um retry de rede: um paciente vivo por (aluno_email, curso),
 sempre.
 
-**Onde as etapas 2 e 3 se encontram.** A narração por IA não tinha onde
-acontecer de verdade até existir estado persistente para narrar a
-evolução de. `POST /pacientes/{id}/sessoes` é esse lugar: chama
-`narrar()` com o narrador HTTP se `SENA_IA_URL`/`SENA_IA_CHAVE`/
-`SENA_IA_MODELOS` estiverem configuradas, e cai para o texto fixo do
-motor se não estiverem — mesma garantia estrutural da etapa 2.
+**Por que SQLAlchemy, e não `sqlite3` puro** (que a primeira versão desta
+camada usava): a etapa 4 esbarrou numa restrição real — hospedagem
+gratuita tem disco EFÊMERO, então SQLite local deixou de ser opção viável
+para produção. SQLAlchemy Core elimina o risco de duas implementações de
+SQL (uma por dialeto) divergirem silenciosamente: o mesmo código Python
+gera SQL correto para os dois bancos. Verificado não só contra SQLite —
+`testes_servico/test_postgres_real.py` roda os mesmos pontos críticos
+contra um Postgres de verdade (pulado por padrão; ver o cabeçalho do
+arquivo para como ligar).
 
-**Esta API ainda não é para o aluno acessar diretamente.** As respostas
-incluem `estado_atual` e `ficha_do_supervisor` — leitura interna, nunca
-segura para o navegador de um aluno. Separar "o que é seguro mostrar" (a
-`abertura`, sem número, sem termo técnico) de "o que é leitura de
-supervisor" é trabalho da etapa 4, que decide como isto chega ao SENA de
-verdade (proxy do Netlify, autenticação por token).
+## Etapa 4 — piloto interno (autenticação, gate, hospedagem)
+
+Onde o Paciente Vivo passa a rodar hospedado, atrás de autenticação real
+— mas ainda **fechado a aluno**, de propósito.
+
+**Autenticação real, não um sistema novo.** `sena_servico/autenticacao.py`
+verifica o MESMO token assinado que `appscript/autenticacao.gs` já emite
+para o resto do SENA (HMAC-SHA256, formato idêntico) — inventar uma
+segunda forma de provar "quem é este aluno" seria exatamente o tipo de
+divergência que este projeto evita desde a etapa 0. Verificado por
+interoperabilidade real: um token construído em Node (`crypto`, o jeito
+que qualquer ambiente fora do Python constrói) é aceito pelo verificador
+Python — foi assim, aliás, que um bug de padding do base64 foi encontrado
+(ver o histórico de commits).
+
+**O gate do piloto.** Toda rota exige, além do token válido, que o e-mail
+autenticado esteja em `SENA_EMAILS_PILOTO` (lista separada por vírgula,
+variável de ambiente). Isto não é um detalhe de autorização — é o que
+torna concreto o registro da etapa 1: o instituto ainda não tem
+responsável técnico revisando o conteúdo clínico, então nenhum aluno
+pode encostar nisto ainda. Tirar o gate é decisão de produto de quem
+administra o SENA, nunca uma linha de código a remover por conveniência.
+
+**A separação aluno/supervisor, finalmente real.** `POST
+/pacientes/{id}/sessoes` devolve só `fala` e `corpo` — sem número, sem
+termo técnico, o formato seguro para QUALQUER cliente, inclusive um
+aluno, no dia em que o gate abrir. A leitura técnica
+(`ficha_do_supervisor`, com `estado_atual`, ganhos/perdas, alertas) mudou
+para uma rota separada, `GET /pacientes/{id}/ficha/{numero_sessao}`. Hoje
+as duas exigem o mesmo gate — mas a arquitetura já não permite um cliente
+de aluno receber a ficha por engano, porque essa separação não pode ser
+adiada para quando for tarde.
+
+**Isolamento entre alunos do piloto.** Toda rota que lê ou altera um
+paciente confirma que ele pertence ao e-mail da sessão (`_exigir_dono`) —
+sem isso, dois e-mails autorizados no piloto poderiam ler o caso um do
+outro só sabendo o id.
+
+**Hospedagem, sem orçamento.** `render.yaml` (na raiz do repositório)
+configura o serviço no plano gratuito do Render — mas o plano gratuito
+tem disco efêmero, que apagaria um SQLite local a cada hibernação
+(15 min sem requisição). A solução foi desacoplar o banco do disco do
+servidor: Postgres gratuito via [Neon](https://neon.tech) (nunca expira
+por tempo, só suspende a computação — acorda sozinho na próxima consulta,
+sem perder dado), configurado via `SENA_BANCO_URL`.
+
+### Colocar no ar
+
+1. Crie uma conta no [Neon](https://neon.tech) (grátis, sem cartão) e um
+   projeto. Copie a "Connection string" (`postgresql://...` — troque o
+   início por `postgresql+psycopg://` para o SQLAlchemy usar o driver
+   certo).
+2. Crie uma conta no [Render](https://render.com) e conecte este
+   repositório como "Blueprint" — ele lê `render.yaml` sozinho.
+3. No painel do Render, preencha as variáveis marcadas `sync: false`:
+   `SENA_SESSION_SECRET` (o MESMO valor já configurado no Apps Script —
+   copie, não gere um novo), `SENA_EMAILS_PILOTO`, e `SENA_BANCO_URL` (a
+   connection string do Neon, do passo 1).
+4. O Render publica uma URL (`https://sena-paciente-vivo.onrender.com`
+   ou parecido). Teste com `GET /saude` (sem token) e depois `/docs`
+   (Swagger — cole `Bearer <token>` em Authorize; um token de teste sai
+   de `sena_servico.autenticacao._emitir_token_para_teste`).
+5. No painel do **Netlify** (não do Render), Site configuration →
+   Environment variables, adicione `VITE_PACIENTE_VIVO_URL` com a URL do
+   passo 4 (sem barra no final) e faça um novo deploy — é uma variável de
+   *build* do Vite, então só entra no site depois de um build novo. Sem
+   ela, a tela em `/paciente-vivo` mostra um aviso em vez de tentar
+   chamar um host vazio.
+
+   Se a URL do seu serviço no Render NÃO for `sena-paciente-vivo`
+   (você renomeou o serviço, ou o Render escolheu outro subdomínio por já
+   existir um com esse nome), atualize também `connect-src` em
+   `netlify.toml` e o `allow_origin_regex` de `CORSMiddleware` em
+   `sena_servico/api.py` — os dois têm o domínio do Render fixado, e o
+   navegador bloqueia silenciosamente qualquer chamada para um host fora
+   dessas duas listas (CSP e CORS são permissões independentes; as duas
+   precisam concordar).
+
+### A tela do instrutor
+
+`/paciente-vivo` (Vue, `src/views/PacienteVivoView.vue`) é a interface —
+login (mesmo OTP do resto do SENA), escolha de curso e perfil, prescrição
+semana a semana, e a leitura de supervisor de cada sessão
+(`src/components/FichaSupervisor.vue`). De propósito **sem link em
+nenhuma outra tela** (ver `src/router/index.js`): alcançável só por quem
+já sabe a URL, enquanto o piloto for fechado — o gate de verdade continua
+sendo o servidor (`SENA_EMAILS_PILOTO`), isto aqui só evita descoberta
+acidental por quem não devia nem tentar.
+
+Fala com o serviço do Render diretamente do navegador (não pelo proxy
+`/api` do Netlify, que é só para o Apps Script) — por isso o serviço
+Python precisa de CORS (`CORSMiddleware` em `api.py`, restrito por regex
+ao domínio do site) e o `netlify.toml` precisa liberar esse host em
+`connect-src` da CSP.
 
 ## Ainda não existe
 
-- Integração com o Apps Script / backend real do SENA — isso é a etapa 4.
-- Separação entre resposta segura para aluno e leitura de supervisor na
-  API (ver aviso acima). A etapa 3 prova que a persistência funciona; não
-  decide o contrato final com o front.
-- Autenticação na API do serviço. `sena_servico/api.py` confia em quem
-  chama — está correto para uma prova isolada rodando localmente, e teria
-  de mudar antes de qualquer exposição pública.
+- Abrir para aluno de verdade. Isso não é uma linha de configuração — é
+  uma decisão que espera o responsável técnico da etapa 1 e uma escolha
+  de produto sobre quem entra primeiro.

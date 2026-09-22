@@ -2,10 +2,18 @@
 #
 # sena_nucleo/ continua zero-dependência de propósito — é o que faz os 109
 # testes do motor rodarem em qualquer lugar sem instalar nada. Este arquivo
-# só existe para a API e a persistência, que são infraestrutura nova e
-# ainda não estão em produção.
+# só existe para a API, a persistência e a autenticação.
 #
 # Instalar:  pip install -r nucleo/requirements-servico.txt
 fastapi==0.141.1
 uvicorn==0.53.0
 httpx==0.28.1
+
+# SQLAlchemy fala SQLite (dev/teste) e Postgres (produção, via Neon) com o
+# MESMO código Python — ver o cabeçalho de sena_servico/banco.py para o
+# porquê disso ser etapa 4, não capricho.
+sqlalchemy>=2.0,<3.0
+# Driver Postgres. "binary" traz o libpq compilado — sem isso, instalar
+# psycopg exigiria toolchain de compilação C no host (o Render free tem,
+# mas o objetivo aqui é o caminho mais simples de operar).
+psycopg[binary]>=3.1,<4.0
