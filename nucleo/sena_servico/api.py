@@ -143,11 +143,14 @@ _NARRADOR = obter_narrador()
 # continua sendo o token (autenticacao.py) + o e-mail no piloto
 # (exigir_piloto) — CORS aqui é a segunda camada, não a primeira.
 #
-# Cobre: a produção (sena-ibsdh.netlify.app), cada deploy preview de PR
-# (deploy-preview-123--sena-ibsdh.netlify.app) e o dev local do Vite.
+# Cobre: o domínio próprio de produção (simulador.institutobrunosena.com.br
+# — o site aponta pra lá, não pro *.netlify.app cru, mesmo hospedado no
+# Netlify), o subdomínio padrão do Netlify (caso o domínio próprio mude ou
+# saia do ar), cada deploy preview de PR (deploy-preview-123--sena-ibsdh.
+# netlify.app) e o dev local do Vite.
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"^(https://([a-z0-9-]+--)?sena-ibsdh\.netlify\.app|http://localhost:\d+)$",
+    allow_origin_regex=r"^(https://simulador\.institutobrunosena\.com\.br|https://([a-z0-9-]+--)?sena-ibsdh\.netlify\.app|http://localhost:\d+)$",
     allow_methods=["GET", "POST"],
     allow_headers=["Authorization", "Content-Type"],
 )
