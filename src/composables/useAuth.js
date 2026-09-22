@@ -41,7 +41,15 @@ export function limparSessao() {
 }
 
 async function post(payload) {
-  const res = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+  let res
+  try {
+    res = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+  } catch (e) {
+    // Aqui o fetch nem chegou a receber resposta: rede caída, proxy /api fora
+    // do ar ou requisição barrada pelo navegador (CSP). O erro cru do
+    // navegador é um "Failed to fetch" que não diz nada ao aluno.
+    throw new Error('Não foi possível falar com o servidor. Verifique sua conexão e tente novamente.')
+  }
   if (!res.ok) throw new Error('Servidor indisponível. Tente novamente.')
   return await res.json()
 }
