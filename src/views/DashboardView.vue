@@ -1650,7 +1650,7 @@ body.alto-contraste .dash-page .rank-badge {
     .dash-page .journey-connector { flex-shrink:0; height:2px; width:32px; margin-top:-28px; position:relative; z-index:0; }
     .dash-page .journey-connector.done   { background:var(--success); }
     .dash-page .journey-connector.active { background:linear-gradient(90deg,var(--success),rgba(82,196,179,0.3)); }
-    .dash-page .journey-connector.locked { background:rgba(255,255,255,0.07); }
+    .dash-page .journey-connector.locked { background:color-mix(in srgb, var(--text) 10%, transparent); }
 
     /* Módulos */
     .dash-page .modules { display:grid; gap:14px; margin-bottom:22px; }
@@ -1675,23 +1675,23 @@ body.alto-contraste .dash-page .rank-badge {
     .dash-page .module-card.locked .module-header { cursor:not-allowed; }
     /* Os filhos viraram <span> (um <button> não pode conter <div>). */
     .dash-page .module-info, .dash-page .module-title, .dash-page .module-meta { display:block; }
-    .dash-page .module-card.open .module-header { border-bottom-color:rgba(255,255,255,0.06); }
-    .dash-page .module-num { width:36px; height:36px; flex-shrink:0; border-radius:11px; display:grid; place-items:center; font-size:13px; font-weight:800; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:var(--text-soft); }
+    .dash-page .module-card.open .module-header { border-bottom-color:color-mix(in srgb, var(--text) 8%, transparent); }
+    .dash-page .module-num { width:36px; height:36px; flex-shrink:0; border-radius:11px; display:grid; place-items:center; font-size:13px; font-weight:800; background:color-mix(in srgb, var(--text) 6%, transparent); border:1px solid color-mix(in srgb, var(--text) 10%, transparent); color:var(--text-soft); }
     .dash-page .module-card.complete .module-num { background:var(--success-dim); border-color:rgba(124,196,100,0.2); color:var(--success); }
-    .dash-page .module-card.locked .module-num { background:rgba(255,255,255,0.03); color:var(--text-faint); }
+    .dash-page .module-card.locked .module-num { background:color-mix(in srgb, var(--text) 4%, transparent); color:var(--text-faint); }
     .dash-page .module-info { flex:1; min-width:0; }
     .dash-page .module-title { font-size:14px; font-weight:700; margin-bottom:3px; line-height:1.3; overflow-wrap: break-word; }
     .dash-page .module-meta { font-size:12px; color:var(--text-faint); }
     .dash-page .module-badge { flex-shrink:0; padding:4px 10px; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:.06em; }
     .dash-page .module-badge.done    { background:var(--success-dim); color:var(--success); }
     .dash-page .module-badge.partial { background:var(--cyan-dim); color:var(--cyan); }
-    .dash-page .module-badge.locked  { background:rgba(255,255,255,0.04); color:var(--text-faint); }
+    .dash-page .module-badge.locked  { background:color-mix(in srgb, var(--text) 5%, transparent); color:var(--text-faint); }
     .dash-page .module-badge.pending { background:var(--gold-dim); color:var(--gold); }
     .dash-page .module-chevron { flex-shrink:0; color:var(--text-faint); font-size:12px; transition:transform .2s; }
     .dash-page .module-card.open .module-chevron { transform:rotate(180deg); }
     .dash-page .module-progress { padding:0 20px 14px; display:none; }
     .dash-page .module-card.open .module-progress { display:block; }
-    .dash-page .mod-track { height:3px; border-radius:999px; background:rgba(255,255,255,0.05); overflow:hidden; margin-top:2px; }
+    .dash-page .mod-track { height:3px; border-radius:999px; background:color-mix(in srgb, var(--text) 6%, transparent); overflow:hidden; margin-top:2px; }
     .dash-page .mod-fill { height:100%; border-radius:999px; background:var(--cyan); transition:width .6s ease; }
     .dash-page .aulas-list { display:none; padding:0 12px 14px; gap:8px; }
     .dash-page .module-card.open .aulas-list { display:grid; }
@@ -1699,7 +1699,7 @@ body.alto-contraste .dash-page .rank-badge {
     .dash-page .aula-row:not(.locked):hover { border-color:rgba(82,196,179,0.2); background-color:rgba(82,196,179,0.06); }
     .dash-page .aula-row.locked { opacity:.5; cursor:not-allowed; }
     .dash-page .aula-status { width:28px; height:28px; flex-shrink:0; border-radius:8px; display:grid; place-items:center; font-size:13px; }
-    .dash-page .aula-status.pending  { background:rgba(255,255,255,0.08); color:var(--text-faint); border:1px solid rgba(255,255,255,0.15); }
+    .dash-page .aula-status.pending  { background:color-mix(in srgb, var(--text) 8%, transparent); color:var(--text-faint); border:1px solid color-mix(in srgb, var(--text) 15%, transparent); }
     .dash-page .aula-status.approved { background:var(--success-dim); color:var(--success); border:1px solid rgba(124,196,100,0.3); }
     .dash-page .aula-status.rejected { background:var(--danger-dim); color:var(--danger); border:1px solid rgba(226,119,92,0.3); }
     .dash-page .aula-info { flex:1; min-width:0; }
