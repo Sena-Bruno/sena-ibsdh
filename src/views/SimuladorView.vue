@@ -1823,28 +1823,28 @@ onUnmounted(() => {
        carregada por último (ou seja, a última rota visitada) decidia a
        paleta das duas. */
     .sim-page {
-      --bg: #12100c;
-      --panel: rgba(27,23,17,0.85);
-      --border: rgba(168,150,120,0.25);
-      --text: #f4eee1;
-      --text-soft: #b7ab98;
+      --bg: #15130e;
+      --panel: rgba(30,26,19,0.85);
+      --border: rgba(179,162,130,0.20);
+      --text: #f7f4ee;
+      --text-soft: #bdb096;
       --text-faint: #9c9080;   /* era #756a58 — 4.24:1, reprovava 1.4.3; agora 6.35:1 */
-      --cyan: #7fc9bb;
-      --cyan-dim: rgba(127,201,187,0.12);
-      --gold: #d3a24f;
-      --gold-dim: rgba(211,162,79,0.12);
-      --success: #93bf78;
-      --success-dim: rgba(147,191,120,0.1);
-      --danger: #e0846a;
-      --danger-dim: rgba(224,132,106,0.1);
+      --cyan: #52c4b3;
+      --cyan-dim: rgba(82,196,179,0.12);
+      --gold: #e0a545;
+      --gold-dim: rgba(224,165,69,0.12);
+      --success: #7cc464;
+      --success-dim: rgba(124,196,100,0.1);
+      --danger: #e2775c;
+      --danger-dim: rgba(226,119,92,0.1);
       --shadow-premium: 0 4px 6px rgba(0,0,0,0.2), 0 12px 24px rgba(0,0,0,0.4);
       --radius-xl: 24px; --radius-lg: 18px; --radius-md: 14px; --radius-sm: 10px;
     }
-    
+
     .sim-page {
-      background: radial-gradient(circle at top left, rgba(127,201,187,0.06), transparent 28%), 
-                  radial-gradient(circle at bottom right, rgba(211,162,79,0.04), transparent 22%), 
-                  linear-gradient(180deg, #12100c 0%, #1a160f 100%);
+      background: radial-gradient(circle at top left, rgba(82,196,179,0.06), transparent 28%),
+                  radial-gradient(circle at bottom right, rgba(224,165,69,0.04), transparent 22%),
+                  linear-gradient(180deg, #15130e 0%, #1d1811 100%);
     }
 
     /* Tema Claro */
