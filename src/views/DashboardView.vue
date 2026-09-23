@@ -1527,7 +1527,9 @@ body.alto-contraste .dash-page .rank-badge {
       font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
       color: var(--text-faint); margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
     }
-    .dash-page .section-title::after { content:''; flex:1; height:1px; background: rgba(255,255,255,0.06); }
+    /* var(--border) em vez de um branco translúcido fixo: a linha somia
+       no tema claro (branco sobre um fundo quase branco). */
+    .dash-page .section-title::after { content:''; flex:1; height:1px; background: var(--border); }
 
     /* Hero */
     .dash-page .hero { 
@@ -1578,7 +1580,7 @@ body.alto-contraste .dash-page .rank-badge {
     .dash-page .progress-header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px; }
     .dash-page .progress-label { font-size:12px; font-weight:700; color:var(--text-soft); letter-spacing:.08em; text-transform:uppercase; }
     .dash-page .progress-count { font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--cyan); }
-    .dash-page .progress-track { height:6px; border-radius:999px; background:rgba(255,255,255,0.06); overflow:hidden; }
+    .dash-page .progress-track { height:6px; border-radius:999px; background:color-mix(in srgb, var(--text) 8%, transparent); overflow:hidden; }
     .dash-page .progress-fill { height:100%; border-radius:999px; background:linear-gradient(90deg,var(--cyan),#b7ded4); transition:width .8s cubic-bezier(.4,0,.2,1); box-shadow:0 0 12px rgba(82,196,179,0.35); }
 
     /* Info cards */
@@ -1628,15 +1630,19 @@ body.alto-contraste .dash-page .rank-badge {
     }
     .dash-page .journey-node.done .journey-circle    { background:var(--success-dim); border-color:var(--success); color:var(--success); }
     .dash-page .journey-node.active .journey-circle  { background:var(--cyan-dim); border-color:var(--cyan); color:var(--cyan); box-shadow:0 0 18px rgba(82,196,179,0.3); animation:pulse 2s ease-in-out infinite; }
-    .dash-page .journey-node.locked .journey-circle  { background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.1); color:var(--text-faint); }
+    .dash-page .journey-node.locked .journey-circle  { background:color-mix(in srgb, var(--text) 4%, transparent); border-color:color-mix(in srgb, var(--text) 12%, transparent); color:var(--text-faint); }
     @keyframes pulse { 0%,100%{box-shadow:0 0 14px rgba(82,196,179,0.25)} 50%{box-shadow:0 0 28px rgba(82,196,179,0.5)} }
+    /* Era rgba(15,13,9,0.97) fixo — um balão quase-preto com texto
+       var(--text), que no tema claro fica escuro sobre escuro. var(--panel)
+       acompanha o tema, como o resto dos cartões da página. */
     .dash-page .journey-node .journey-tooltip {
       position:absolute; bottom:calc(100% + 10px); left:50%; transform:translateX(-50%);
-      background:rgba(15,13,9,0.97); border:1px solid var(--border); border-radius:8px;
+      background:var(--panel); border:1px solid var(--border); border-radius:8px;
       padding:6px 10px; font-size:11px; font-weight:600; color:var(--text);
       white-space:nowrap; pointer-events:none; opacity:0; transition:opacity .15s; z-index:10;
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
     }
-    .dash-page .journey-node .journey-tooltip::after { content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:5px solid transparent; border-top-color:rgba(15,13,9,0.97); }
+    .dash-page .journey-node .journey-tooltip::after { content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:5px solid transparent; border-top-color:var(--panel); }
     .dash-page .journey-node:hover .journey-tooltip { opacity:1; }
     .dash-page .journey-num { font-size:9px; font-weight:700; color:var(--text-faint); letter-spacing:.06em; }
     .dash-page .journey-node.done .journey-num   { color:var(--success); }
