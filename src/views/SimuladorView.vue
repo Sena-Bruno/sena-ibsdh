@@ -2083,14 +2083,14 @@ body.alto-contraste .sim-page input:focus {
     .sim-page .hero h1 { font-size: clamp(32px,5vw,48px); line-height: 1; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 10px; }
     .sim-page .hero p { color: var(--text-soft); max-width: 760px; font-size: 15px; }
     .sim-page .status-grid { margin-top: 24px; position: relative; z-index: 1; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 14px; }
-    .sim-page .status-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 18px; padding: 16px; backdrop-filter: blur(8px); }
+    .sim-page .status-card { background: color-mix(in srgb, var(--text) 3%, transparent); border: 1px solid color-mix(in srgb, var(--text) 6%, transparent); border-radius: 18px; padding: 16px; backdrop-filter: blur(8px); }
     .sim-page .status-label { color: var(--text-faint); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 8px; }
     .sim-page .status-value { color: var(--text); font-size: 15px; font-weight: 700; word-break: break-word; }
     .sim-page .status-value.primary { color: var(--cyan); }
     .sim-page .status-value.critical { color: var(--danger); }
     .sim-page .layout { display: grid; grid-template-columns: 1.08fr 0.92fr; gap: 18px; align-items: start; }
     .sim-page .card { background: linear-gradient(180deg,rgba(27,23,17,0.95) 0%,rgba(15,13,9,0.98) 100%); border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--shadow-premium); overflow: hidden; }
-    .sim-page .card-header { display: flex; align-items: center; gap: 12px; padding: 18px 22px; border-bottom: 1px solid rgba(255,255,255,0.06); background: linear-gradient(180deg,rgba(255,255,255,0.02) 0%,rgba(255,255,255,0.01) 100%); }
+    .sim-page .card-header { display: flex; align-items: center; gap: 12px; padding: 18px 22px; border-bottom: 1px solid color-mix(in srgb, var(--text) 6%, transparent); background: linear-gradient(180deg,color-mix(in srgb, var(--text) 2%, transparent) 0%,color-mix(in srgb, var(--text) 1%, transparent) 100%); }
     .sim-page .card-dot { width: 11px; height: 11px; border-radius: 999px; background: var(--gold); box-shadow: 0 0 12px color-mix(in srgb, var(--gold) 55%, transparent); }
     .sim-page .card-dot.active { background: var(--cyan); box-shadow: 0 0 14px color-mix(in srgb, var(--cyan) 55%, transparent); }
     .sim-page .card-title { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-soft); }
@@ -2098,14 +2098,14 @@ body.alto-contraste .sim-page input:focus {
     .sim-page .alert { display: none; margin-bottom: 16px; padding: 14px 16px; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--danger) 18%, transparent); background: var(--danger-dim); color: var(--danger); font-size: 14px; }
     .sim-page .alert.visible { display: block; }
     .sim-page .patient-shell { display: grid; gap: 16px; }
-    .sim-page .patient-hero { position: relative; padding: 22px; border-radius: 22px; border: 1px solid rgba(255,255,255,0.06); background: linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.01)),linear-gradient(135deg,color-mix(in srgb, var(--cyan) 5%, transparent),color-mix(in srgb, var(--gold) 2%, transparent)); overflow: hidden; }
+    .sim-page .patient-hero { position: relative; padding: 22px; border-radius: 22px; border: 1px solid color-mix(in srgb, var(--text) 6%, transparent); background: linear-gradient(180deg,color-mix(in srgb, var(--text) 2.5%, transparent),color-mix(in srgb, var(--text) 1%, transparent)),linear-gradient(135deg,color-mix(in srgb, var(--cyan) 5%, transparent),color-mix(in srgb, var(--gold) 2%, transparent)); overflow: hidden; }
     .sim-page .patient-avatar { margin-bottom: 16px; }
-    .sim-page .patient-id { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 14px; padding: 7px 12px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-soft); background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); }
+    .sim-page .patient-id { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 14px; padding: 7px 12px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-soft); background: color-mix(in srgb, var(--text) 4%, transparent); border: 1px solid color-mix(in srgb, var(--text) 6%, transparent); }
     .sim-page .patient-id::before { content: ''; width: 8px; height: 8px; border-radius: 999px; background: var(--danger); box-shadow: 0 0 10px color-mix(in srgb, var(--danger) 45%, transparent); }
     .sim-page .patient-name { font-size: 30px; line-height: 1.05; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 10px; }
     .sim-page .patient-desc { color: var(--text-soft); font-size: 15px; max-width: 700px; }
     .sim-page .patient-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .sim-page .mini-panel { border-radius: 18px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.03); padding: 16px; }
+    .sim-page .mini-panel { border-radius: 18px; border: 1px solid color-mix(in srgb, var(--text) 6%, transparent); background: color-mix(in srgb, var(--text) 3%, transparent); padding: 16px; }
     .sim-page .mini-title { font-size: 11px; font-weight: 700; color: var(--gold); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px; }
     .sim-page .mini-text { color: var(--text-soft); font-size: 14px; }
     .sim-page .mini-list { list-style: none; display: grid; gap: 8px; }
@@ -2115,13 +2115,13 @@ body.alto-contraste .sim-page input:focus {
 .sim-page .ghost-btn { width: 100%; border: none; border-radius: 16px; padding: 16px 18px; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: transform 0.18s ease,box-shadow 0.18s ease,opacity 0.18s ease; }
     .sim-page .primary-btn { color: var(--on-accent); background: linear-gradient(135deg,var(--cyan) 0%,color-mix(in srgb, var(--cyan) 55%, white) 100%); box-shadow: 0 18px 32px color-mix(in srgb, var(--cyan) 18%, transparent); }
     .sim-page .primary-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 22px 36px color-mix(in srgb, var(--cyan) 24%, transparent); }
-    .sim-page .ghost-btn { background: rgba(255,255,255,0.04); color: var(--text); border: 1px solid rgba(255,255,255,0.08); margin-top: 12px; }
-    .sim-page .ghost-btn:hover:not(:disabled) { transform: translateY(-1px); background: rgba(255,255,255,0.06); }
+    .sim-page .ghost-btn { background: color-mix(in srgb, var(--text) 4%, transparent); color: var(--text); border: 1px solid color-mix(in srgb, var(--text) 8%, transparent); margin-top: 12px; }
+    .sim-page .ghost-btn:hover:not(:disabled) { transform: translateY(-1px); background: color-mix(in srgb, var(--text) 6%, transparent); }
     .sim-page .primary-btn:disabled,
 .sim-page .ghost-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
     .sim-page .input-panel { display: none; gap: 16px; }
     .sim-page .input-panel.visible { display: grid; }
-    .sim-page .section-block { border-radius: 18px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.03); padding: 16px; }
+    .sim-page .section-block { border-radius: 18px; border: 1px solid color-mix(in srgb, var(--text) 6%, transparent); background: color-mix(in srgb, var(--text) 3%, transparent); padding: 16px; }
     .sim-page .section-title { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px; color: var(--gold); }
     .sim-page .section-title.alt { color: var(--cyan); }
     .sim-page .section-body { color: var(--text-soft); font-size: 14px; line-height: 1.7; white-space: pre-line; }
@@ -2136,16 +2136,16 @@ body.alto-contraste .sim-page input:focus {
     .sim-page .orbital { width: 120px; height: 120px; position: relative; margin-bottom: 18px; }
     .sim-page .ring { position: absolute; inset: 0; border-radius: 999px; border: 2px solid color-mix(in srgb, var(--cyan) 18%, transparent); border-top-color: var(--cyan); animation: spin 1.6s linear infinite; }
     .sim-page .ring:nth-child(2) { inset: 16px; border-color: color-mix(in srgb, var(--gold) 18%, transparent); border-right-color: var(--gold); animation-duration: 1.2s; animation-direction: reverse; }
-    .sim-page .ring:nth-child(3) { inset: 34px; border-color: rgba(255,255,255,0.12); border-bottom-color: rgba(255,255,255,0.55); animation-duration: 1.8s; }
+    .sim-page .ring:nth-child(3) { inset: 34px; border-color: color-mix(in srgb, var(--text) 12%, transparent); border-bottom-color: color-mix(in srgb, var(--text) 55%, transparent); animation-duration: 1.8s; }
     .sim-page .core { position: absolute; inset: 45px; border-radius: 999px; background: radial-gradient(circle,var(--cyan) 0%,color-mix(in srgb, var(--cyan) 20%, transparent) 65%,transparent 100%); box-shadow: 0 0 24px color-mix(in srgb, var(--cyan) 40%, transparent); }
     @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
     .sim-page .processing-title { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 6px; }
     .sim-page .processing-copy { color: var(--text-soft); font-size: 14px; max-width: 340px; }
     .sim-page .result-panel { display: none; gap: 16px; }
     .sim-page .result-panel.visible { display: grid; }
-    .sim-page .score-card { border-radius: 22px; padding: 22px; border: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.03); }
-    .sim-page .score-card.approved { border-color: color-mix(in srgb, var(--success) 22%, transparent); background: linear-gradient(180deg,color-mix(in srgb, var(--success) 8%, transparent),rgba(255,255,255,0.025)); }
-    .sim-page .score-card.rejected { border-color: color-mix(in srgb, var(--danger) 20%, transparent); background: linear-gradient(180deg,color-mix(in srgb, var(--danger) 8%, transparent),rgba(255,255,255,0.025)); }
+    .sim-page .score-card { border-radius: 22px; padding: 22px; border: 1px solid color-mix(in srgb, var(--text) 7%, transparent); background: color-mix(in srgb, var(--text) 3%, transparent); }
+    .sim-page .score-card.approved { border-color: color-mix(in srgb, var(--success) 22%, transparent); background: linear-gradient(180deg,color-mix(in srgb, var(--success) 8%, transparent),color-mix(in srgb, var(--text) 2.5%, transparent)); }
+    .sim-page .score-card.rejected { border-color: color-mix(in srgb, var(--danger) 20%, transparent); background: linear-gradient(180deg,color-mix(in srgb, var(--danger) 8%, transparent),color-mix(in srgb, var(--text) 2.5%, transparent)); }
     .sim-page .result-tag { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px; }
     .sim-page .result-tag.approved { color: var(--success); background: color-mix(in srgb, var(--success) 10%, transparent); border: 1px solid color-mix(in srgb, var(--success) 16%, transparent); }
     .sim-page .result-tag.rejected { color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); border: 1px solid color-mix(in srgb, var(--danger) 16%, transparent); }
@@ -2154,7 +2154,7 @@ body.alto-contraste .sim-page input:focus {
     .sim-page .score-number.rejected { color: var(--danger); }
     .sim-page .score-sub { color: var(--text-soft); font-size: 14px; }
     .sim-page .result-grid { display: grid; gap: 14px; }
-    .sim-page .result-block { padding: 16px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.03); }
+    .sim-page .result-block { padding: 16px; border-radius: 18px; border: 1px solid color-mix(in srgb, var(--text) 6%, transparent); background: color-mix(in srgb, var(--text) 3%, transparent); }
     .sim-page .result-block-title { font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px; }
     .sim-page .result-block-title.good { color: var(--success); }
     .sim-page .result-block-title.bad { color: var(--danger); }
@@ -2166,7 +2166,7 @@ body.alto-contraste .sim-page input:focus {
     .sim-page .gate-loading { min-height:70vh;display:grid;place-items:center;color:var(--text-soft);font-size:14px; }
 
     /* ÁUDIO */
-    .sim-page .audio-bar { display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);margin-bottom:2px; }
+    .sim-page .audio-bar { display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;border:1px solid color-mix(in srgb, var(--text) 6%, transparent);background:color-mix(in srgb, var(--text) 2%, transparent);margin-bottom:2px; }
     .sim-page .mic-btn { flex-shrink:0;width:42px;height:42px;border-radius:12px;border:1px solid color-mix(in srgb, var(--cyan) 20%, transparent);cursor:pointer;display:grid;place-items:center;font-size:18px;transition:transform .18s,box-shadow .18s,background .18s;background:color-mix(in srgb, var(--cyan) 10%, transparent); }
     .sim-page .mic-btn:hover:not(.unsupported) { transform:scale(1.06);background:color-mix(in srgb, var(--cyan) 16%, transparent); }
     .sim-page .mic-btn.recording { background:color-mix(in srgb, var(--danger) 15%, transparent);border-color:color-mix(in srgb, var(--danger) 35%, transparent);animation:micPulse 1.2s ease-in-out infinite; }
@@ -2177,7 +2177,7 @@ body.alto-contraste .sim-page input:focus {
     .sim-page .audio-status { font-size:13px;color:var(--text-faint);transition:color .2s; }
     .sim-page .audio-status.active { color:var(--danger); }
     .sim-page .audio-status.done { color:var(--success); }
-    .sim-page .audio-lang select { background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:var(--text-soft);font-family:'Inter',sans-serif;font-size:12px;padding:5px 8px;outline:none;cursor:pointer; }
+    .sim-page .audio-lang select { background:color-mix(in srgb, var(--text) 4%, transparent);border:1px solid color-mix(in srgb, var(--text) 8%, transparent);border-radius:8px;color:var(--text-soft);font-family:'Inter',sans-serif;font-size:12px;padding:5px 8px;outline:none;cursor:pointer; }
 
     /* ── RESPONSIVIDADE & MOBILE NAV GLOBAL ─────────────────────────────── */
     
@@ -2545,8 +2545,8 @@ body.alto-contraste .sim-page input:focus {
     .sim-page .tentativa-card {
       padding: 14px 16px;
       border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.06);
-      background: rgba(255,255,255,0.02);
+      border: 1px solid color-mix(in srgb, var(--text) 6%, transparent);
+      background: color-mix(in srgb, var(--text) 2%, transparent);
     }
     .sim-page .tentativa-card.aprovada { border-color: color-mix(in srgb, var(--success) 15%, transparent); background: color-mix(in srgb, var(--success) 4%, transparent); }
     .sim-page .tentativa-card.reprovada { border-color: color-mix(in srgb, var(--danger) 12%, transparent); background: color-mix(in srgb, var(--danger) 3%, transparent); }
@@ -2575,7 +2575,7 @@ body.alto-contraste .sim-page input:focus {
     .sim-page .tentativa-label.good { color: var(--success); }
     .sim-page .tentativa-label.bad  { color: var(--danger); }
     .sim-page .tentativa-label.mid  { color: var(--gold); }
-    .sim-page .tentativa-sep { height: 1px; background: rgba(255,255,255,0.05); margin: 10px 0; }
+    .sim-page .tentativa-sep { height: 1px; background: color-mix(in srgb, var(--text) 8%, transparent); margin: 10px 0; }
 
     /* ── MODO SUPERVISOR ─────────────────────────────── */
     .sim-page .supervisor-overlay {
@@ -2594,7 +2594,7 @@ body.alto-contraste .sim-page input:focus {
     .sim-page .supervisor-card {
       width: 100%;
       max-width: 580px;
-      background: linear-gradient(180deg, rgba(27,23,17,0.99), rgba(15,13,9,1));
+      background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 24px;
       box-shadow: 0 32px 64px rgba(0,0,0,0.55);
@@ -2604,7 +2604,7 @@ body.alto-contraste .sim-page input:focus {
 
     .sim-page .supervisor-header {
       padding: 24px 24px 16px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      border-bottom: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
     }
 
     .sim-page .supervisor-eyebrow {
@@ -2644,14 +2644,14 @@ body.alto-contraste .sim-page input:focus {
       gap: 14px;
       padding: 14px 16px;
       border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.06);
-      background: rgba(255,255,255,0.02);
+      border: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
+      background: color-mix(in srgb, var(--text) 3%, transparent);
       cursor: pointer;
       transition: border-color .18s, background .18s;
       user-select: none;
     }
 
-    .sim-page .supervisor-item:hover { background: rgba(255,255,255,0.04); }
+    .sim-page .supervisor-item:hover { background: color-mix(in srgb, var(--text) 6%, transparent); }
     .sim-page .supervisor-item.sim { border-color: color-mix(in srgb, var(--success) 25%, transparent); background: color-mix(in srgb, var(--success) 6%, transparent); }
     .sim-page .supervisor-item.nao { border-color: color-mix(in srgb, var(--danger) 20%, transparent); background: color-mix(in srgb, var(--danger) 5%, transparent); }
 
@@ -2660,8 +2660,8 @@ body.alto-contraste .sim-page input:focus {
       width: 44px;
       height: 24px;
       border-radius: 999px;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.12);
+      background: color-mix(in srgb, var(--text) 15%, transparent);
+      border: 1px solid color-mix(in srgb, var(--text) 20%, transparent);
       position: relative;
       transition: background .2s, border-color .2s;
     }
@@ -2681,7 +2681,8 @@ body.alto-contraste .sim-page input:focus {
       top: 3px; left: 3px;
       width: 16px; height: 16px;
       border-radius: 999px;
-      background: rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.9);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.25);
       transition: left .2s, background .2s;
     }
 
@@ -2715,8 +2716,8 @@ body.alto-contraste .sim-page input:focus {
       flex: 1;
       padding: 13px;
       border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(255,255,255,0.04);
+      border: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
+      background: color-mix(in srgb, var(--text) 4%, transparent);
       color: var(--text-soft);
       font-family: 'Inter', sans-serif;
       font-size: 13px;
@@ -2725,7 +2726,7 @@ body.alto-contraste .sim-page input:focus {
       transition: background .18s;
     }
 
-    .sim-page .supervisor-btn-cancel:hover { background: rgba(255,255,255,0.08); }
+    .sim-page .supervisor-btn-cancel:hover { background: color-mix(in srgb, var(--text) 8%, transparent); }
 
     .sim-page .supervisor-btn-submit {
       flex: 2;
@@ -2774,8 +2775,8 @@ body.alto-contraste .sim-page input:focus {
       gap: 10px;
       padding: 10px 12px;
       border-radius: 10px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.05);
+      background: color-mix(in srgb, var(--text) 3%, transparent);
+      border: 1px solid color-mix(in srgb, var(--text) 5%, transparent);
       font-size: 13px;
     }
 
@@ -2835,7 +2836,7 @@ body.alto-contraste .sim-page input:focus {
     }
 
     .sim-page .mode-btn:not(.active):hover {
-      background: rgba(255,255,255,0.06);
+      background: color-mix(in srgb, var(--text) 6%, transparent);
     }
 
     .sim-page .chat-panel {
@@ -2852,9 +2853,9 @@ body.alto-contraste .sim-page input:focus {
       overflow-y: auto;
       padding: 16px;
       border-radius: 18px 18px 0 0;
-      border: 1px solid rgba(255,255,255,0.08);
+      border: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
       border-bottom: none;
-      background: rgba(16,14,10,0.55);
+      background: color-mix(in srgb, var(--bg) 55%, transparent);
       display: flex;
       flex-direction: column;
       gap: 12px;
@@ -2863,7 +2864,7 @@ body.alto-contraste .sim-page input:focus {
 
     .sim-page .chat-messages::-webkit-scrollbar { width: 4px; }
     .sim-page .chat-messages::-webkit-scrollbar-track { background: transparent; }
-    .sim-page .chat-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 999px; }
+    .sim-page .chat-messages::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--text) 12%, transparent); border-radius: 999px; }
 
     .sim-page .chat-empty {
       flex: 1;
@@ -2922,8 +2923,8 @@ body.alto-contraste .sim-page input:focus {
     }
 
     .sim-page .chat-msg.paciente .chat-bubble {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.07);
+      background: color-mix(in srgb, var(--text) 4%, transparent);
+      border: 1px solid color-mix(in srgb, var(--text) 7%, transparent);
       color: var(--text-soft);
       border-radius: 4px 14px 14px 14px;
     }
@@ -2948,8 +2949,8 @@ body.alto-contraste .sim-page input:focus {
       display: flex;
       gap: 4px;
       padding: 10px 14px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.07);
+      background: color-mix(in srgb, var(--text) 4%, transparent);
+      border: 1px solid color-mix(in srgb, var(--text) 7%, transparent);
       border-radius: 4px 14px 14px 14px;
     }
 
@@ -2973,17 +2974,17 @@ body.alto-contraste .sim-page input:focus {
       gap: 8px;
       padding: 12px;
       border-radius: 0 0 18px 18px;
-      border: 1px solid rgba(255,255,255,0.08);
+      border: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
       border-top: 1px solid color-mix(in srgb, var(--cyan) 10%, transparent);
-      background: rgba(15,13,9,0.8);
+      background: color-mix(in srgb, var(--bg) 80%, transparent);
     }
 
     .sim-page .chat-input {
       flex: 1;
       padding: 10px 14px;
       border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(16,14,10,0.6);
+      border: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
+      background: color-mix(in srgb, var(--bg) 60%, transparent);
       color: var(--text);
       font-family: 'Inter', sans-serif;
       font-size: 14px;
@@ -3059,7 +3060,7 @@ body.alto-contraste .sim-page input:focus {
 
     .sim-page .replay-header {
       padding: 14px 16px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      border-bottom: 1px solid color-mix(in srgb, var(--text) 6%, transparent);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -3193,7 +3194,7 @@ body.alto-contraste .sim-page input:focus {
 
     .sim-page .contraste-header {
       padding: 14px 16px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      border-bottom: 1px solid color-mix(in srgb, var(--text) 6%, transparent);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -3239,9 +3240,9 @@ body.alto-contraste .sim-page input:focus {
     .sim-page .contraste-variacao {
       font-size: 13px; font-weight: 800; padding: 3px 9px; border-radius: 999px;
     }
-    .sim-page .contraste-delta.subiu .contraste-variacao { color: #1c2317; background: var(--success); }
-    .sim-page .contraste-delta.caiu  .contraste-variacao { color: #2a150f; background: var(--danger); }
-    .sim-page .contraste-delta.igual .contraste-variacao { color: var(--text-faint); background: rgba(255,255,255,0.06); }
+    .sim-page .contraste-delta.subiu .contraste-variacao { color: var(--on-accent); background: var(--success); }
+    .sim-page .contraste-delta.caiu  .contraste-variacao { color: var(--on-accent); background: var(--danger); }
+    .sim-page .contraste-delta.igual .contraste-variacao { color: var(--text-faint); background: color-mix(in srgb, var(--text) 6%, transparent); }
 
     /* O que estava pendente vem antes dos dois textos, sozinho. */
     .sim-page .contraste-pedido {
@@ -3264,8 +3265,8 @@ body.alto-contraste .sim-page input:focus {
     }
     .sim-page .contraste-col {
       border-radius: 12px; padding: 12px 14px;
-      border: 1px solid rgba(255,255,255,0.06);
-      background: rgba(255,255,255,0.02);
+      border: 1px solid color-mix(in srgb, var(--text) 6%, transparent);
+      background: color-mix(in srgb, var(--text) 2%, transparent);
     }
     .sim-page .contraste-col.agora {
       border-color: color-mix(in srgb, var(--cyan) 20%, transparent);
@@ -3394,7 +3395,7 @@ body.alto-contraste .sim-page input:focus {
 
     .sim-page .diario-header {
       padding: 14px 16px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      border-bottom: 1px solid color-mix(in srgb, var(--text) 6%, transparent);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -3419,9 +3420,9 @@ body.alto-contraste .sim-page input:focus {
       width: 100%;
       min-height: 100px;
       resize: vertical;
-      border: 1px solid rgba(255,255,255,0.08);
+      border: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
       border-radius: 12px;
-      background: rgba(16,14,10,0.55);
+      background: color-mix(in srgb, var(--bg) 55%, transparent);
       color: var(--text);
       padding: 14px;
       font-family: 'Inter', sans-serif;
