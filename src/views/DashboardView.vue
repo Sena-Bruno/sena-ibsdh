@@ -1716,8 +1716,8 @@ body.alto-contraste .dash-page .rank-badge {
     .dash-page .btn-praticar:hover::after { width:100px; height:100px; }
     .dash-page .btn-praticar.retry { background:rgba(226,119,92,0.15); color:var(--danger); border:1px solid rgba(226,119,92,0.25); box-shadow:none; }
     .dash-page .btn-praticar.retry:hover { background:rgba(226,119,92,0.22); box-shadow:none; transform:translateY(-1px); }
-    .dash-page .btn-praticar.rever { background:rgba(255,255,255,0.08); color:var(--text-soft); border:1px solid rgba(255,255,255,0.12); box-shadow:none; }
-    .dash-page .btn-praticar.rever:hover { background:rgba(255,255,255,0.12); box-shadow:none; }
+    .dash-page .btn-praticar.rever { background:color-mix(in srgb, var(--text) 8%, transparent); color:var(--text-soft); border:1px solid color-mix(in srgb, var(--text) 12%, transparent); box-shadow:none; }
+    .dash-page .btn-praticar.rever:hover { background:color-mix(in srgb, var(--text) 12%, transparent); box-shadow:none; }
 
     /* Certificado & Banners */
     .dash-page .cert-banner { display:none; margin-bottom:22px; padding:24px 28px; border-radius:var(--r-xl); border:1px solid rgba(224,165,69,0.25); background:linear-gradient(135deg,rgba(224,165,69,0.08),rgba(124,196,100,0.05)); text-align:center; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: var(--shadow-premium); }
