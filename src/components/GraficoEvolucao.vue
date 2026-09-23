@@ -275,7 +275,7 @@ const descricaoAcessivel = computed(() => {
 <style scoped>
 .evo {
   /* Fundo opaco do tooltip, um por tema (ver .evo-tip) */
-  --evo-tip-bg: #1b1711;
+  --evo-tip-bg: #1e1a13;
   margin-bottom: 22px;
   padding: 20px;
   border-radius: 16px;
@@ -365,7 +365,7 @@ body.alto-contraste .evo { --evo-tip-bg: #000000; }
   position: absolute; transform: translate(-50%, calc(-100% - 16px));
   /* Opaco de propósito: o token --panel é translúcido (0.7) e deixava o
      conteúdo de trás atravessar o tooltip, que flutua sobre o gráfico. */
-  background: var(--evo-tip-bg, #1b1711); border: 1px solid var(--border);
+  background: var(--evo-tip-bg, #1e1a13); border: 1px solid var(--border);
   border-radius: 10px; padding: 8px 12px; pointer-events: none;
   box-shadow: 0 8px 24px rgba(0, 0, 0, .35); white-space: nowrap; z-index: 5;
   backdrop-filter: blur(8px);

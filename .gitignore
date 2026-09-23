@@ -30,3 +30,13 @@ __pycache__/
 # Etapa 3 — banco local do serviço (nunca versionar dados de paciente)
 nucleo/sena_servico/*.sqlite3
 nucleo/sena_servico.sqlite3
+
+# Scripts de verificação visual ad-hoc (screenshot via Playwright etc.),
+# nunca fazem parte do app — ver AGENTS.md/CLAUDE.md.
+shot*.cjs
+shot*.mjs
+.qa-*.cjs
+.qa-*.mjs
+qa-shot*.cjs
+qa-shot*.mjs
+

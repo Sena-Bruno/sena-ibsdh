@@ -9,8 +9,8 @@
     <meta name="description" content="SENA — Sistema Evolutivo de Neuroaprendizagem Aplicada do IBSDH. Simulador clínico com paciente virtual, painel de progresso, plantão, ranking e certificação." />
     <!-- Pinta a barra do navegador na cor da página em cada tema, em vez de
          deixar o branco padrão brigar com a interface escura. -->
-    <meta name="theme-color" content="#12100c" media="(prefers-color-scheme: dark)" />
-    <meta name="theme-color" content="#f6f1e7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#15130e" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#faf8f4" media="(prefers-color-scheme: light)" />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
@@ -27,6 +27,10 @@
     >
   </head>
   <body>
+    <!-- Precisa ser um arquivo à parte, não inline: o CSP do site é
+         script-src 'self' sem 'unsafe-inline' (ver netlify.toml), então um
+         <script> inline aqui seria bloqueado em produção. Ver theme-init.js. -->
+    <script src="/theme-init.js"></script>
     <div id="app"></div>
     <noscript>
       <div style="font-family:system-ui,sans-serif;max-width:34rem;margin:15vh auto;padding:0 1.5rem;color:#f4eee1;text-align:center;line-height:1.6">

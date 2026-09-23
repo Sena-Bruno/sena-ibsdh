@@ -29,13 +29,13 @@ body {
   font-family: var(--sena-fonte);
   /* Rede de segurança: cada view pinta o próprio fundo, mas se sobrar
      qualquer área descoberta (overscroll no mobile, por exemplo) ela fica
-     escura em vez do branco padrão do navegador. O tema claro do Dashboard
-     e do Simulador (body.tema-claro) tem especificidade maior e continua
-     sobrescrevendo isso normalmente. */
-  background-color: #12100c;
+     no tom certo em vez do branco padrão do navegador. O tema claro é o
+     padrão de abertura do produto (ver useAccessibility.js), que aplica a
+     classe abaixo antes da primeira pintura para não piscar escuro. */
+  background-color: #15130e;
 }
 
-body.tema-claro { background-color: #f6f1e7; }
+body.tema-claro { background-color: #faf8f4; }
 body.alto-contraste { background-color: #000; }
 
 /* ─── Foco visível ───────────────────────────────────────────────────────
