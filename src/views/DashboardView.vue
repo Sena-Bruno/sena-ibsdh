@@ -1236,7 +1236,7 @@ onUnmounted(() => {
     .dash-page .modal-input:focus { border-color:rgba(82,196,179,0.32);box-shadow:0 0 0 3px rgba(82,196,179,0.07); }
     .dash-page .modal-input::placeholder { color:#8a8171; } /* era #3d4a56 — 2.22:1, reprovava 1.4.3 */
     .dash-page .modal-error { color:var(--danger);font-size:13px;min-height:18px;margin-bottom:10px; }
-    .dash-page .btn-primary { width:100%;padding:14px 20px;border:none;border-radius:var(--r-md);background:linear-gradient(135deg,var(--cyan),#b7ded4);color:#15130e;font-family:'Inter',sans-serif;font-size:13px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;transition:all .2s cubic-bezier(.4,0,.2,1); }
+    .dash-page .btn-primary { width:100%;padding:14px 20px;border:none;border-radius:var(--r-md);background:linear-gradient(135deg,var(--cyan),#b7ded4);color:var(--on-acento);font-family:'Inter',sans-serif;font-size:13px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;transition:all .2s cubic-bezier(.4,0,.2,1); }
     .dash-page .btn-primary:hover { transform:translateY(-1px);box-shadow:0 12px 24px rgba(82,196,179,0.2); }
     .dash-page .btn-primary:active { transform:scale(0.98); }
     .dash-page .btn-primary:disabled { opacity:.55;cursor:not-allowed;transform:none;box-shadow:none; }
@@ -1261,7 +1261,7 @@ onUnmounted(() => {
     body.tema-claro .dash-page {
       --bg: #faf8f4;
       --panel: rgba(255,255,255,0.85);
-      --border: rgba(35,32,26,0.2);
+      --border: rgba(35,32,26,0.12);
       --text: #23201a;
       --text-soft: #5c5647;    /* era #786f5e (4.55:1, no limite) → 5.80:1 */
       --text-faint: #786f5e;   /* era #94a3b8 (2.45:1, reprovava)  → 4.55:1 */
@@ -1273,6 +1273,9 @@ onUnmounted(() => {
       --success-dim: rgba(47,122,61,0.1);
       --danger: #ad3b26;       /* era #dc2626 (4.62:1)             → 5.48:1 */
       --danger-dim: rgba(173,59,38,0.1);
+      --on-acento: #ffffff;
+      --shadow: 0 20px 48px rgba(35,32,26,0.10);
+      --shadow-premium: 0 4px 6px rgba(35,32,26,0.04), 0 12px 24px rgba(35,32,26,0.07), 0 24px 48px rgba(35,32,26,0.05);
     }
     /* O <body> continua pintado com valor literal: os tokens já não moram
        nele, então var(--bg) aqui não resolveria. */
@@ -1314,7 +1317,8 @@ body.tema-claro .dash-page .info-card { background: rgba(255,255,255,0.7); borde
     body.tema-claro .dash-page .mobile-nav-item { color: var(--text-soft); }
     body.tema-claro .dash-page .mobile-nav-item:hover { background: rgba(14,122,111,0.08); color: var(--cyan); }
     body.tema-claro .dash-page .mobile-nav-item.active { color: var(--cyan); background: rgba(14,122,111,0.12); }
-    body.tema-claro .dash-page .progress-bar { background: rgba(35,32,26,0.15); }
+    /* Era .progress-bar — a marcação usa .progress-track (ver <template>). */
+    body.tema-claro .dash-page .progress-track { background: rgba(35,32,26,0.15); }
     body.tema-claro .dash-page .progress-fill { background: linear-gradient(90deg,var(--cyan),rgba(14,122,111,0.85)); }
     body.tema-claro .dash-page .conquista-badge { background: rgba(14,122,111,0.08); border-color: rgba(14,122,111,0.2); }
     body.tema-claro .dash-page .meta-btn { background: rgba(14,122,111,0.08); border-color: rgba(14,122,111,0.2); }
@@ -1393,7 +1397,10 @@ body.alto-contraste .dash-page .meta-btn {
       border-color: #00ffff !important;
     }
     
-    body.alto-contraste .dash-page .progress-bar { background: #000; border: 3px solid #fff; }
+    /* Era .progress-bar — a marcação usa .progress-track (ver <template>),
+       então esta regra nunca batia com nada; a trilha de progresso ficava
+       sem o tratamento de alto contraste. */
+    body.alto-contraste .dash-page .progress-track { background: #000; border: 3px solid #fff; }
     body.alto-contraste .dash-page .progress-fill { background: #00ffff !important; }
     
     body.alto-contraste .dash-page .aula-status.pending { background: #000; border: 3px solid #fff; color: #fff; }
@@ -1456,7 +1463,7 @@ body.alto-contraste .dash-page .rank-badge {
       transition: all .2s;
     }
     .dash-page .meta-btn:hover { background: rgba(82,196,179,0.12); border-color: rgba(82,196,179,0.4); }
-    .dash-page .meta-btn.ativo { background: var(--cyan); color: #15130e; border-color: var(--cyan); font-weight: 800; }
+    .dash-page .meta-btn.ativo { background: var(--cyan); color: var(--on-acento); border-color: var(--cyan); font-weight: 800; }
 
     /* Botões de acessibilidade */
     .dash-page .acess-btn {
@@ -1500,7 +1507,7 @@ body.alto-contraste .dash-page .rank-badge {
       width: 56px; height: 56px;
       border-radius: 50%;
       background: linear-gradient(135deg, var(--cyan), #b7ded4);
-      color: #15130e;
+      color: var(--on-acento);
       font-size: 24px;
       border: none;
       box-shadow: 0 8px 24px rgba(82,196,179,0.4);
@@ -1696,7 +1703,7 @@ body.alto-contraste .dash-page .rank-badge {
     .dash-page .aula-nota.approved { background:var(--success-dim); color:var(--success); }
     .dash-page .aula-nota.rejected { background:var(--danger-dim); color:var(--danger); }
     .dash-page .aula-nota.pending  { color:var(--text-faint); }
-    .dash-page .btn-praticar { flex-shrink:0; padding:9px 18px; border:none; border-radius:10px; background:linear-gradient(135deg,var(--cyan),#b7ded4); color:#15130e; font-family:'Inter',sans-serif; font-size:12px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; cursor:pointer; transition:all .2s cubic-bezier(.4,0,.2,1); white-space:nowrap; position:relative; overflow:hidden; box-shadow:0 2px 8px rgba(82,196,179,0.2); }
+    .dash-page .btn-praticar { flex-shrink:0; padding:9px 18px; border:none; border-radius:10px; background:linear-gradient(135deg,var(--cyan),#b7ded4); color:var(--on-acento); font-family:'Inter',sans-serif; font-size:12px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; cursor:pointer; transition:all .2s cubic-bezier(.4,0,.2,1); white-space:nowrap; position:relative; overflow:hidden; box-shadow:0 2px 8px rgba(82,196,179,0.2); }
     .dash-page .btn-praticar:hover { transform:translateY(-1px); box-shadow:0 6px 14px rgba(82,196,179,0.25); }
     .dash-page .btn-praticar:active { transform:scale(0.98); }
     .dash-page .btn-praticar::after { content:''; position:absolute; top:50%; left:50%; width:0; height:0; border-radius:50%; background:rgba(255,255,255,0.3); transform:translate(-50%,-50%); transition:width 0.3s,height 0.3s; }
@@ -1711,7 +1718,7 @@ body.alto-contraste .dash-page .rank-badge {
     .dash-page .cert-banner.visible { display:block; }
     .dash-page .cert-banner h2 { font-size:20px; font-weight:800; color:var(--gold); margin-bottom:6px; }
     .dash-page .cert-banner p  { color:var(--text-soft); font-size:14px; margin-bottom:18px; }
-    .dash-page .btn-cert { display:inline-block; padding:13px 28px; border-radius:var(--r-md); background:linear-gradient(135deg,var(--gold),#e8c88f); color:#15130e; font-weight:800; font-size:13px; letter-spacing:.07em; text-transform:uppercase; text-decoration:none; cursor:pointer; border:none; font-family:'Inter',sans-serif; transition:all .2s; }
+    .dash-page .btn-cert { display:inline-block; padding:13px 28px; border-radius:var(--r-md); background:linear-gradient(135deg,var(--gold),#e8c88f); color:var(--on-acento); font-weight:800; font-size:13px; letter-spacing:.07em; text-transform:uppercase; text-decoration:none; cursor:pointer; border:none; font-family:'Inter',sans-serif; transition:all .2s; }
     .dash-page .btn-cert:hover { transform:translateY(-1px); box-shadow:0 8px 20px rgba(224,165,69,0.3); }
     .dash-page .btn-cert:active { transform:scale(0.98); }
 

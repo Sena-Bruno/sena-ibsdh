@@ -3302,7 +3302,7 @@ body.alto-contraste .sim-page input:focus {
 
     .sim-page .comparacao-header {
       padding: 14px 16px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      border-bottom: 1px solid color-mix(in srgb, var(--text) 6%, transparent);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -3325,8 +3325,8 @@ body.alto-contraste .sim-page input:focus {
 
     .sim-page .comp-card {
       border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.06);
-      background: rgba(255,255,255,0.02);
+      border: 1px solid color-mix(in srgb, var(--text) 6%, transparent);
+      background: color-mix(in srgb, var(--text) 2%, transparent);
       overflow: hidden;
     }
 
@@ -3335,7 +3335,7 @@ body.alto-contraste .sim-page input:focus {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
+      border-bottom: 1px solid color-mix(in srgb, var(--text) 5%, transparent);
     }
 
     .sim-page .comp-card-id {
@@ -3518,8 +3518,8 @@ body.alto-contraste .sim-page input:focus {
     .sim-page .diario-entrada {
       padding: 10px 12px;
       border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.06);
-      background: rgba(255,255,255,0.02);
+      border: 1px solid color-mix(in srgb, var(--text) 6%, transparent);
+      background: color-mix(in srgb, var(--text) 2%, transparent);
     }
 
     .sim-page .diario-entrada-meta {
@@ -3585,8 +3585,8 @@ body.alto-contraste .sim-page input:focus {
       flex: 1;
       padding: 10px 8px;
       border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(255,255,255,0.03);
+      border: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
+      background: color-mix(in srgb, var(--text) 3%, transparent);
       color: var(--text-soft);
       font-family: 'Inter', sans-serif;
       font-size: 11px;
@@ -3736,8 +3736,8 @@ body.alto-contraste .sim-page input:focus {
       gap: 10px;
       padding: 10px 14px;
       border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.06);
-      background: rgba(255,255,255,0.02);
+      border: 1px solid color-mix(in srgb, var(--text) 6%, transparent);
+      background: color-mix(in srgb, var(--text) 2%, transparent);
       margin-bottom: 10px;
       transition: all .4s ease;
     }
@@ -3763,7 +3763,7 @@ body.alto-contraste .sim-page input:focus {
       width: 80px;
       height: 4px;
       border-radius: 999px;
-      background: rgba(255,255,255,0.06);
+      background: color-mix(in srgb, var(--text) 8%, transparent);
       overflow: hidden;
     }
     .sim-page .estado-barra {
