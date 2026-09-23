@@ -40,3 +40,6 @@ shot*.mjs
 qa-shot*.cjs
 qa-shot*.mjs
 
+# Estado local do Netlify CLI (link do site), não é config do projeto.
+.netlify/
+
