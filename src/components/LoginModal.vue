@@ -130,24 +130,24 @@ onMounted(() => {
 }
 .login-card {
   width: 100%; max-width: 380px;
-  background: var(--sena-surface, #1b1711);
+  background: var(--sena-surface, #ffffff);
   border: 1px solid var(--sena-border-forte, rgba(196,180,150,0.55));
   border-radius: var(--sena-r-xl, 22px);
   box-shadow: var(--sena-sombra-alta, 0 24px 48px rgba(0,0,0,0.3));
   padding: var(--sena-e-6, 24px);
   font-family: var(--sena-fonte, 'Inter', sans-serif);
-  color: var(--sena-text, #f4eee1);
+  color: var(--sena-text, #23201a);
 }
 .login-eyebrow {
   font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
-  color: var(--sena-gold, #d3a24f); margin-bottom: var(--sena-e-3, 12px);
+  color: var(--sena-gold, #9c5a0c); margin-bottom: var(--sena-e-3, 12px);
 }
 .login-titulo {
   font-family: var(--sena-fonte-titulo, 'Fraunces', serif);
   font-size: var(--sena-t-lg, 22px); font-weight: 600; margin: 0 0 8px;
 }
 .login-sub {
-  color: var(--sena-text-soft, #b7ab98); font-size: var(--sena-t-corpo, 15px);
+  color: var(--sena-text-soft, #5c5647); font-size: var(--sena-t-corpo, 15px);
   line-height: var(--sena-lh-corpo, 1.65); margin: 0 0 var(--sena-e-5, 20px);
 }
 form { display: grid; gap: var(--sena-e-3, 12px); }
@@ -155,31 +155,31 @@ input {
   width: 100%; padding: 14px 16px; border-radius: var(--sena-r-md, 12px);
   border: 1px solid var(--sena-border-forte, rgba(196,180,150,0.55));
   background: var(--sena-surface-1, rgba(244,238,225,0.04));
-  color: var(--sena-text, #f4eee1); font-size: var(--sena-t-corpo, 15px);
+  color: var(--sena-text, #23201a); font-size: var(--sena-t-corpo, 15px);
   font-family: inherit; outline: none; min-height: var(--sena-toque-min, 44px);
 }
 input:focus-visible {
-  outline: var(--sena-foco-largura, 2px) solid var(--sena-foco, #e3b567);
+  outline: var(--sena-foco-largura, 2px) solid var(--sena-foco, #7a4a12);
   outline-offset: var(--sena-foco-offset, 2px);
 }
 input:disabled { opacity: .6; }
 .login-erro {
-  color: var(--sena-danger, #e0846a); font-size: var(--sena-t-peq, 13px);
+  color: var(--sena-danger, #ad3b26); font-size: var(--sena-t-peq, 13px);
 }
 .login-btn {
   border: none; border-radius: var(--sena-r-md, 12px); padding: 14px 18px;
   font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
   cursor: pointer; min-height: var(--sena-toque-min, 44px);
-  color: var(--sena-on-acento, #17130c);
-  background: linear-gradient(135deg, var(--sena-cyan, #7fc9bb) 0%, #b7ded4 100%);
+  color: var(--sena-on-acento, #ffffff);
+  background: var(--sena-cyan, #0e7a6f);
 }
 .login-btn:disabled { opacity: .55; cursor: not-allowed; }
 .login-btn:focus-visible {
-  outline: var(--sena-foco-largura, 2px) solid var(--sena-foco, #e3b567);
+  outline: var(--sena-foco-largura, 2px) solid var(--sena-foco, #7a4a12);
   outline-offset: var(--sena-foco-offset, 2px);
 }
 .login-link {
-  background: none; border: none; color: var(--sena-text-soft, #b7ab98);
+  background: none; border: none; color: var(--sena-text-soft, #5c5647);
   font-size: var(--sena-t-peq, 13px); text-decoration: underline; cursor: pointer;
   padding: 6px 0; justify-self: start;
 }

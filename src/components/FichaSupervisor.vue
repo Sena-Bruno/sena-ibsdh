@@ -92,8 +92,8 @@ const dimensoes = computed(() =>
 
 <style scoped>
 .ficha-card {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(35, 32, 26, 0.02);
+  border: 1px solid rgba(35, 32, 26, 0.08);
   border-radius: 16px;
   padding: 18px;
   margin-top: 16px;
@@ -109,7 +109,7 @@ const dimensoes = computed(() =>
 .ficha-titulo {
   font-size: 13px;
   font-weight: 700;
-  color: var(--text, #f4eee1);
+  color: var(--text, #23201a);
 }
 .ficha-badges { display: flex; gap: 6px; }
 .badge {
@@ -120,11 +120,11 @@ const dimensoes = computed(() =>
   padding: 3px 8px;
   border-radius: 999px;
 }
-.badge-erro { background: rgba(224, 132, 106, 0.15); color: #e0846a; }
-.badge-ok { background: rgba(147, 191, 120, 0.12); color: #93bf78; }
+.badge-erro { background: rgba(173, 59, 38, 0.15); color: var(--danger, #ad3b26); }
+.badge-ok { background: rgba(47, 122, 61, 0.12); color: var(--success, #2f7a3d); }
 .ficha-resumo {
   font-size: 12px;
-  color: var(--text-faint, #9c9080);
+  color: var(--text-faint, #786f5e);
   margin-bottom: 14px;
 }
 .ficha-barras { display: grid; gap: 10px; margin-bottom: 14px; }
@@ -134,20 +134,20 @@ const dimensoes = computed(() =>
   align-items: baseline;
   justify-content: space-between;
   font-size: 11px;
-  color: var(--text-soft, #b7ab98);
+  color: var(--text-soft, #5c5647);
 }
 .ficha-delta { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
-.delta-bom { color: #93bf78; }
-.delta-ruim { color: #e0846a; }
+.delta-bom { color: var(--success, #2f7a3d); }
+.delta-ruim { color: var(--danger, #ad3b26); }
 .ficha-barra-trilho {
   height: 6px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(35, 32, 26, 0.08);
   overflow: hidden;
 }
 .ficha-barra-fill {
   height: 100%;
-  background: linear-gradient(90deg, #7fc9bb, #b7ded4);
+  background: var(--cyan, #0e7a6f);
   border-radius: 999px;
   transition: width 400ms ease;
 }
@@ -156,19 +156,19 @@ const dimensoes = computed(() =>
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--text-faint, #9c9080);
+  color: var(--text-faint, #786f5e);
   margin: 12px 0 6px;
 }
-.alerta-title { color: #e0846a; }
+.alerta-title { color: var(--danger, #ad3b26); }
 .ficha-texto {
   font-size: 12px;
-  color: var(--text-soft, #b7ab98);
+  color: var(--text-soft, #5c5647);
   line-height: 1.65;
   margin-bottom: 6px;
 }
 .ficha-alerta {
   font-size: 12px;
-  color: #e0846a;
+  color: var(--danger, #ad3b26);
   line-height: 1.65;
   margin-bottom: 6px;
 }

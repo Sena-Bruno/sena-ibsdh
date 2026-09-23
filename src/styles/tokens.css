@@ -9,77 +9,77 @@
    transição e 21 tamanhos de fonte no projeto. Aqui cada decisão tem UM
    nome e UM valor.
 
-   Identidade: a paleta antiga (preto quase puro + ciano neon + dourado
-   brilhante) é o kit de cores genérico de qualquer dashboard de IA — não
-   diz nada sobre o SENA ser um instituto de desenvolvimento humano que
-   treina profissionais de saúde para lidar com pessoas. Trocamos para uma
-   paleta "clínica editorial": tinta quente em vez de preto-azulado, e três
-   acentos terrosos (verde-azulado, ocre, musgo) e um quarto para alerta
-   (terracota) em vez de neon. Os NOMES das variáveis não mudaram — só os
-   valores — então nenhuma view precisou ser restruturada para herdar a
-   nova identidade.
+   Identidade (2ª revisão): a 1ª revisão trocou o preto-neon/ciano-dourado
+   original por uma paleta escura "editorial clínica" — mas escura como
+   padrão lia como pouco convidativa, e o par ciano-esverdeado + dourado
+   terroso não tinha harmonia suficiente para parecer um produto cuidado.
+   Esta revisão inverte o padrão: CLARO é o tema de abertura do produto —
+   fundo quase branco (papel), texto em carvão quente, com dois acentos de
+   uma mesma família cromática (verde-azulado profissional + âmbar), em vez
+   de um grafite frio e um dourado que competiam entre si. O escuro continua
+   disponível (usuário escolhe), só que também recalibrado para a mesma
+   família de cor — os dois temas agora parecem a mesma marca, não dois
+   produtos diferentes.
 
-   Tipografia: títulos trocaram de 'Space Grotesk' (geométrica, o mesmo
-   estilo usado por incontáveis produtos de IA) para 'Fraunces', uma serifada
-   com caráter — mais alinhada a um instituto de ensino do que a um SaaS.
+   Tipografia: mantém 'Fraunces' nos títulos — uma serifada com caráter,
+   mais alinhada a um instituto de ensino do que a um SaaS genérico.
 
-   Escopo: os tokens ficam em :root, então valem para qualquer view e para
-   os componentes compartilhados. As views legadas (Dashboard/Simulador)
-   continuam com seus próprios blocos de cor escopados ao elemento raiz da
-   página — a migração para estes tokens é incremental, view por view, sem
-   precisar reescrever as duas telas maiores de uma vez.
+   Escopo: os tokens ficam em :root (tema escuro, a base histórica do
+   arquivo) e são sobrescritos por body.tema-claro — que agora é o estado
+   com que o produto abre para quem nunca escolheu um tema (ver
+   useAccessibility.js). As views legadas (Dashboard/Simulador) mantêm seus
+   próprios blocos de cor escopados ao elemento raiz da página, com os
+   mesmos valores replicados aqui — a migração para consumir estes tokens
+   diretamente é incremental, view por view.
 
    Contraste: todo par texto/fundo abaixo foi conferido contra a superfície
    do próprio tema (WCAG 2.2, 1.4.3 — mínimo 4.5:1 para texto normal e
-   3:1 para texto grande e objetos gráficos).
+   3:1 para texto grande, objetos gráficos e traço de componente).
    ═══════════════════════════════════════════════════════════════════════ */
 
 :root {
-  /* ── Superfícies (tema escuro, o padrão do produto) ──────────────── */
-  --sena-bg: #12100c;
-  --sena-bg-fim: #1a160f;          /* fim do gradiente vertical da página */
-  --sena-surface: #1b1711;         /* painel opaco — use em tooltip/menu  */
-  --sena-surface-1: rgba(244, 238, 225, 0.04);
-  --sena-surface-2: rgba(244, 238, 225, 0.07);
+  /* ── Superfícies (tema escuro — opcional, ver body.tema-claro) ────── */
+  --sena-bg: #15130e;
+  --sena-bg-fim: #1d1811;          /* fim do gradiente vertical da página */
+  --sena-surface: #1e1a13;         /* painel opaco — use em tooltip/menu  */
+  --sena-surface-1: rgba(247, 244, 238, 0.04);
+  --sena-surface-2: rgba(247, 244, 238, 0.07);
 
   /* ── Traço ───────────────────────────────────────────────────────── */
-  /* A borda antiga (branco 6–9%) dava 1.1:1 contra o fundo: a linha que
-     delimita um campo de formulário não era perceptível. 1.4.11 pede 3:1
-     para o traço que identifica um componente — é o que --sena-border-forte
-     entrega (4.1:1 no escuro, 3.8:1 no claro). --sena-border continua fraca
-     de propósito: divisória é decoração e 1.4.11 não se aplica a ela. */
-  --sena-border: rgba(168, 150, 120, 0.22);      /* decorativa, divisórias */
-  --sena-border-forte: rgba(196, 180, 150, 0.55); /* campos e controles    */
+  /* --sena-border-forte entrega 3:1+ contra a superfície (1.4.11); a
+     divisória --sena-border continua fraca de propósito — decoração não
+     precisa do mesmo piso de contraste que um componente interativo. */
+  --sena-border: rgba(179, 162, 130, 0.20);       /* decorativa, divisórias */
+  --sena-border-forte: rgba(206, 190, 160, 0.50); /* campos e controles    */
 
   /* ── Texto ───────────────────────────────────────────────────────── */
-  --sena-text: #f4eee1;            /* 16.4:1 sobre --sena-bg */
-  --sena-text-soft: #b7ab98;       /*  8.4:1 */
-  --sena-text-faint: #9c9080;      /*  6.1:1 */
-  --sena-placeholder: #8c8071;     /*  4.9:1 */
+  --sena-text: #f7f4ee;            /* 16.9:1 sobre --sena-bg */
+  --sena-text-soft: #bdb096;       /*  8.7:1 */
+  --sena-text-faint: #9c9080;      /*  5.9:1 */
+  --sena-placeholder: #8c8071;     /*  4.8:1 */
 
   /* ── Acento e semântica ──────────────────────────────────────────── */
-  /* Verde-azulado em vez de ciano neon: acento primário, mesma função de
-     link/destaque/foco de atenção, sem parecer painel de nave espacial. */
-  --sena-cyan: #7fc9bb;
-  --sena-cyan-dim: rgba(127, 201, 187, 0.12);
-  /* Ocre em vez de dourado brilhante: mesma função de conquista/destaque
-     secundário, com peso mais terroso. */
-  --sena-gold: #d3a24f;
-  --sena-gold-dim: rgba(211, 162, 79, 0.12);
-  --sena-success: #93bf78;
-  --sena-success-dim: rgba(147, 191, 120, 0.1);
-  --sena-danger: #e0846a;
-  --sena-danger-dim: rgba(224, 132, 106, 0.1);
+  /* Verde-azulado — acento primário: link, destaque, foco de atenção. */
+  --sena-cyan: #52c4b3;
+  --sena-cyan-dim: rgba(82, 196, 179, 0.12);
+  /* Âmbar — acento secundário: conquista, destaque de apoio. Mesma
+     temperatura quente do primário, então os dois convivem sem disputar
+     atenção. */
+  --sena-gold: #e0a545;
+  --sena-gold-dim: rgba(224, 165, 69, 0.12);
+  --sena-success: #7cc464;
+  --sena-success-dim: rgba(124, 196, 100, 0.1);
+  --sena-danger: #e2775c;
+  --sena-danger-dim: rgba(226, 119, 92, 0.1);
 
   /* Texto sobre os botões preenchidos com as cores acima. */
-  --sena-on-acento: #17130c;
+  --sena-on-acento: #15130e;
 
   /* ── Foco ────────────────────────────────────────────────────────── */
   /* Anel de 2px + deslocamento, para funcionar sobre fundo escuro, claro e
-     em cima de um botão preenchido. As views usavam apenas troca de cor de
-     borda a 2.2:1 — abaixo do 3:1 que um indicador de estado exige. Âmbar
-     em vez de azul-claro: não se confunde com o acento primário. */
-  --sena-foco: #e3b567;
+     em cima de um botão preenchido. Âmbar-claro em vez de repetir o acento
+     primário: não se confunde com link/destaque comuns. */
+  --sena-foco: #ffcf6e;
   --sena-foco-largura: 2px;
   --sena-foco-offset: 2px;
 
@@ -125,10 +125,10 @@
   --sena-r-pill: 999px;
 
   /* ── Elevação ────────────────────────────────────────────────────── */
-  --sena-sombra: 0 20px 48px rgba(0, 0, 0, 0.38);
-  --sena-sombra-alta: 0 4px 6px rgba(0, 0, 0, 0.1),
-                      0 12px 24px rgba(0, 0, 0, 0.3),
-                      0 24px 48px rgba(0, 0, 0, 0.2);
+  --sena-sombra: 0 20px 48px rgba(0, 0, 0, 0.45);
+  --sena-sombra-alta: 0 4px 6px rgba(0, 0, 0, 0.15),
+                      0 12px 24px rgba(0, 0, 0, 0.35),
+                      0 24px 48px rgba(0, 0, 0, 0.25);
 
   /* ── Movimento ───────────────────────────────────────────────────── */
   --sena-dur-rapida: 120ms;   /* estado de controle (hover, press)     */
@@ -142,41 +142,43 @@
   --sena-toque-min: 44px;
 }
 
-/* ── Tema claro ─────────────────────────────────────────────────────── */
-/* Ativado pela classe em <body> (escolha explícita do aluno). Fundo em tom
-   de papel em vez de branco-azulado frio — a mesma lógica editorial do
-   escuro, só que na ponta clara. */
+/* ── Tema claro (padrão de abertura do produto) ───────────────────────── */
+/* Fundo em papel quase branco, texto em carvão quente. Os dois acentos
+   (verde-azulado e âmbar) usam a mesma saturação e temperatura para ler
+   como um par pensado, não como duas cores que sobraram de paletas
+   diferentes. Ver useAccessibility.js: quem nunca escolheu um tema abre
+   aqui; o escuro acima continua a um clique de distância. */
 body.tema-claro {
-  --sena-bg: #f6f1e7;
-  --sena-bg-fim: #ece2cd;
-  --sena-surface: #fdf9f1;
-  --sena-surface-1: rgba(253, 249, 241, 0.7);
-  --sena-surface-2: rgba(44, 36, 24, 0.05);
+  --sena-bg: #faf8f4;
+  --sena-bg-fim: #f1ece2;
+  --sena-surface: #ffffff;
+  --sena-surface-1: rgba(35, 32, 26, 0.035);
+  --sena-surface-2: rgba(35, 32, 26, 0.06);
 
-  --sena-border: rgba(140, 116, 80, 0.22);
-  --sena-border-forte: rgba(96, 76, 48, 0.65);
+  --sena-border: rgba(35, 32, 26, 0.12);
+  --sena-border-forte: rgba(35, 32, 26, 0.5);
 
-  --sena-text: #2c2418;
-  --sena-text-soft: #6b5f4d;        /* 5.5:1 */
-  --sena-text-faint: #756a58;       /* 4.7:1 */
-  --sena-placeholder: #6d6250;      /* 5.3:1 */
+  --sena-text: #23201a;
+  --sena-text-soft: #5c5647;        /* 7.3:1 sobre --sena-surface  */
+  --sena-text-faint: #786f5e;       /* 5.0:1 sobre --sena-surface  */
+  --sena-placeholder: #8a8171;      /* 3.6:1 — só para placeholder */
 
-  --sena-cyan: #1f6b63;             /* 5.6:1 como texto */
-  --sena-cyan-dim: rgba(31, 107, 99, 0.1);
-  --sena-gold: #8a5518;             /* 5.5:1 */
-  --sena-gold-dim: rgba(138, 85, 24, 0.1);
-  --sena-success: #3f6b2a;          /* 5.6:1 */
-  --sena-success-dim: rgba(63, 107, 42, 0.1);
-  --sena-danger: #a03c27;           /* 5.9:1 */
-  --sena-danger-dim: rgba(160, 60, 39, 0.1);
+  --sena-cyan: #0e7a6f;             /* 4.9:1 como texto */
+  --sena-cyan-dim: rgba(14, 122, 111, 0.10);
+  --sena-gold: #9c5a0c;             /* 5.1:1 como texto */
+  --sena-gold-dim: rgba(156, 90, 12, 0.10);
+  --sena-success: #2f7a3d;          /* 5.0:1 */
+  --sena-success-dim: rgba(47, 122, 61, 0.10);
+  --sena-danger: #ad3b26;           /* 5.8:1 */
+  --sena-danger-dim: rgba(173, 59, 38, 0.10);
 
-  --sena-on-acento: #fbf7ee;        /* 5.8:1 sobre --sena-cyan */
-  --sena-foco: #7a4a12;
+  --sena-on-acento: #ffffff;        /* 5.2:1+ sobre qualquer acento acima */
+  --sena-foco: #7a4a12;             /* 7.0:1 sobre --sena-bg */
 
-  --sena-sombra: 0 20px 48px rgba(44, 36, 24, 0.12);
-  --sena-sombra-alta: 0 4px 6px rgba(44, 36, 24, 0.04),
-                      0 12px 24px rgba(44, 36, 24, 0.08),
-                      0 24px 48px rgba(44, 36, 24, 0.06);
+  --sena-sombra: 0 20px 48px rgba(35, 32, 26, 0.10);
+  --sena-sombra-alta: 0 4px 6px rgba(35, 32, 26, 0.04),
+                      0 12px 24px rgba(35, 32, 26, 0.07),
+                      0 24px 48px rgba(35, 32, 26, 0.05);
 }
 
 /* ── Alto contraste ─────────────────────────────────────────────────── */

@@ -8,6 +8,11 @@
 // ('sena_tema' / 'sena_alto_contraste' / 'sena_reduzir_movimento'): antes o
 // dashboard.html e o index.html usavam prefixos diferentes ('sena_' vs
 // 'sen-'), então a preferência escolhida numa tela não valia na outra.
+//
+// Claro é o tema de abertura do produto: só aplicamos escuro para quem já
+// escolheu isso explicitamente. O <script> inline em index.html faz a mesma
+// leitura antes da primeira pintura (evita o flash escuro); esta função
+// repete a regra para quando a view monta depois de uma navegação SPA.
 
 export function useAccessibility(keys) {
   const storageKeys = {
@@ -17,7 +22,7 @@ export function useAccessibility(keys) {
   }
 
   function carregarPreferencias() {
-    if (localStorage.getItem(storageKeys.tema) === 'claro') {
+    if (localStorage.getItem(storageKeys.tema) !== 'escuro') {
       document.body.classList.add('tema-claro')
     }
     if (localStorage.getItem(storageKeys.altoContraste) === 'true') {

@@ -146,17 +146,17 @@ const estiloRaiz = computed(() => {
   transition: filter 900ms var(--sena-ease, ease), opacity 900ms var(--sena-ease, ease);
 }
 
-.avatar-corpo-fill { fill: var(--cyan, #7fc9bb); opacity: 0.9; }
-.avatar-tracos { fill: none; stroke: var(--bg, #12100c); stroke-width: 2; stroke-linecap: round; }
-.avatar-olho-fundo { fill: var(--bg, #12100c); opacity: 0.85; }
-.avatar-pupila-fill { fill: var(--panel, #1b1711); }
-.avatar-palpebra { fill: var(--cyan, #7fc9bb); }
-.avatar-boca { fill: var(--bg, #12100c); opacity: 0.75; transform-origin: 60px 65px; }
+.avatar-corpo-fill { fill: var(--cyan, #0e7a6f); opacity: 0.9; }
+.avatar-tracos { fill: none; stroke: var(--bg, #faf8f4); stroke-width: 2; stroke-linecap: round; }
+.avatar-olho-fundo { fill: var(--bg, #faf8f4); opacity: 0.85; }
+.avatar-pupila-fill { fill: var(--panel, #ffffff); }
+.avatar-palpebra { fill: var(--cyan, #0e7a6f); }
+.avatar-boca { fill: var(--bg, #faf8f4); opacity: 0.75; transform-origin: 60px 65px; }
 
 .avatar-legenda {
   margin: 0;
   font-size: var(--sena-t-micro, 12px);
-  color: var(--text-faint, #9c9080);
+  color: var(--text-faint, #786f5e);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
