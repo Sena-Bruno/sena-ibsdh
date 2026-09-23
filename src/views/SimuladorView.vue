@@ -3847,7 +3847,7 @@ body.alto-contraste .sim-page input:focus {
     }
 
     .sim-page .prontuario-header {
-      background: linear-gradient(135deg, #0f0d09, #1a160f);
+      background: linear-gradient(135deg, #15130e, #1d1811);
       padding: 24px 28px;
       display: flex;
       align-items: center;
@@ -3857,7 +3857,7 @@ body.alto-contraste .sim-page input:focus {
     .sim-page .prontuario-logo {
       font-size: 13px;
       font-weight: 800;
-      color: #f4eee1;
+      color: #f7f4ee;
       letter-spacing: .1em;
       text-transform: uppercase;
     }
@@ -3865,7 +3865,7 @@ body.alto-contraste .sim-page input:focus {
     .sim-page .prontuario-logo small {
       display: block;
       font-size: 10px;
-      color: #b7ab98;
+      color: #bdb096;
       font-weight: 400;
       letter-spacing: .05em;
       margin-top: 2px;
