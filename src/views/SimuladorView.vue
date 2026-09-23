@@ -1851,22 +1851,22 @@ onUnmounted(() => {
     /* Mesmos valores do tema claro do Dashboard, para que as duas telas
        principais não tenham dois temas claros levemente diferentes. */
     body.tema-claro .sim-page {
-      --bg: #f6f1e7;
+      --bg: #faf8f4;
       --panel: rgba(255,255,255,0.85);
-      --border: rgba(168,150,120,0.2);
-      --text: #2c2418;
-      --text-soft: #6b5f4d;    /* 5.80:1 */
-      --text-faint: #756a58;   /* era #94a3b8 (2.45:1) → 4.55:1 */
-      --cyan: #1f6b63;         /* era #1f6b63 (3.52:1) → 5.12:1 */
-      --cyan-dim: rgba(31,107,99,0.1);
-      --gold: #8a5518;         /* 5.47:1 */
-      --gold-dim: rgba(138,85,24,0.1);
-      --success: #3f6b2a;      /* era #059669 (3.60:1) → 5.24:1 */
-      --success-dim: rgba(63,107,42,0.1);
-      --danger: #a03c27;       /* 5.48:1 */
-      --danger-dim: rgba(160,60,39,0.1);
+      --border: rgba(35,32,26,0.12);
+      --text: #23201a;
+      --text-soft: #5c5647;    /* 7.3:1 */
+      --text-faint: #786f5e;   /* 5.0:1 */
+      --cyan: #0e7a6f;         /* 4.9:1 */
+      --cyan-dim: rgba(14,122,111,0.10);
+      --gold: #9c5a0c;         /* 5.1:1 */
+      --gold-dim: rgba(156,90,12,0.10);
+      --success: #2f7a3d;      /* 5.0:1 */
+      --success-dim: rgba(47,122,61,0.10);
+      --danger: #ad3b26;       /* 5.8:1 */
+      --danger-dim: rgba(173,59,38,0.10);
     }
-    body.tema-claro { background: linear-gradient(180deg,#f6f1e7 0%,#ece2cd 100%); }
+    body.tema-claro { background: linear-gradient(180deg,#faf8f4 0%,#f1ece2 100%); }
     /* Este override não existia, e era o bug mais visível do tema claro no
        Simulador: `.sim-page` traz um gradiente ESCURO fixo
        (#12100c → #1a160f) escrito à mão, sem token. Com os cartões virando
@@ -1875,52 +1875,52 @@ onUnmounted(() => {
        contorno dos painéis desaparecendo no fundo. */
     body.tema-claro .sim-page {
       background:
-        radial-gradient(circle at top left, rgba(31,107,99,0.08), transparent 28%),
-        radial-gradient(circle at bottom right, rgba(138,85,24,0.06), transparent 22%),
-        linear-gradient(180deg, #f6f1e7 0%, #ece2cd 100%);
+        radial-gradient(circle at top left, rgba(14,122,111,0.08), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(156,90,12,0.06), transparent 22%),
+        linear-gradient(180deg, #faf8f4 0%, #f1ece2 100%);
     }
-    body.tema-claro .sim-page .hero { background: linear-gradient(180deg,rgba(255,255,255,0.95) 0%,rgba(241,235,220,0.98) 100%); border-color: rgba(168,150,120,0.25); }
-    body.tema-claro .sim-page .hero::before { background: linear-gradient(135deg,rgba(31,107,99,0.1),transparent 40%),linear-gradient(225deg,rgba(138,85,24,0.08),transparent 35%); }
-    body.tema-claro .sim-page .seal { background: radial-gradient(circle at 30% 30%,rgba(31,107,99,0.2),transparent 45%),linear-gradient(180deg,rgba(255,255,255,1),rgba(241,235,220,1)); border-color: rgba(31,107,99,0.3); }
+    body.tema-claro .sim-page .hero { background: linear-gradient(180deg,rgba(255,255,255,0.95) 0%,rgba(241,236,226,0.98) 100%); border-color: rgba(35,32,26,0.14); }
+    body.tema-claro .sim-page .hero::before { background: linear-gradient(135deg,rgba(14,122,111,0.1),transparent 40%),linear-gradient(225deg,rgba(156,90,12,0.08),transparent 35%); }
+    body.tema-claro .sim-page .seal { background: radial-gradient(circle at 30% 30%,rgba(14,122,111,0.2),transparent 45%),linear-gradient(180deg,rgba(255,255,255,1),rgba(241,236,226,1)); border-color: rgba(14,122,111,0.3); }
     body.tema-claro .sim-page .seal::before { color: var(--text); }
-    body.tema-claro .sim-page .eyebrow { background: rgba(31,107,99,0.08); border-color: rgba(31,107,99,0.2); color: var(--gold); }
-    body.tema-claro .sim-page .acess-btn { background: rgba(31,107,99,0.08); border-color: rgba(31,107,99,0.2); color: var(--text); }
-    body.tema-claro .sim-page .acess-btn:hover { background: rgba(31,107,99,0.15); }
+    body.tema-claro .sim-page .eyebrow { background: rgba(14,122,111,0.08); border-color: rgba(14,122,111,0.2); color: var(--gold); }
+    body.tema-claro .sim-page .acess-btn { background: rgba(14,122,111,0.08); border-color: rgba(14,122,111,0.2); color: var(--text); }
+    body.tema-claro .sim-page .acess-btn:hover { background: rgba(14,122,111,0.15); }
     body.tema-claro .sim-page .card,
 body.tema-claro .sim-page .premium-card,
 body.tema-claro .sim-page .module-card,
-body.tema-claro .sim-page .info-card { background: rgba(255,255,255,0.7); border-color: rgba(168,150,120,0.2); }
-    body.tema-claro .sim-page .patient-shell { background: rgba(255,255,255,0.8); border-color: rgba(168,150,120,0.2); }
-    body.tema-claro .sim-page .input-panel { background: rgba(255,255,255,0.7); border-color: rgba(168,150,120,0.2); }
+body.tema-claro .sim-page .info-card { background: rgba(255,255,255,0.7); border-color: rgba(35,32,26,0.12); }
+    body.tema-claro .sim-page .patient-shell { background: rgba(255,255,255,0.8); border-color: rgba(35,32,26,0.12); }
+    body.tema-claro .sim-page .input-panel { background: rgba(255,255,255,0.7); border-color: rgba(35,32,26,0.12); }
     body.tema-claro .sim-page textarea,
 body.tema-claro .sim-page input,
-body.tema-claro .sim-page select { background: rgba(255,255,255,0.9); border-color: rgba(168,150,120,0.3); color: var(--text); }
+body.tema-claro .sim-page select { background: rgba(255,255,255,0.9); border-color: rgba(35,32,26,0.18); color: var(--text); }
     body.tema-claro .sim-page textarea::placeholder,
 body.tema-claro .sim-page input::placeholder { color: var(--text-faint); }
-    body.tema-claro .sim-page .btn-primary { background: linear-gradient(135deg,var(--cyan),rgba(31,107,99,0.85)); color: #fff; }
-    body.tema-claro .sim-page .btn-secondary { background: rgba(168,150,120,0.15); color: var(--text); border-color: rgba(168,150,120,0.25); }
-    body.tema-claro .sim-page .btn-secondary:hover { background: rgba(168,150,120,0.25); }
-    body.tema-claro .sim-page .chat-bubble.user { background: rgba(31,107,99,0.15); border-color: rgba(31,107,99,0.25); }
-    body.tema-claro .sim-page .chat-bubble.paciente { background: rgba(241,235,220,0.9); border-color: rgba(168,150,120,0.2); }
-    body.tema-claro .sim-page .supervisor-item { background: rgba(255,255,255,0.6); border-color: rgba(168,150,120,0.15); }
-    body.tema-claro .sim-page .historico-toggle { background: rgba(255,255,255,0.5); border-color: rgba(168,150,120,0.2); }
+    body.tema-claro .sim-page .btn-primary { background: linear-gradient(135deg,var(--cyan),rgba(14,122,111,0.85)); color: #fff; }
+    body.tema-claro .sim-page .btn-secondary { background: rgba(35,32,26,0.08); color: var(--text); border-color: rgba(35,32,26,0.14); }
+    body.tema-claro .sim-page .btn-secondary:hover { background: rgba(35,32,26,0.14); }
+    body.tema-claro .sim-page .chat-bubble.user { background: rgba(14,122,111,0.15); border-color: rgba(14,122,111,0.25); }
+    body.tema-claro .sim-page .chat-bubble.paciente { background: rgba(241,236,226,0.9); border-color: rgba(35,32,26,0.12); }
+    body.tema-claro .sim-page .supervisor-item { background: rgba(255,255,255,0.6); border-color: rgba(35,32,26,0.1); }
+    body.tema-claro .sim-page .historico-toggle { background: rgba(255,255,255,0.5); border-color: rgba(35,32,26,0.12); }
     body.tema-claro .sim-page .historico-toggle:hover { background: rgba(255,255,255,0.8); }
-    body.tema-claro .sim-page .voz-toggle { background: rgba(255,255,255,0.6); border-color: rgba(168,150,120,0.2); }
+    body.tema-claro .sim-page .voz-toggle { background: rgba(255,255,255,0.6); border-color: rgba(35,32,26,0.12); }
     body.tema-claro .sim-page .voz-toggle:hover { background: rgba(255,255,255,0.9); }
-    body.tema-claro .sim-page .result-panel { background: rgba(255,255,255,0.85); border-color: rgba(168,150,120,0.25); }
-    body.tema-claro .sim-page .processing { background: rgba(255,255,255,0.9); border-color: rgba(168,150,120,0.2); }
-    body.tema-claro .sim-page .mode-selector button { background: rgba(255,255,255,0.7); border-color: rgba(168,150,120,0.25); color: var(--text); }
-    body.tema-claro .sim-page .mode-selector button.active { background: rgba(31,107,99,0.15); border-color: rgba(31,107,99,0.4); color: var(--cyan); }
-    body.tema-claro .sim-page .mobile-nav { background: rgba(255,255,255,0.95); border-top-color: rgba(168,150,120,0.2); }
+    body.tema-claro .sim-page .result-panel { background: rgba(255,255,255,0.85); border-color: rgba(35,32,26,0.14); }
+    body.tema-claro .sim-page .processing { background: rgba(255,255,255,0.9); border-color: rgba(35,32,26,0.12); }
+    body.tema-claro .sim-page .mode-selector button { background: rgba(255,255,255,0.7); border-color: rgba(35,32,26,0.14); color: var(--text); }
+    body.tema-claro .sim-page .mode-selector button.active { background: rgba(14,122,111,0.15); border-color: rgba(14,122,111,0.4); color: var(--cyan); }
+    body.tema-claro .sim-page .mobile-nav { background: rgba(255,255,255,0.95); border-top-color: rgba(35,32,26,0.12); }
     body.tema-claro .sim-page .mobile-nav-btn { color: var(--text-soft); }
     body.tema-claro .sim-page .mobile-nav-btn.active { color: var(--cyan); }
     body.tema-claro .sim-page .mobile-nav-item { color: var(--text-soft); }
-    body.tema-claro .sim-page .mobile-nav-item:hover { background: rgba(31,107,99,0.08); color: var(--cyan); }
-    body.tema-claro .sim-page .mobile-nav-item.active { color: var(--cyan); background: rgba(31,107,99,0.12); }
+    body.tema-claro .sim-page .mobile-nav-item:hover { background: rgba(14,122,111,0.08); color: var(--cyan); }
+    body.tema-claro .sim-page .mobile-nav-item.active { color: var(--cyan); background: rgba(14,122,111,0.12); }
     /* min-height: no HTML original o fundo ficava no body, que propaga a
        pintura para a tela inteira; numa div comum isso não acontece, então
        sem isso sobra área sem fundo quando o conteúdo é curto. */
-    .sim-page { font-family: 'Inter', sans-serif; min-height: 100vh; background: radial-gradient(circle at top left,rgba(127,201,187,0.07),transparent 28%), radial-gradient(circle at bottom right,rgba(211,162,79,0.05),transparent 22%), linear-gradient(180deg,#12100c 0%,#1a160f 100%); color: var(--text); line-height: 1.6; overflow-x: hidden; }
+    .sim-page { font-family: 'Inter', sans-serif; min-height: 100vh; background: radial-gradient(circle at top left,rgba(82,196,179,0.07),transparent 28%), radial-gradient(circle at bottom right,rgba(224,165,69,0.05),transparent 22%), linear-gradient(180deg,#15130e 0%,#1d1811 100%); color: var(--text); line-height: 1.6; overflow-x: hidden; }
     /* Acessibilidade - Alto Contraste aprimorado */
     /* Alto Contraste Aprimorado */
     body.alto-contraste { background: #000; }
@@ -2035,7 +2035,7 @@ body.alto-contraste .sim-page input:focus {
       border: 2px solid rgba(0,255,255,0.5);
     }
     body.alto-contraste .sim-page .eyebrow {
-      background: rgba(211,162,79,0.15);
+      background: rgba(224,165,69,0.15);
       border: 2px solid #ffd700;
       color: #ffd700;
     }
