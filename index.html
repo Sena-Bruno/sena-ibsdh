@@ -27,23 +27,10 @@
     >
   </head>
   <body>
-    <script>
-      // Aplica o tema antes da primeira pintura, para não piscar escuro e
-      // depois trocar para claro assim que o Vue montar. Claro é o padrão:
-      // só quem já escolheu escuro explicitamente (useAccessibility.js)
-      // sai daqui. Mantém as mesmas chaves de localStorage que o Dashboard
-      // e o Simulador usam para ler/gravar a preferência.
-      (function () {
-        try {
-          if (localStorage.getItem('sena_tema') !== 'escuro') {
-            document.body.classList.add('tema-claro');
-          }
-          if (localStorage.getItem('sena_alto_contraste') === 'true') {
-            document.body.classList.add('alto-contraste');
-          }
-        } catch (e) {}
-      })();
-    </script>
+    <!-- Precisa ser um arquivo à parte, não inline: o CSP do site é
+         script-src 'self' sem 'unsafe-inline' (ver netlify.toml), então um
+         <script> inline aqui seria bloqueado em produção. Ver theme-init.js. -->
+    <script src="/theme-init.js"></script>
     <div id="app"></div>
     <noscript>
       <div style="font-family:system-ui,sans-serif;max-width:34rem;margin:15vh auto;padding:0 1.5rem;color:#f4eee1;text-align:center;line-height:1.6">
