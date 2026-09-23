@@ -1558,7 +1558,7 @@ const ESTADOS_EMOCIONAIS = {
   aberto: { label: 'Aberto', cor: 'var(--success)', pct: 85 },
   engajado: { label: 'Engajado', cor: 'var(--cyan)', pct: 70 },
   neutro: { label: 'Neutro', cor: 'var(--text-faint)', pct: 50 },
-  resistente: { label: 'Resistente', cor: '#d3a24f', pct: 35 },
+  resistente: { label: 'Resistente', cor: 'var(--gold)', pct: 35 },
   fechado: { label: 'Fechado', cor: 'var(--danger)', pct: 15 }
 }
 
@@ -2795,7 +2795,7 @@ body.alto-contraste .sim-page input:focus {
     .sim-page .compare-pill.sim-ia    { background: color-mix(in srgb, var(--cyan) 10%, transparent); color: var(--cyan); }
     .sim-page .compare-pill.nao-ia    { background: color-mix(in srgb, var(--danger) 12%, transparent); color: var(--danger); }
     .sim-page .compare-pill.match     { background: color-mix(in srgb, var(--success) 6%, transparent); }
-    .sim-page .compare-pill.mismatch  { background: color-mix(in srgb, var(--gold) 10%, transparent); color: #d3a24f; }
+    .sim-page .compare-pill.mismatch  { background: color-mix(in srgb, var(--gold) 10%, transparent); color: var(--gold); }
 
     .sim-page .compare-match-icon { font-size: 14px; }
 
@@ -3540,7 +3540,7 @@ body.alto-contraste .sim-page input:focus {
       border-radius: 14px;
       border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent);
       background: linear-gradient(135deg, color-mix(in srgb, var(--gold) 15%, transparent), color-mix(in srgb, var(--gold) 10%, transparent));
-      color: #d3a24f;
+      color: var(--gold);
       font-family: 'Inter', sans-serif;
       font-size: 12px;
       font-weight: 800;
@@ -3574,7 +3574,7 @@ body.alto-contraste .sim-page input:focus {
       font-weight: 800;
       letter-spacing: .12em;
       text-transform: uppercase;
-      color: #d3a24f;
+      color: var(--gold);
       margin-bottom: 4px;
     }
 
@@ -3595,10 +3595,10 @@ body.alto-contraste .sim-page input:focus {
       transition: all .18s;
     }
 
-    .sim-page .nivel-btn:hover { background: color-mix(in srgb, var(--gold) 12%, transparent); border-color: color-mix(in srgb, var(--gold) 25%, transparent); color: #d3a24f; }
+    .sim-page .nivel-btn:hover { background: color-mix(in srgb, var(--gold) 12%, transparent); border-color: color-mix(in srgb, var(--gold) 25%, transparent); color: var(--gold); }
 
     .sim-page .nivel-btn.nivel-1:hover { background: color-mix(in srgb, var(--success) 10%, transparent); border-color: color-mix(in srgb, var(--success) 20%, transparent); color: var(--success); }
-    .sim-page .nivel-btn.nivel-2:hover { background: color-mix(in srgb, var(--gold) 10%, transparent); border-color: color-mix(in srgb, var(--gold) 20%, transparent); color: #d3a24f; }
+    .sim-page .nivel-btn.nivel-2:hover { background: color-mix(in srgb, var(--gold) 10%, transparent); border-color: color-mix(in srgb, var(--gold) 20%, transparent); color: var(--gold); }
     .sim-page .nivel-btn.nivel-3:hover { background: color-mix(in srgb, var(--danger) 10%, transparent); border-color: color-mix(in srgb, var(--danger) 20%, transparent); color: var(--danger); }
 
     .sim-page .desafio-card {
@@ -3619,7 +3619,7 @@ body.alto-contraste .sim-page input:focus {
       letter-spacing: .1em;
       text-transform: uppercase;
       background: color-mix(in srgb, var(--gold) 15%, transparent);
-      color: #d3a24f;
+      color: var(--gold);
       border: 1px solid color-mix(in srgb, var(--gold) 25%, transparent);
       margin-bottom: 10px;
     }
@@ -3661,7 +3661,7 @@ body.alto-contraste .sim-page input:focus {
     .sim-page .desafio-nota-min {
       margin-top: 12px;
       font-size: 12px;
-      color: #d3a24f;
+      color: var(--gold);
       font-weight: 700;
     }
 
@@ -3677,10 +3677,10 @@ body.alto-contraste .sim-page input:focus {
 
     .sim-page .selo-desafio.visible { display: flex; }
 
-    .sim-page .selo-icon { flex-shrink: 0; color: #d3a24f; }
+    .sim-page .selo-icon { flex-shrink: 0; color: var(--gold); }
 
     .sim-page .selo-info {}
-    .sim-page .selo-label { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #d3a24f; }
+    .sim-page .selo-label { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
     .sim-page .selo-nome { font-size: 15px; font-weight: 800; color: var(--text); margin-top: 2px; }
 
     /* ── VOZ DO PACIENTE ─────────────────────────────── */
@@ -3876,7 +3876,7 @@ body.alto-contraste .sim-page input:focus {
       font-weight: 700;
       letter-spacing: .12em;
       text-transform: uppercase;
-      color: #d3a24f;
+      color: var(--gold);
       padding: 4px 10px;
       border-radius: 999px;
       border: 1px solid color-mix(in srgb, var(--gold) 30%, transparent);
