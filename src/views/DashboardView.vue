@@ -58,7 +58,7 @@
       </div>
       <div class="wpp-step" id="wppStep2">
         <p>Passo 2 de 2 — Ative o serviço enviando esta mensagem exata para o número abaixo:</p>
-        <div class="wpp-code" style="background:rgba(255,255,255,0.05);padding:10px;border-radius:6px;font-family:monospace;margin:10px 0;">I allow callmebot to send me messages</div>
+        <div class="wpp-code" style="background:color-mix(in srgb, var(--text) 6%, transparent);padding:10px;border-radius:6px;font-family:monospace;margin:10px 0;">I allow callmebot to send me messages</div>
         <a id="wppLink" href="#" target="_blank" class="btn-wpp" style="display:inline-block; margin-bottom:16px; text-decoration:none;">Abrir WhatsApp e enviar</a>
         <p style="color:var(--text-faint);font-size:12px;margin-bottom:16px;">Após enviar a mensagem, clique em "Já ativei"</p>
         <button class="btn-primary" @click="confirmarWpp">✓ Já ativei</button>
@@ -184,7 +184,7 @@
           <button class="meta-btn" data-meta="7" @click="definirMeta(7)">Todos os dias</button>
         </div>
       </div>
-      <div style="margin-top:12px;height:6px;border-radius:999px;background:rgba(255,255,255,0.06);overflow:hidden;">
+      <div style="margin-top:12px;height:6px;border-radius:999px;background:color-mix(in srgb, var(--text) 8%, transparent);overflow:hidden;">
         <div id="metaProgress" style="height:100%;border-radius:999px;background:linear-gradient(90deg,var(--cyan),#b7ded4);width:0%;transition:width .6s;"></div>
       </div>
     </div>
@@ -205,7 +205,7 @@
           <span class="premium-arrow">→</span>
         </router-link>
         <router-link to="/desafio.html" class="premium-card" id="premDesafio">
-          <div class="premium-icon" style="background: rgba(224,165,69,0.1); border-color: rgba(224,165,69,0.2); color: #e0a545;"><Icone nome="raio" :tamanho="20" /></div>
+          <div class="premium-icon" style="background: rgba(224,165,69,0.1); border-color: rgba(224,165,69,0.2); color: var(--gold);"><Icone nome="raio" :tamanho="20" /></div>
           <div>
             <div class="premium-title">Desafio Semanal</div>
             <div class="premium-sub">Teste seus conhecimentos</div>
@@ -268,13 +268,13 @@
 
     <!-- Modal relatório -->
     <div id="relatorioOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);backdrop-filter:blur(8px);z-index:9999;place-items:start center;padding:20px;overflow-y:auto;">
-      <div style="width:100%;max-width:680px;background:linear-gradient(180deg,rgba(27,23,17,0.99),rgba(15,13,9,1));border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow-premium);overflow:hidden;">
-        <div style="padding:22px 24px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between;">
+      <div style="width:100%;max-width:680px;background:linear-gradient(180deg,var(--panel) 0%,var(--bg) 100%);border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow-premium);overflow:hidden;">
+        <div style="padding:22px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
           <div>
             <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;">IBSDH — Relatório Oficial</div>
             <div style="font-size:18px;font-weight:800;letter-spacing:-.02em;">Relatório de Evolução Clínica</div>
           </div>
-          <button @click="fecharRelatorio" style="padding:8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);color:var(--text-soft);font-family:'Inter',sans-serif;font-size:12px;cursor:pointer;">Fechar</button>
+          <button @click="fecharRelatorio" style="padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:color-mix(in srgb, var(--text) 5%, transparent);color:var(--text-soft);font-family:'Inter',sans-serif;font-size:12px;cursor:pointer;">Fechar</button>
         </div>
         <div id="relatorioConteudo" style="padding:24px;"></div>
       </div>
@@ -582,9 +582,9 @@ async function gerarRelatorio() {
     }
     if (data.erro) throw new Error(data.mensagem)
     const stats = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">' +
-      '<div style="text-align:center;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);"><div style="font-size:24px;font-weight:800;color:var(--success);">' + data.aulas_aprovadas + '</div><div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.08em;">Aprovadas</div></div>' +
-      '<div style="text-align:center;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);"><div style="font-size:24px;font-weight:800;color:var(--cyan);">' + data.media_geral + '</div><div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.08em;">Média geral</div></div>' +
-      '<div style="text-align:center;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);"><div style="font-size:24px;font-weight:800;color:var(--gold);">' + data.total_aulas + '</div><div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.08em;">Realizadas</div></div>' +
+      '<div style="text-align:center;padding:14px;border-radius:12px;border:1px solid color-mix(in srgb, var(--text) 8%, transparent);background:color-mix(in srgb, var(--text) 3%, transparent);"><div style="font-size:24px;font-weight:800;color:var(--success);">' + data.aulas_aprovadas + '</div><div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.08em;">Aprovadas</div></div>' +
+      '<div style="text-align:center;padding:14px;border-radius:12px;border:1px solid color-mix(in srgb, var(--text) 8%, transparent);background:color-mix(in srgb, var(--text) 3%, transparent);"><div style="font-size:24px;font-weight:800;color:var(--cyan);">' + data.media_geral + '</div><div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.08em;">Média geral</div></div>' +
+      '<div style="text-align:center;padding:14px;border-radius:12px;border:1px solid color-mix(in srgb, var(--text) 8%, transparent);background:color-mix(in srgb, var(--text) 3%, transparent);"><div style="font-size:24px;font-weight:800;color:var(--gold);">' + data.total_aulas + '</div><div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.08em;">Realizadas</div></div>' +
       '</div>'
     const analise = '<div style="padding:18px;border-radius:14px;border:1px solid rgba(224,165,69,0.15);background:rgba(224,165,69,0.04);">' +
       '<div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;">Análise da IA — Supervisão Clínica</div>' +
