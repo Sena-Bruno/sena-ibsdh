@@ -1837,6 +1837,7 @@ onUnmounted(() => {
       --success-dim: rgba(124,196,100,0.1);
       --danger: #e2775c;
       --danger-dim: rgba(226,119,92,0.1);
+      --on-accent: #15130e;
       --shadow-premium: 0 4px 6px rgba(0,0,0,0.2), 0 12px 24px rgba(0,0,0,0.4);
       --radius-xl: 24px; --radius-lg: 18px; --radius-md: 14px; --radius-sm: 10px;
     }
@@ -1865,6 +1866,7 @@ onUnmounted(() => {
       --success-dim: rgba(47,122,61,0.10);
       --danger: #ad3b26;       /* 5.8:1 */
       --danger-dim: rgba(173,59,38,0.10);
+      --on-accent: #ffffff;
     }
     body.tema-claro { background: linear-gradient(180deg,#faf8f4 0%,#f1ece2 100%); }
     /* Este override não existia, e era o bug mais visível do tema claro no
@@ -2093,7 +2095,7 @@ body.alto-contraste .sim-page input:focus {
     .sim-page .card-dot.active { background: var(--cyan); box-shadow: 0 0 14px color-mix(in srgb, var(--cyan) 55%, transparent); }
     .sim-page .card-title { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-soft); }
     .sim-page .card-body { padding: 22px; }
-    .sim-page .alert { display: none; margin-bottom: 16px; padding: 14px 16px; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--danger) 18%, transparent); background: var(--danger-dim); color: #eeb09e; font-size: 14px; }
+    .sim-page .alert { display: none; margin-bottom: 16px; padding: 14px 16px; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--danger) 18%, transparent); background: var(--danger-dim); color: var(--danger); font-size: 14px; }
     .sim-page .alert.visible { display: block; }
     .sim-page .patient-shell { display: grid; gap: 16px; }
     .sim-page .patient-hero { position: relative; padding: 22px; border-radius: 22px; border: 1px solid rgba(255,255,255,0.06); background: linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.01)),linear-gradient(135deg,color-mix(in srgb, var(--cyan) 5%, transparent),color-mix(in srgb, var(--gold) 2%, transparent)); overflow: hidden; }
@@ -2111,7 +2113,7 @@ body.alto-contraste .sim-page input:focus {
     .sim-page .mini-list li::before { content: ''; width: 6px; height: 6px; border-radius: 999px; background: var(--cyan); position: absolute; left: 0; top: 9px; box-shadow: 0 0 10px color-mix(in srgb, var(--cyan) 45%, transparent); }
     .sim-page .primary-btn,
 .sim-page .ghost-btn { width: 100%; border: none; border-radius: 16px; padding: 16px 18px; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: transform 0.18s ease,box-shadow 0.18s ease,opacity 0.18s ease; }
-    .sim-page .primary-btn { color: #12100c; background: linear-gradient(135deg,var(--cyan) 0%,#b7ded4 100%); box-shadow: 0 18px 32px color-mix(in srgb, var(--cyan) 18%, transparent); }
+    .sim-page .primary-btn { color: var(--on-accent); background: linear-gradient(135deg,var(--cyan) 0%,color-mix(in srgb, var(--cyan) 55%, white) 100%); box-shadow: 0 18px 32px color-mix(in srgb, var(--cyan) 18%, transparent); }
     .sim-page .primary-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 22px 36px color-mix(in srgb, var(--cyan) 24%, transparent); }
     .sim-page .ghost-btn { background: rgba(255,255,255,0.04); color: var(--text); border: 1px solid rgba(255,255,255,0.08); margin-top: 12px; }
     .sim-page .ghost-btn:hover:not(:disabled) { transform: translateY(-1px); background: rgba(255,255,255,0.06); }
@@ -2730,8 +2732,8 @@ body.alto-contraste .sim-page input:focus {
       padding: 13px;
       border-radius: 12px;
       border: none;
-      background: linear-gradient(135deg, var(--cyan), #b7ded4);
-      color: #12100c;
+      background: linear-gradient(135deg, var(--cyan), color-mix(in srgb, var(--cyan) 55%, white));
+      color: var(--on-accent);
       font-family: 'Inter', sans-serif;
       font-size: 13px;
       font-weight: 800;
@@ -3000,8 +3002,8 @@ body.alto-contraste .sim-page input:focus {
       width: 42px; height: 42px;
       border-radius: 12px;
       border: none;
-      background: linear-gradient(135deg, var(--cyan), #b7ded4);
-      color: #12100c;
+      background: linear-gradient(135deg, var(--cyan), color-mix(in srgb, var(--cyan) 55%, white));
+      color: var(--on-accent);
       font-size: 16px;
       cursor: pointer;
       transition: transform .15s, box-shadow .15s;
@@ -3116,19 +3118,19 @@ body.alto-contraste .sim-page input:focus {
 
     .sim-page .replay-mark.forte {
       background: color-mix(in srgb, var(--success) 18%, transparent);
-      color: #c3dcae;
+      color: var(--success);
       border-bottom: 2px solid color-mix(in srgb, var(--success) 50%, transparent);
     }
 
     .sim-page .replay-mark.atencao {
       background: color-mix(in srgb, var(--gold) 15%, transparent);
-      color: #e8c88f;
+      color: var(--gold);
       border-bottom: 2px solid color-mix(in srgb, var(--gold) 50%, transparent);
     }
 
     .sim-page .replay-mark.ausente_contexto {
       background: color-mix(in srgb, var(--danger) 12%, transparent);
-      color: #eeb09e;
+      color: var(--danger);
       border-bottom: 2px solid color-mix(in srgb, var(--danger) 40%, transparent);
     }
 
@@ -3442,8 +3444,8 @@ body.alto-contraste .sim-page input:focus {
       padding: 10px 18px;
       border-radius: 10px;
       border: none;
-      background: linear-gradient(135deg, var(--success), #c3dcae);
-      color: #12100c;
+      background: linear-gradient(135deg, var(--success), color-mix(in srgb, var(--success) 55%, white));
+      color: var(--on-accent);
       font-family: 'Inter', sans-serif;
       font-size: 12px;
       font-weight: 800;
