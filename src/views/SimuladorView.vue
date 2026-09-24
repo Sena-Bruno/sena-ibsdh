@@ -1858,14 +1858,14 @@ onUnmounted(() => {
       --text: #23201a;
       --text-soft: #5c5647;    /* 7.3:1 */
       --text-faint: #786f5e;   /* 5.0:1 */
-      --cyan: #0e7a6f;         /* 4.9:1 */
-      --cyan-dim: rgba(14,122,111,0.10);
-      --gold: #9c5a0c;         /* 5.1:1 */
-      --gold-dim: rgba(156,90,12,0.10);
-      --success: #2f7a3d;      /* 5.0:1 */
-      --success-dim: rgba(47,122,61,0.10);
-      --danger: #ad3b26;       /* 5.8:1 */
-      --danger-dim: rgba(173,59,38,0.10);
+      --cyan: #0a7566;         /* 4.9:1 */
+      --cyan-dim: rgba(10,117,102,0.10);
+      --gold: #9c5700;         /* 5.1:1 */
+      --gold-dim: rgba(156,87,0,0.10);
+      --success: #1c7a33;      /* 5.0:1 */
+      --success-dim: rgba(28,122,51,0.10);
+      --danger: #c93f24;       /* 5.8:1 */
+      --danger-dim: rgba(201,63,36,0.10);
       --on-accent: #ffffff;
     }
     body.tema-claro { background: linear-gradient(180deg,#faf8f4 0%,#f1ece2 100%); }
@@ -1877,17 +1877,17 @@ onUnmounted(() => {
        contorno dos painéis desaparecendo no fundo. */
     body.tema-claro .sim-page {
       background:
-        radial-gradient(circle at top left, rgba(14,122,111,0.08), transparent 28%),
-        radial-gradient(circle at bottom right, rgba(156,90,12,0.06), transparent 22%),
+        radial-gradient(circle at top left, rgba(10,117,102,0.14), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(156,87,0,0.1), transparent 26%),
         linear-gradient(180deg, #faf8f4 0%, #f1ece2 100%);
     }
     body.tema-claro .sim-page .hero { background: linear-gradient(180deg,rgba(255,255,255,0.95) 0%,rgba(241,236,226,0.98) 100%); border-color: rgba(35,32,26,0.14); }
-    body.tema-claro .sim-page .hero::before { background: linear-gradient(135deg,rgba(14,122,111,0.1),transparent 40%),linear-gradient(225deg,rgba(156,90,12,0.08),transparent 35%); }
-    body.tema-claro .sim-page .seal { background: radial-gradient(circle at 30% 30%,rgba(14,122,111,0.2),transparent 45%),linear-gradient(180deg,rgba(255,255,255,1),rgba(241,236,226,1)); border-color: rgba(14,122,111,0.3); }
+    body.tema-claro .sim-page .hero::before { background: linear-gradient(135deg,rgba(10,117,102,0.1),transparent 40%),linear-gradient(225deg,rgba(156,87,0,0.08),transparent 35%); }
+    body.tema-claro .sim-page .seal { background: radial-gradient(circle at 30% 30%,rgba(10,117,102,0.2),transparent 45%),linear-gradient(180deg,rgba(255,255,255,1),rgba(241,236,226,1)); border-color: rgba(10,117,102,0.3); }
     body.tema-claro .sim-page .seal::before { color: var(--text); }
-    body.tema-claro .sim-page .eyebrow { background: rgba(14,122,111,0.08); border-color: rgba(14,122,111,0.2); color: var(--gold); }
-    body.tema-claro .sim-page .acess-btn { background: rgba(14,122,111,0.08); border-color: rgba(14,122,111,0.2); color: var(--text); }
-    body.tema-claro .sim-page .acess-btn:hover { background: rgba(14,122,111,0.15); }
+    body.tema-claro .sim-page .eyebrow { background: rgba(10,117,102,0.08); border-color: rgba(10,117,102,0.2); color: var(--gold); }
+    body.tema-claro .sim-page .acess-btn { background: rgba(10,117,102,0.08); border-color: rgba(10,117,102,0.2); color: var(--text); }
+    body.tema-claro .sim-page .acess-btn:hover { background: rgba(10,117,102,0.15); }
     body.tema-claro .sim-page .card,
 body.tema-claro .sim-page .premium-card,
 body.tema-claro .sim-page .module-card,
@@ -1899,10 +1899,10 @@ body.tema-claro .sim-page input,
 body.tema-claro .sim-page select { background: rgba(255,255,255,0.9); border-color: rgba(35,32,26,0.18); color: var(--text); }
     body.tema-claro .sim-page textarea::placeholder,
 body.tema-claro .sim-page input::placeholder { color: var(--text-faint); }
-    body.tema-claro .sim-page .btn-primary { background: linear-gradient(135deg,var(--cyan),rgba(14,122,111,0.85)); color: #fff; }
+    body.tema-claro .sim-page .btn-primary { background: linear-gradient(135deg,var(--cyan),rgba(10,117,102,0.85)); color: #fff; }
     body.tema-claro .sim-page .btn-secondary { background: rgba(35,32,26,0.08); color: var(--text); border-color: rgba(35,32,26,0.14); }
     body.tema-claro .sim-page .btn-secondary:hover { background: rgba(35,32,26,0.14); }
-    body.tema-claro .sim-page .chat-bubble.user { background: rgba(14,122,111,0.15); border-color: rgba(14,122,111,0.25); }
+    body.tema-claro .sim-page .chat-bubble.user { background: rgba(10,117,102,0.15); border-color: rgba(10,117,102,0.25); }
     body.tema-claro .sim-page .chat-bubble.paciente { background: rgba(241,236,226,0.9); border-color: rgba(35,32,26,0.12); }
     body.tema-claro .sim-page .supervisor-item { background: rgba(255,255,255,0.6); border-color: rgba(35,32,26,0.1); }
     body.tema-claro .sim-page .historico-toggle { background: rgba(255,255,255,0.5); border-color: rgba(35,32,26,0.12); }
@@ -1912,13 +1912,13 @@ body.tema-claro .sim-page input::placeholder { color: var(--text-faint); }
     body.tema-claro .sim-page .result-panel { background: rgba(255,255,255,0.85); border-color: rgba(35,32,26,0.14); }
     body.tema-claro .sim-page .processing { background: rgba(255,255,255,0.9); border-color: rgba(35,32,26,0.12); }
     body.tema-claro .sim-page .mode-selector button { background: rgba(255,255,255,0.7); border-color: rgba(35,32,26,0.14); color: var(--text); }
-    body.tema-claro .sim-page .mode-selector button.active { background: rgba(14,122,111,0.15); border-color: rgba(14,122,111,0.4); color: var(--cyan); }
+    body.tema-claro .sim-page .mode-selector button.active { background: rgba(10,117,102,0.15); border-color: rgba(10,117,102,0.4); color: var(--cyan); }
     body.tema-claro .sim-page .mobile-nav { background: rgba(255,255,255,0.95); border-top-color: rgba(35,32,26,0.12); }
     body.tema-claro .sim-page .mobile-nav-btn { color: var(--text-soft); }
     body.tema-claro .sim-page .mobile-nav-btn.active { color: var(--cyan); }
     body.tema-claro .sim-page .mobile-nav-item { color: var(--text-soft); }
-    body.tema-claro .sim-page .mobile-nav-item:hover { background: rgba(14,122,111,0.08); color: var(--cyan); }
-    body.tema-claro .sim-page .mobile-nav-item.active { color: var(--cyan); background: rgba(14,122,111,0.12); }
+    body.tema-claro .sim-page .mobile-nav-item:hover { background: rgba(10,117,102,0.08); color: var(--cyan); }
+    body.tema-claro .sim-page .mobile-nav-item.active { color: var(--cyan); background: rgba(10,117,102,0.12); }
     /* min-height: no HTML original o fundo ficava no body, que propaga a
        pintura para a tela inteira; numa div comum isso não acontece, então
        sem isso sobra área sem fundo quando o conteúdo é curto. */

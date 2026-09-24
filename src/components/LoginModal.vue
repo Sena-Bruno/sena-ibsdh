@@ -140,7 +140,7 @@ onMounted(() => {
 }
 .login-eyebrow {
   font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
-  color: var(--sena-gold, #9c5a0c); margin-bottom: var(--sena-e-3, 12px);
+  color: var(--sena-gold, #9c5700); margin-bottom: var(--sena-e-3, 12px);
 }
 .login-titulo {
   font-family: var(--sena-fonte-titulo, 'Fraunces', serif);
@@ -164,14 +164,14 @@ input:focus-visible {
 }
 input:disabled { opacity: .6; }
 .login-erro {
-  color: var(--sena-danger, #ad3b26); font-size: var(--sena-t-peq, 13px);
+  color: var(--sena-danger, #c93f24); font-size: var(--sena-t-peq, 13px);
 }
 .login-btn {
   border: none; border-radius: var(--sena-r-md, 12px); padding: 14px 18px;
   font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
   cursor: pointer; min-height: var(--sena-toque-min, 44px);
   color: var(--sena-on-acento, #ffffff);
-  background: var(--sena-cyan, #0e7a6f);
+  background: var(--sena-cyan, #0a7566);
 }
 .login-btn:disabled { opacity: .55; cursor: not-allowed; }
 .login-btn:focus-visible {

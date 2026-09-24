@@ -120,8 +120,8 @@ const dimensoes = computed(() =>
   padding: 3px 8px;
   border-radius: 999px;
 }
-.badge-erro { background: rgba(173, 59, 38, 0.15); color: var(--danger, #ad3b26); }
-.badge-ok { background: rgba(47, 122, 61, 0.12); color: var(--success, #2f7a3d); }
+.badge-erro { background: rgba(173, 59, 38, 0.15); color: var(--danger, #c93f24); }
+.badge-ok { background: rgba(47, 122, 61, 0.12); color: var(--success, #1c7a33); }
 .ficha-resumo {
   font-size: 12px;
   color: var(--text-faint, #786f5e);
@@ -137,8 +137,8 @@ const dimensoes = computed(() =>
   color: var(--text-soft, #5c5647);
 }
 .ficha-delta { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
-.delta-bom { color: var(--success, #2f7a3d); }
-.delta-ruim { color: var(--danger, #ad3b26); }
+.delta-bom { color: var(--success, #1c7a33); }
+.delta-ruim { color: var(--danger, #c93f24); }
 .ficha-barra-trilho {
   height: 6px;
   border-radius: 999px;
@@ -147,7 +147,7 @@ const dimensoes = computed(() =>
 }
 .ficha-barra-fill {
   height: 100%;
-  background: var(--cyan, #0e7a6f);
+  background: var(--cyan, #0a7566);
   border-radius: 999px;
   transition: width 400ms ease;
 }
@@ -159,7 +159,7 @@ const dimensoes = computed(() =>
   color: var(--text-faint, #786f5e);
   margin: 12px 0 6px;
 }
-.alerta-title { color: var(--danger, #ad3b26); }
+.alerta-title { color: var(--danger, #c93f24); }
 .ficha-texto {
   font-size: 12px;
   color: var(--text-soft, #5c5647);
@@ -168,7 +168,7 @@ const dimensoes = computed(() =>
 }
 .ficha-alerta {
   font-size: 12px;
-  color: var(--danger, #ad3b26);
+  color: var(--danger, #c93f24);
   line-height: 1.65;
   margin-bottom: 6px;
 }

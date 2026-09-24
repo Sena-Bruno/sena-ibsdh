@@ -146,11 +146,11 @@ const estiloRaiz = computed(() => {
   transition: filter 900ms var(--sena-ease, ease), opacity 900ms var(--sena-ease, ease);
 }
 
-.avatar-corpo-fill { fill: var(--cyan, #0e7a6f); opacity: 0.9; }
+.avatar-corpo-fill { fill: var(--cyan, #0a7566); opacity: 0.9; }
 .avatar-tracos { fill: none; stroke: var(--bg, #faf8f4); stroke-width: 2; stroke-linecap: round; }
 .avatar-olho-fundo { fill: var(--bg, #faf8f4); opacity: 0.85; }
 .avatar-pupila-fill { fill: var(--panel, #ffffff); }
-.avatar-palpebra { fill: var(--cyan, #0e7a6f); }
+.avatar-palpebra { fill: var(--cyan, #0a7566); }
 .avatar-boca { fill: var(--bg, #faf8f4); opacity: 0.75; transform-origin: 60px 65px; }
 
 .avatar-legenda {
