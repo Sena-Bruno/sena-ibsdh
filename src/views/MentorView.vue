@@ -149,29 +149,31 @@ onMounted(() => {
 /* O fundo fica no wrapper full-width (.page) e a largura máxima no .shell —
    mesma divisão do mentor.html original. Se o fundo ficar no .shell, que é
    limitado a 720px, sobra o branco do body nas laterais da tela. */
-.page { --text:#23201a;--text-soft:#5c5647;--text-faint:#786f5e;--cyan:#0e7a6f;--gold:#9c5a0c;--success:#2f7a3d;--danger:#ad3b26;--border:rgba(35,32,26,0.12);--shadow:0 20px 48px rgba(35,32,26,0.1);
-  font-family:'Inter',sans-serif;min-height:100vh;background:radial-gradient(ellipse at bottom right,rgba(47,122,61,0.06),transparent 30%),linear-gradient(180deg,#faf8f4,#f1ece2);color:var(--text);line-height:1.6; }
+.page { --text:#23201a;--text-soft:#5c5647;--text-faint:#786f5e;--cyan:#0a7566;--gold:#9c5700;--success:#1c7a33;--danger:#c93f24;--border:rgba(35,32,26,0.12);--shadow:0 1px 2px rgba(35,32,26,0.06),0 24px 48px rgba(35,32,26,0.14);
+  font-family:'Inter',sans-serif;min-height:100vh;background:radial-gradient(ellipse at bottom right,rgba(28,122,51,0.14),transparent 32%),radial-gradient(ellipse at top left,rgba(10,117,102,0.08),transparent 34%),linear-gradient(180deg,#faf8f4,#f1ece2);color:var(--text);line-height:1.6; }
 .shell { max-width:720px;margin:0 auto;padding:28px 18px 48px; }
-.btn-voltar { display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;border:1px solid rgba(35,32,26,0.08);background:rgba(35,32,26,0.03);color:var(--text-soft);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;margin-bottom:16px;transition:background .18s; }
-.btn-voltar:hover { background:rgba(35,32,26,0.06); }
-.hero { background:linear-gradient(180deg,rgba(255,255,255,0.92),rgba(250,248,244,0.98));border:1px solid var(--border);border-radius:24px;padding:28px;margin-bottom:22px;box-shadow:var(--shadow); }
-.eyebrow { display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;background:rgba(47,122,61,0.08);border:1px solid rgba(47,122,61,0.15);color:var(--success);font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:12px; }
-h1 { font-size:clamp(24px,5vw,36px);font-weight:800;letter-spacing:-.03em;margin-bottom:6px; }
-.sub { color:var(--text-soft);font-size:14px; }
-.aviso { padding:14px;border-radius:12px;border:1px solid rgba(156,90,12,0.2);background:rgba(156,90,12,0.06);color:#9c5a0c;font-size:13px;margin-bottom:18px; }
+.btn-voltar { display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;border:1px solid rgba(35,32,26,0.12);background:#ffffff;color:var(--text-soft);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;margin-bottom:16px;transition:all .18s; }
+.btn-voltar:hover { background:rgba(28,122,51,0.06);border-color:rgba(28,122,51,0.3);color:var(--success); }
+.hero { position:relative;overflow:hidden;background:linear-gradient(155deg,rgba(255,255,255,0.98) 0%,rgba(255,255,255,0.9) 55%,rgba(28,122,51,0.1) 100%);border:1px solid rgba(35,32,26,0.14);border-radius:24px;padding:28px;margin-bottom:22px;box-shadow:var(--shadow); }
+.hero::before { content:'';position:absolute;top:-60px;right:-60px;width:180px;height:180px;border-radius:999px;background:radial-gradient(circle,rgba(28,122,51,0.16),transparent 70%); }
+.eyebrow { position:relative;display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;background:rgba(28,122,51,0.1);border:1px solid rgba(28,122,51,0.25);color:var(--success);font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:12px; }
+h1 { position:relative;font-size:clamp(24px,5vw,36px);font-weight:800;letter-spacing:-.03em;margin-bottom:6px; }
+.sub { position:relative;color:var(--text-soft);font-size:14px; }
+.aviso { padding:14px;border-radius:12px;border:1px solid rgba(156,87,0,0.22);background:rgba(156,87,0,0.07);color:#9c5700;font-size:13px;margin-bottom:18px; }
 .loading { text-align:center;padding:48px;color:var(--text-faint);font-size:14px; }
 .mentor-lista { display:grid;gap:16px; }
-.mentor-card { background:rgba(35,32,26,0.02);border:1px solid rgba(35,32,26,0.06);border-radius:18px;overflow:hidden; }
-.mentor-card-header { padding:14px 16px;border-bottom:1px solid rgba(35,32,26,0.05);display:flex;align-items:center;justify-content:space-between; }
+.mentor-card { position:relative;background:#ffffff;border:1px solid rgba(35,32,26,0.1);border-radius:18px;overflow:hidden;box-shadow:0 1px 2px rgba(35,32,26,0.04),0 8px 20px rgba(35,32,26,0.05); }
+.mentor-card::before { content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,var(--success),var(--cyan)); }
+.mentor-card-header { padding:14px 16px 14px 22px;border-bottom:1px solid rgba(35,32,26,0.07);display:flex;align-items:center;justify-content:space-between; }
 .mentor-card-meta { font-size:12px;color:var(--text-faint); }
-.mentor-card-nota { font-family:'JetBrains Mono',monospace;font-size:13px;padding:3px 8px;border-radius:6px;background:rgba(47,122,61,0.1);color:var(--success); }
-.mentor-card-body { padding:16px; }
+.mentor-card-nota { font-family:'JetBrains Mono',monospace;font-size:13px;padding:3px 8px;border-radius:6px;background:rgba(28,122,51,0.12);color:var(--success); }
+.mentor-card-body { padding:16px 16px 16px 22px; }
 .mentor-label { font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-faint);margin-bottom:6px;margin-top:12px; }
 .mentor-label:first-child { margin-top:0; }
 .mentor-trecho { font-size:13px;color:var(--text-soft);line-height:1.7;font-style:italic; }
 .mentor-fortes { font-size:13px;color:var(--text-soft);line-height:1.65; }
-.mentor-textarea { width:100%;min-height:100px;resize:vertical;border:1px solid rgba(35,32,26,0.08);border-radius:12px;background:rgba(35,32,26,0.03);color:var(--text);padding:12px 14px;font-family:'Inter',sans-serif;font-size:13px;line-height:1.65;outline:none;margin-top:10px;transition:border-color .18s; }
-.mentor-textarea:focus { border-color:rgba(47,122,61,0.3); }
+.mentor-textarea { width:100%;min-height:100px;resize:vertical;border:1px solid rgba(35,32,26,0.12);border-radius:12px;background:#ffffff;color:var(--text);padding:12px 14px;font-family:'Inter',sans-serif;font-size:13px;line-height:1.65;outline:none;margin-top:10px;transition:border-color .18s; }
+.mentor-textarea:focus { border-color:rgba(28,122,51,0.3); }
 .mentor-textarea::placeholder { color:#8a8171; } /* era #4a5568 — 2.62:1, reprovava 1.4.3 */
 .mentor-actions { display:flex;align-items:center;justify-content:space-between;margin-top:8px; }
 .mentor-status { font-size:12px;color:var(--text-faint);min-height:16px; }

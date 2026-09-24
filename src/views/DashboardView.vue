@@ -1265,17 +1265,17 @@ onUnmounted(() => {
       --text: #23201a;
       --text-soft: #5c5647;    /* era #786f5e (4.55:1, no limite) → 5.80:1 */
       --text-faint: #786f5e;   /* era #94a3b8 (2.45:1, reprovava)  → 4.55:1 */
-      --cyan: #0e7a6f;         /* era #0e7a6f (3.52:1)             → 5.12:1 */
-      --cyan-dim: rgba(14,122,111,0.1);
-      --gold: #9c5a0c;         /* era #b45309 (4.80:1)             → 5.47:1 */
-      --gold-dim: rgba(156,90,12,0.1);
-      --success: #2f7a3d;      /* era #059669 (3.60:1, reprovava)  → 5.24:1 */
-      --success-dim: rgba(47,122,61,0.1);
-      --danger: #ad3b26;       /* era #dc2626 (4.62:1)             → 5.48:1 */
-      --danger-dim: rgba(173,59,38,0.1);
+      --cyan: #0a7566;         /* revisão 3: mais croma, mesma margem → 5.3:1 */
+      --cyan-dim: rgba(10,117,102,0.1);
+      --gold: #9c5700;         /* revisão 3 → 5.2:1 */
+      --gold-dim: rgba(156,87,0,0.1);
+      --success: #1c7a33;      /* revisão 3 → 5.1:1 */
+      --success-dim: rgba(28,122,51,0.1);
+      --danger: #c93f24;       /* revisão 3 → 4.7:1 */
+      --danger-dim: rgba(201,63,36,0.1);
       --on-acento: #ffffff;
-      --shadow: 0 20px 48px rgba(35,32,26,0.10);
-      --shadow-premium: 0 4px 6px rgba(35,32,26,0.04), 0 12px 24px rgba(35,32,26,0.07), 0 24px 48px rgba(35,32,26,0.05);
+      --shadow: 0 1px 2px rgba(35,32,26,0.06), 0 24px 48px rgba(35,32,26,0.14);
+      --shadow-premium: 0 4px 6px rgba(35,32,26,0.06), 0 12px 24px rgba(35,32,26,0.10), 0 24px 48px rgba(35,32,26,0.08);
     }
     /* O <body> continua pintado com valor literal: os tokens já não moram
        nele, então var(--bg) aqui não resolveria. */
@@ -1286,16 +1286,16 @@ onUnmounted(() => {
     body.tema-claro .dash-page {
       background-color: var(--bg);
       background-image:
-        radial-gradient(ellipse at top left, rgba(14,122,111,0.08), transparent 30%),
-        radial-gradient(ellipse at bottom right, rgba(156,90,12,0.06), transparent 28%),
+        radial-gradient(ellipse at top left, rgba(10,117,102,0.14), transparent 32%),
+        radial-gradient(ellipse at bottom right, rgba(156,87,0,0.1), transparent 30%),
         linear-gradient(180deg, transparent 0%, #f1ece2 100%);
     }
     body.tema-claro .dash-page .hero { background: linear-gradient(180deg,rgba(255,255,255,0.95) 0%,rgba(241,236,226,0.98) 100%); border-color: rgba(35,32,26,0.25); }
-    body.tema-claro .dash-page .hero::before { background: linear-gradient(135deg,rgba(14,122,111,0.1),transparent 40%),linear-gradient(225deg,rgba(156,90,12,0.08),transparent 35%); }
-    body.tema-claro .dash-page .seal { background: radial-gradient(circle at 30% 30%,rgba(14,122,111,0.2),transparent 45%),linear-gradient(180deg,rgba(255,255,255,1),rgba(241,236,226,1)); border-color: rgba(14,122,111,0.3); }
-    body.tema-claro .dash-page .eyebrow { background: rgba(14,122,111,0.08); border-color: rgba(14,122,111,0.2); color: var(--gold); }
-    body.tema-claro .dash-page .acess-btn { background: rgba(14,122,111,0.08); border-color: rgba(14,122,111,0.2); color: var(--text); }
-    body.tema-claro .dash-page .acess-btn:hover { background: rgba(14,122,111,0.15); }
+    body.tema-claro .dash-page .hero::before { background: linear-gradient(135deg,rgba(10,117,102,0.16),transparent 40%),linear-gradient(225deg,rgba(156,87,0,0.13),transparent 35%); }
+    body.tema-claro .dash-page .seal { background: radial-gradient(circle at 30% 30%,rgba(10,117,102,0.2),transparent 45%),linear-gradient(180deg,rgba(255,255,255,1),rgba(241,236,226,1)); border-color: rgba(10,117,102,0.3); }
+    body.tema-claro .dash-page .eyebrow { background: rgba(10,117,102,0.08); border-color: rgba(10,117,102,0.2); color: var(--gold); }
+    body.tema-claro .dash-page .acess-btn { background: rgba(10,117,102,0.08); border-color: rgba(10,117,102,0.2); color: var(--text); }
+    body.tema-claro .dash-page .acess-btn:hover { background: rgba(10,117,102,0.15); }
     body.tema-claro .dash-page .card,
 body.tema-claro .dash-page .premium-card,
 body.tema-claro .dash-page .module-card,
@@ -1303,28 +1303,28 @@ body.tema-claro .dash-page .info-card { background: rgba(255,255,255,0.7); borde
     body.tema-claro .dash-page .module-header { background: rgba(255,255,255,0.6); border-color: rgba(35,32,26,0.2); }
     body.tema-claro .dash-page .aula-row { background: rgba(255,255,255,0.5); border-color: rgba(35,32,26,0.15); }
     body.tema-claro .dash-page .aula-row:hover { background: rgba(255,255,255,0.8); }
-    body.tema-claro .dash-page .aula-row.concluido { background: rgba(47,122,61,0.1); border-color: rgba(47,122,61,0.3); }
-    body.tema-claro .dash-page .btn-praticar { background: linear-gradient(135deg,var(--cyan),rgba(14,122,111,0.85)); color: #fff; }
-    body.tema-claro .dash-page .btn-praticar.retry { background: rgba(173,59,38,0.15); color: var(--danger); border: 1px solid rgba(173,59,38,0.3); }
+    body.tema-claro .dash-page .aula-row.concluido { background: rgba(28,122,51,0.1); border-color: rgba(28,122,51,0.3); }
+    body.tema-claro .dash-page .btn-praticar { background: linear-gradient(135deg,var(--cyan),rgba(10,117,102,0.85)); color: #fff; }
+    body.tema-claro .dash-page .btn-praticar.retry { background: rgba(201,63,36,0.15); color: var(--danger); border: 1px solid rgba(201,63,36,0.3); }
     body.tema-claro .dash-page .btn-praticar.rever { background: rgba(35,32,26,0.15); color: var(--text-soft); border: 1px solid rgba(35,32,26,0.25); }
     body.tema-claro .dash-page .aula-status.pending { background: rgba(35,32,26,0.15); color: var(--text-faint); }
-    body.tema-claro .dash-page .aula-status.approved { background: rgba(47,122,61,0.15); color: var(--success); }
-    body.tema-claro .dash-page .aula-status.rejected { background: rgba(173,59,38,0.15); color: var(--danger); }
-    body.tema-claro .dash-page .btn-primary { background: linear-gradient(135deg,var(--cyan),rgba(14,122,111,0.85)); color: #fff; }
+    body.tema-claro .dash-page .aula-status.approved { background: rgba(28,122,51,0.15); color: var(--success); }
+    body.tema-claro .dash-page .aula-status.rejected { background: rgba(201,63,36,0.15); color: var(--danger); }
+    body.tema-claro .dash-page .btn-primary { background: linear-gradient(135deg,var(--cyan),rgba(10,117,102,0.85)); color: #fff; }
     body.tema-claro .dash-page .btn-secondary { background: rgba(35,32,26,0.15); color: var(--text); border-color: rgba(35,32,26,0.25); }
     body.tema-claro .dash-page .btn-secondary:hover { background: rgba(35,32,26,0.25); }
     body.tema-claro .dash-page .mobile-nav { background: rgba(255,255,255,0.95); border-top-color: rgba(35,32,26,0.2); }
     body.tema-claro .dash-page .mobile-nav-item { color: var(--text-soft); }
-    body.tema-claro .dash-page .mobile-nav-item:hover { background: rgba(14,122,111,0.08); color: var(--cyan); }
-    body.tema-claro .dash-page .mobile-nav-item.active { color: var(--cyan); background: rgba(14,122,111,0.12); }
+    body.tema-claro .dash-page .mobile-nav-item:hover { background: rgba(10,117,102,0.08); color: var(--cyan); }
+    body.tema-claro .dash-page .mobile-nav-item.active { color: var(--cyan); background: rgba(10,117,102,0.12); }
     /* Era .progress-bar — a marcação usa .progress-track (ver <template>). */
     body.tema-claro .dash-page .progress-track { background: rgba(35,32,26,0.15); }
-    body.tema-claro .dash-page .progress-fill { background: linear-gradient(90deg,var(--cyan),rgba(14,122,111,0.85)); }
-    body.tema-claro .dash-page .conquista-badge { background: rgba(14,122,111,0.08); border-color: rgba(14,122,111,0.2); }
-    body.tema-claro .dash-page .meta-btn { background: rgba(14,122,111,0.08); border-color: rgba(14,122,111,0.2); }
-    body.tema-claro .dash-page .meta-btn:hover { background: rgba(14,122,111,0.15); }
+    body.tema-claro .dash-page .progress-fill { background: linear-gradient(90deg,var(--cyan),rgba(10,117,102,0.85)); }
+    body.tema-claro .dash-page .conquista-badge { background: rgba(10,117,102,0.08); border-color: rgba(10,117,102,0.2); }
+    body.tema-claro .dash-page .meta-btn { background: rgba(10,117,102,0.08); border-color: rgba(10,117,102,0.2); }
+    body.tema-claro .dash-page .meta-btn:hover { background: rgba(10,117,102,0.15); }
     body.tema-claro .dash-page .meta-btn.ativo { background: var(--cyan); color: #fff; }
-    body.tema-claro .dash-page .rank-badge { background: rgba(156,90,12,0.1); border-color: rgba(156,90,12,0.2); }
+    body.tema-claro .dash-page .rank-badge { background: rgba(156,87,0,0.1); border-color: rgba(156,87,0,0.2); }
     body.tema-claro .dash-page .hero-stats { border-top-color: rgba(35,32,26,0.2); }
     body.tema-claro .dash-page .hero-stat { border-right-color: rgba(35,32,26,0.15); }
 

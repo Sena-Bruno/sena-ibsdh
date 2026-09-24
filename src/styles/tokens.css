@@ -163,22 +163,30 @@ body.tema-claro {
   --sena-text-faint: #786f5e;       /* 5.0:1 sobre --sena-surface  */
   --sena-placeholder: #8a8171;      /* 3.6:1 — só para placeholder */
 
-  --sena-cyan: #0e7a6f;             /* 4.9:1 como texto */
-  --sena-cyan-dim: rgba(14, 122, 111, 0.10);
-  --sena-gold: #9c5a0c;             /* 5.1:1 como texto */
-  --sena-gold-dim: rgba(156, 90, 12, 0.10);
-  --sena-success: #2f7a3d;          /* 5.0:1 */
-  --sena-success-dim: rgba(47, 122, 61, 0.10);
-  --sena-danger: #ad3b26;           /* 5.8:1 */
-  --sena-danger-dim: rgba(173, 59, 38, 0.10);
+  /* Revisão 3: os acentos da revisão anterior (#0e7a6f/#9c5a0c) passavam no
+     contraste mas liam como "sem graça" — pouco saturados demais para
+     carregar uma tela inteira de fundo quase branco. Mais croma na mesma
+     matiz, luminosidade ajustada para manter a mesma margem de contraste
+     (~5:1 texto, ~5.5:1 texto branco sobre o acento cheio). */
+  --sena-cyan: #0a7566;             /* 5.3:1 como texto */
+  --sena-cyan-dim: rgba(10, 117, 102, 0.10);
+  --sena-gold: #9c5700;             /* 5.2:1 como texto */
+  --sena-gold-dim: rgba(156, 87, 0, 0.10);
+  --sena-success: #1c7a33;          /* 5.1:1 */
+  --sena-success-dim: rgba(28, 122, 51, 0.10);
+  --sena-danger: #c93f24;           /* 4.7:1 */
+  --sena-danger-dim: rgba(201, 63, 36, 0.10);
 
-  --sena-on-acento: #ffffff;        /* 5.2:1+ sobre qualquer acento acima */
+  --sena-on-acento: #ffffff;        /* 5.4:1+ sobre qualquer acento acima */
   --sena-foco: #7a4a12;             /* 7.0:1 sobre --sena-bg */
 
-  --sena-sombra: 0 20px 48px rgba(35, 32, 26, 0.10);
-  --sena-sombra-alta: 0 4px 6px rgba(35, 32, 26, 0.04),
-                      0 12px 24px rgba(35, 32, 26, 0.07),
-                      0 24px 48px rgba(35, 32, 26, 0.05);
+  /* Sombra com mais presença: a versão anterior (0.10 de opacidade) deixava
+     os cartões brancos quase se fundindo com o fundo em papel — sem
+     definição de profundidade. */
+  --sena-sombra: 0 1px 2px rgba(35, 32, 26, 0.06), 0 24px 48px rgba(35, 32, 26, 0.14);
+  --sena-sombra-alta: 0 4px 6px rgba(35, 32, 26, 0.06),
+                      0 12px 24px rgba(35, 32, 26, 0.10),
+                      0 24px 48px rgba(35, 32, 26, 0.08);
 }
 
 /* ── Alto contraste ─────────────────────────────────────────────────── */
