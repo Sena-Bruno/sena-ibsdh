@@ -22,6 +22,14 @@ incompleta do arquivo original virar a fonte da verdade.
   `doPost` (linhas no fim do arquivo) e siga a seção **Autenticação (F1/F2)**
   abaixo para trocar `payload.email` por `emailAutenticado(payload)` em toda
   ação existente que hoje confia nesse campo.
+- `autorizacao-compra.gs` — **arquivo novo, leia logo em seguida.** O OTP
+  prova identidade, mas até aqui nenhuma ação além da checagem de tela do
+  Dashboard confirmava que aquele e-mail **comprou** o curso — qualquer
+  e-mail passava pelo login normalmente e usava a API direto (avaliar aulas,
+  emitir certificado) sem nunca ter pago nada. Cole como arquivo separado e
+  siga a seção **Autorização por compra** abaixo para trocar
+  `emailAutenticado(...)` por `emailAutenticadoEAutorizado(...)` nas ações
+  listadas no fim do próprio arquivo.
 - `funcoes-corrigidas.gs` — correções de funções que já existiam no `Codigo.gs`
   (ver "O que foi corrigido" abaixo).
 - `plantao.gs` — **arquivo novo**, do Modo Plantão. Cole como um arquivo
@@ -58,6 +66,9 @@ incompleta do arquivo original virar a fonte da verdade.
 - `teste-autenticacao.mjs` — testes do OTP e do token de sessão: código
   expira, força bruta no código é bloqueada, token adulterado ou assinado com
   outro segredo é rejeitado (`node appscript/teste-autenticacao.mjs`).
+- `teste-autorizacao-compra.mjs` — prova que identidade sozinha não basta:
+  um token válido de um e-mail que nunca comprou, ou cuja compra foi
+  reembolsada, é recusado (`node appscript/teste-autorizacao-compra.mjs`).
 - `teste-plantao.mjs` — testes da neutralização de fórmula (F7) e da exigência
   de token no plantão, incluindo o caso que prova o fim do IDOR: um payload
   com `token` de um aluno e `email` de outro grava os dados sob o e-mail do
@@ -126,6 +137,54 @@ endereço.
 Simulador, Plantão e Certificado já foram adaptadas para pedir o código por
 e-mail e usar o token nas chamadas — ver `src/composables/useAuth.js` e
 `src/components/LoginModal.vue`.
+
+## Autorização por compra (`autorizacao-compra.gs`)
+
+**O problema que isso resolve:** o OTP prova que quem está logando é dono
+daquele e-mail — mas por design ele **aceita pedir código para qualquer
+endereço**, mesmo um que nunca comprou nada (é assim que um comprador de
+verdade, ainda sem sessão, consegue logar pela primeira vez). Quem decide se
+esse e-mail pode *usar* o sistema é `verificarAcessoAluno` (já existe no
+`Codigo.gs`, lê a aba `Alunos_Hotmart` que o próprio webhook da Hotmart
+mantém atualizada no `doPost`). O problema é que, antes desta mudança, essa
+checagem só era chamada pela ação `verificar_acesso` — e só o
+`DashboardView.vue` chama essa ação, como gate de tela, depois do login. As
+demais ~18 ações (`avaliar`, `progresso`, `emitir_certificado`, etc.) só
+verificavam identidade (`emailAutenticado`), nunca compra — então qualquer
+cliente HTTP falando direto com o Apps Script (sem passar pelo Dashboard)
+conseguia usar o simulador e até emitir certificado com um e-mail que nunca
+pagou nada, só completando o OTP.
+
+**O que fazer no `Codigo.gs` e no `plantao.gs`:** depois de colar
+`autorizacao-compra.gs`, troque `emailAutenticado(...)` por
+`emailAutenticadoEAutorizado(...)` — mesmos argumentos, só o nome muda — em
+todos os pontos abaixo (a lista completa, com o trecho exato de cada um,
+também está no fim do próprio `autorizacao-compra.gs`):
+
+| Onde                                    | Arquivo      |
+|------------------------------------------|-------------|
+| `avaliar`, `tutor` (dentro de `payload.dados.email = ...`) | Codigo.gs |
+| `progresso`, `submeter_mentor`, `buscar_mentor`, `boas_vindas`, `prontuario`, `relatorio_evolucao`, `salvar_diario`, `analise_diario`, `buscar_diario`, `comparacao_anonima`, `historico`, `consultar_certificado`, `emitir_certificado`, `reenviar_certificado`, `posicao_ranking`, `evolucao_perfis`, `tentativa_anterior` | Codigo.gs |
+| `avaliarPlantao` (dentro da função) e o `case 'plantao_historico'` do `doPost` | plantao.gs |
+
+**Não mexa em:** `verificar_acesso` (já checa compra separadamente — é onde
+essa lógica nasceu), `solicitar_codigo`/`confirmar_codigo` (não podem exigir
+compra, senão ninguém consegue logar pela primeira vez), e as ações que não
+identificam um aluno específico (`plantao_gerar`, `base_aula`,
+`ranking_perfis`, `desafio_semanal`, `gerar_desafio`, `estrutura_curso`,
+`replay`, `conversar`, `titulos`).
+
+**Limitação conhecida, fora do escopo desta mudança:** `verificarAcessoAluno`
+hoje confere só se o e-mail existe com status aprovado em `Alunos_Hotmart` —
+ela recebe `curso` mas não filtra por ele (para no primeiro e-mail que bate,
+seja qual for o produto). Se o instituto vende mais de um curso separadamente
+pela Hotmart, alguém que comprou só o Curso A hoje é liberado também para o
+Curso B. Ajustar isso exige saber como o nome do produto na Hotmart
+(`purchase.product.name`, gravado na coluna `produto` de `Alunos_Hotmart`)
+corresponde a cada valor de `curso` usado no app (`Practitioner`, `Master`,
+etc.) — não dá para adivinhar essa correspondência sem arriscar bloquear
+comprador de verdade, então fica registrado aqui para decisão de quem
+administra o SENA.
 
 > O `plantao.gs` traz uma função `testarPlantao()`. Rode-a no editor (seletor
 > de função → **Executar**) e leia o **Registro de execução**: ela dispara as
