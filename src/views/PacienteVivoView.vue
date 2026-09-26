@@ -168,9 +168,11 @@
               </label>
               <input type="range" min="0" max="1" step="0.05" v-model.number="prescricao.especificidade" />
               <p class="campo-ajuda">
-                Quão executável é o pedido, sem precisar interpretar: de "tente ficar melhor" (vaga)
-                a "às 7h, sentado, seis ciclos" (muito específica). Vago também é cumprido bem menos.
+                Quão executável é o pedido, sem o paciente precisar interpretar o que você quis dizer.
+                Mexa no controle e veja como a mesma tarefa fica em cada nível:
               </p>
+              <p v-if="exemploEspecificidade" class="campo-exemplo">"{{ exemploEspecificidade }}"</p>
+              <p class="campo-ajuda">Vago também é cumprido bem menos — o paciente inventa a própria versão da tarefa.</p>
 
               <label class="campo-label">
                 Carga pedida — {{ rotuloCarga }} ({{ prescricao.carga.toFixed(2) }})
@@ -318,6 +320,50 @@ const TIPOS_PRESCRICAO = [
   },
 ]
 
+// "Especificidade 0.50" não diz nada sozinho — o que ajuda a entender é ver
+// a MESMA tarefa escrita em três níveis de precisão. As frases mudam por
+// tipo (a de RESPIRATORIA não serve pra ilustrar CONTENCAO), e dentro de
+// cada tipo vão de "tente fazer algo" (vaga) a hora, lugar e quantidade
+// marcados (muito específica) — a mesma escala 0-1 que viaja para a API,
+// só que como exemplo em vez de número.
+const EXEMPLOS_ESPECIFICIDADE = {
+  RESPIRATORIA: [
+    'Tente respirar fundo quando lembrar durante a semana.',
+    'Pratique respiração profunda uma vez por dia.',
+    'Às 7h e às 22h, sentado, seis ciclos de respiração 4-7-8.',
+  ],
+  REGISTRO: [
+    'Anote como você está se sentindo de vez em quando.',
+    'Escreva no diário todo fim de dia.',
+    'Todo dia às 21h, escreva três frases: o que aconteceu, o que sentiu, o que pensou.',
+  ],
+  ATIVACAO_COMPORTAMENTAL: [
+    'Tente fazer alguma coisa diferente essa semana.',
+    'Saia de casa pelo menos três vezes na semana.',
+    'Terça, quinta e sábado às 16h, caminhe 10 minutos até a praça e volte.',
+  ],
+  ANCORAGEM: [
+    'Use a técnica de ancoragem quando precisar.',
+    'Pratique a ancoragem uma vez por dia.',
+    'Ao acordar, sentado, cinco minutos: nomeie 5 coisas que vê, 4 que ouve, 3 que sente.',
+  ],
+  EXPOSICAO_GRADUAL: [
+    'Tente se aproximar do que te incomoda.',
+    'Encare uma situação leve da lista dois dias na semana.',
+    'Segunda e quinta às 18h, fique 5 minutos no primeiro degrau da lista de exposição.',
+  ],
+  PSICOEDUCACAO: [
+    'Pense sobre o que a gente conversou.',
+    'Releia o material que passei uma vez essa semana.',
+    'Leia uma página do material toda noite antes de dormir e anote uma dúvida.',
+  ],
+  CONTENCAO: [
+    'Se piorar, tente se acalmar.',
+    'Se piorar, use o plano de segurança combinado.',
+    'Se a angústia passar de 8, ligue para o contato combinado e vá para o lugar seguro combinado.',
+  ],
+}
+
 const logado = ref(false)
 // Máquina de estados da tela, depois do login:
 // 'conectando' → 'nao-configurado' | 'fora-do-piloto' | 'piloto-nao-configurado'
@@ -352,16 +398,26 @@ const sinaisAvatar = computed(() =>
 // sem tradução, "0.65" não diz nada para quem não abriu o motor. Estas
 // faixas são só rótulo de apoio na tela; o número exato continua visível
 // e é o que de fato viaja para a API.
-function rotuloFaixa(valor, [baixo, medio, alto]) {
-  if (valor < 0.34) return baixo
-  if (valor < 0.67) return medio
-  return alto
+function indiceFaixa(valor) {
+  if (valor < 0.34) return 0
+  if (valor < 0.67) return 1
+  return 2
+}
+function rotuloFaixa(valor, opcoes) {
+  return opcoes[indiceFaixa(valor)]
 }
 const rotuloEspecificidade = computed(() =>
   rotuloFaixa(prescricao.especificidade, ['vaga', 'razoável', 'muito específica'])
 )
 const rotuloCarga = computed(() => rotuloFaixa(prescricao.carga, ['leve', 'moderada', 'pesada']))
 const tipoSelecionado = computed(() => TIPOS_PRESCRICAO.find((t) => t.valor === prescricao.tipo))
+
+// O exemplo muda junto com o slider — é o que faz "especificidade" parar
+// de ser um número abstrato e virar "ah, é ISSO que 0.85 significa aqui".
+const exemploEspecificidade = computed(() => {
+  const exemplos = EXEMPLOS_ESPECIFICIDADE[prescricao.tipo]
+  return exemplos ? exemplos[indiceFaixa(prescricao.especificidade)] : null
+})
 
 // `carga_tolerada` já vem de GET /perfis (ver api.py, listar_perfis) — é
 // o teto real que o motor usa (excesso_de_carga em prescricao.py), não uma
@@ -609,6 +665,11 @@ h1 { position: relative; font-size: clamp(24px, 5vw, 36px); font-weight: 800; le
 
 .painel-intro { font-size: 12px; color: var(--text-faint); line-height: 1.6; margin-bottom: 14px; }
 .campo-ajuda { font-size: 11px; color: var(--text-faint); line-height: 1.55; margin-top: 5px; }
+.campo-exemplo {
+  font-size: 12px; color: var(--text); font-style: italic; line-height: 1.6;
+  background: rgba(10,117,102,0.06); border-left: 3px solid var(--cyan);
+  border-radius: 6px; padding: 8px 10px; margin: 6px 0;
+}
 .campo-ajuda-recuada { margin-top: 4px; margin-left: 24px; }
 .campo-ajuda-alerta { color: var(--gold); font-weight: 600; }
 .painel-rodape { font-size: 11px; color: var(--text-faint); text-align: center; margin-top: 10px; }
