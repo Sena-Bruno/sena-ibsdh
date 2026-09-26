@@ -17,6 +17,7 @@ import {
   ESTADOS_CONHECIDOS,
   inferirSinaisCorporais,
   calcularEstilosAvatar,
+  calcularParametrosAvatar3D,
   sinaisReaisParaAvatar,
 } from './sinaisCorporais.js'
 
@@ -212,5 +213,60 @@ describe('calcularEstilosAvatar — nunca produz CSS quebrado', () => {
   test('mesmos sinais produzem sempre o mesmo resultado (determinístico)', () => {
     const sinais = inferirSinaisCorporais('resistente')
     assert.deepEqual(calcularEstilosAvatar(sinais), calcularEstilosAvatar(sinais))
+  })
+})
+
+describe('calcularParametrosAvatar3D', () => {
+  // O avatar 3D lê a MESMA amplificação que o 2D, só devolvida como número
+  // em vez de string de CSS — por isso os testes aqui checam paridade com
+  // calcularEstilosAvatar, não redescobrem a lógica de amplificação.
+
+  test('tensão e presença batem com os mesmos números (não amplificados de novo) que o avatar 2D usa', () => {
+    for (const estado of ESTADOS_CONHECIDOS) {
+      const sinais = inferirSinaisCorporais(estado)
+      const params3d = calcularParametrosAvatar3D(sinais)
+      const estilos2d = calcularEstilosAvatar(sinais)
+      assert.equal(params3d.tensao.toFixed(2), estilos2d.tensao)
+      assert.equal(params3d.opacidade.toFixed(2), estilos2d.opacidadePresenca)
+    }
+  })
+
+  test('contato visual total (1.0) produz ângulo de olhar zero', () => {
+    const params = calcularParametrosAvatar3D({ contatoVisual: 1.0 })
+    assert.equal(params.anguloOlharRad, 0)
+  })
+
+  test('nenhum contato visual (0.0) produz o ângulo máximo, nunca além dele', () => {
+    const params = calcularParametrosAvatar3D({ contatoVisual: 0.0 })
+    assert.ok(params.anguloOlharRad > 0)
+    // mesmo com um contatoVisual hostil (negativo), o ângulo não pode
+    // ultrapassar o máximo — clamp01 em `contato` garante isso.
+    const paramsExtremo = calcularParametrosAvatar3D({ contatoVisual: -50 })
+    assert.equal(paramsExtremo.anguloOlharRad, params.anguloOlharRad)
+  })
+
+  test('presença 0 nunca deixa a opacidade abaixo do piso de legibilidade', () => {
+    const params = calcularParametrosAvatar3D({ presenca: 0 })
+    assert.ok(params.opacidade >= 0.6)
+  })
+
+  test('entrada ausente ou malformada não produz NaN em nenhum campo', () => {
+    for (const entrada of [undefined, null, {}, 'não é um objeto']) {
+      const params = calcularParametrosAvatar3D(entrada)
+      for (const [chave, valor] of Object.entries(params)) {
+        assert.ok(Number.isFinite(valor), `${chave} = ${valor} não é finito`)
+      }
+    }
+  })
+
+  test('período de respiração e de fala nunca saem da faixa seguro (sem tremor rápido demais)', () => {
+    const params = calcularParametrosAvatar3D({ respiracaoPorMinuto: 0, velocidadeDaFala: 100000 })
+    assert.ok(params.periodoRespiracaoS > 0 && Number.isFinite(params.periodoRespiracaoS))
+    assert.ok(params.periodoFalaS >= 0.2)
+  })
+
+  test('mesmos sinais produzem sempre o mesmo resultado (determinístico)', () => {
+    const sinais = inferirSinaisCorporais('engajado')
+    assert.deepEqual(calcularParametrosAvatar3D(sinais), calcularParametrosAvatar3D(sinais))
   })
 })
