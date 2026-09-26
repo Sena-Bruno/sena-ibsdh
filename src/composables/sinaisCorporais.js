@@ -126,7 +126,20 @@ const amplificarEmTornoDoNeutro = (valor, centroNeutro) =>
  * quebraria a animação em silêncio (sem erro no console, sem sintoma óbvio
  * — só o avatar parado, e ninguém saberia por quê).
  */
-export function calcularEstilosAvatar(sinais) {
+// Máximo que o olhar 3D gira a cabeça em torno do eixo Y, em radianos, no
+// desvio total (contato visual 0). Equivalente ao "10px" de
+// `desvioOlharPx` abaixo — mesma leitura ("o olhar fica na janela"), só
+// que como ângulo em vez de deslocamento em tela.
+const ANGULO_MAX_OLHAR_RAD = 0.5
+
+// O núcleo dos três sinais "estáticos" (contato, tensão, presença) e das
+// duas durações (respiração, fala) — compartilhado entre
+// `calcularEstilosAvatar` (2D, formata em string de CSS) e
+// `calcularParametrosAvatar3D` (3D, devolve número puro para o Three.js).
+// As DUAS leituras do avatar (bidimensional e tridimensional) vêm do MESMO
+// número amplificado — nenhuma das duas "decide" um valor que a outra não
+// veria, só desenha diferente.
+function computarBase(sinais) {
   const s = sinais && typeof sinais === 'object' ? sinais : PRESETS.neutro
 
   const rpm = Number.isFinite(s.respiracaoPorMinuto) ? s.respiracaoPorMinuto : 16
@@ -151,18 +164,24 @@ export function calcularEstilosAvatar(sinais) {
   // da tabela).
   const duracaoRespiracaoS = clamp(60 / (rpm || 16), 2.6, 5.5)
 
-  // Quanto o olhar se desvia do centro, em px. 0 = olho no aluno; no
-  // máximo, "o olhar fica na janela" (o mesmo texto de corpo.descrever()).
-  // 10px (não 6): o valor menor deixava até desvios reais e notáveis
-  // (contato caindo de 0,55 para 0,35, por exemplo) quase imperceptíveis.
-  const desvioOlharPx = Math.round((1 - contato) * 10)
-
   // Multiplicador de velocidade da boca ao falar: quem fala mais rápido no
   // texto (velocidadeDaFala mais alta) tem o ciclo de abrir/fechar mais
   // curto. Faixa limitada para nunca virar um tremor rápido demais
   // (epilepsia fotossensível é um risco real em animação rápida e
   // repetitiva — 0.5s é o piso).
   const duracaoFalaS = clamp(0.34 * (150 / (velocidadeFalaBase || 150)), 0.2, 0.5)
+
+  return { contato, tensao, presenca, duracaoRespiracaoS, duracaoFalaS }
+}
+
+export function calcularEstilosAvatar(sinais) {
+  const { contato, tensao, presenca, duracaoRespiracaoS, duracaoFalaS } = computarBase(sinais)
+
+  // Quanto o olhar se desvia do centro, em px. 0 = olho no aluno; no
+  // máximo, "o olhar fica na janela" (o mesmo texto de corpo.descrever()).
+  // 10px (não 6): o valor menor deixava até desvios reais e notáveis
+  // (contato caindo de 0,55 para 0,35, por exemplo) quase imperceptíveis.
+  const desvioOlharPx = Math.round((1 - contato) * 10)
 
   return {
     duracaoRespiracao: `${duracaoRespiracaoS.toFixed(2)}s`,
@@ -176,5 +195,24 @@ export function calcularEstilosAvatar(sinais) {
     desfoquePresenca: `${(clamp01(1 - presenca) * 3.2).toFixed(2)}px`,
     opacidadePresenca: (0.6 + presenca * 0.4).toFixed(2),
     duracaoFala: `${duracaoFalaS.toFixed(2)}s`,
+  }
+}
+
+/**
+ * A mesma tradução de `calcularEstilosAvatar`, para o avatar 3D
+ * (AvatarPaciente3D.vue / avatar3d.js): números puros em vez de string de
+ * CSS, porque quem consome isto é uma cena Three.js, não um `style`.
+ * `opacidade` já inclui o piso de 0,6 pela mesma razão do 2D — "parece
+ * longe" nunca pode ficar invisível.
+ */
+export function calcularParametrosAvatar3D(sinais) {
+  const { contato, tensao, presenca, duracaoRespiracaoS, duracaoFalaS } = computarBase(sinais)
+  return {
+    periodoRespiracaoS: duracaoRespiracaoS,
+    anguloOlharRad: (1 - contato) * ANGULO_MAX_OLHAR_RAD,
+    tensao,
+    presenca,
+    opacidade: 0.6 + presenca * 0.4,
+    periodoFalaS: duracaoFalaS,
   }
 }

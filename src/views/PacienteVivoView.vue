@@ -129,7 +129,14 @@
 
         <div class="sessao-grid">
           <div class="painel-paciente">
-            <AvatarPaciente :sinais="sinaisAvatar" :falando="falandoAvatar" :reduzir-movimento="prefs.movimento" />
+            <AvatarPaciente3D
+              v-if="avatar3dDisponivel"
+              :parametros="parametrosAvatar3D"
+              :falando="falandoAvatar"
+              :reduzir-movimento="prefs.movimento"
+              @indisponivel="avatar3dDisponivel = false"
+            />
+            <AvatarPaciente v-else :sinais="sinaisAvatar" :falando="falandoAvatar" :reduzir-movimento="prefs.movimento" />
             <label class="voz-toggle">
               <input type="checkbox" v-model="vozAtiva" @change="aoMudarVoz" />
               Ouvir o paciente (voz do navegador)
@@ -250,9 +257,10 @@ import { useRoute } from 'vue-router'
 import { estaAutenticado, getToken, limparSessao } from '../composables/useAuth'
 import { useAccessibility } from '../composables/useAccessibility'
 import { usePacienteVivo, ErroPacienteVivo } from '../composables/usePacienteVivo'
-import { sinaisReaisParaAvatar } from '../composables/sinaisCorporais.js'
+import { sinaisReaisParaAvatar, calcularParametrosAvatar3D } from '../composables/sinaisCorporais.js'
 import LoginModal from '../components/LoginModal.vue'
 import AvatarPaciente from '../components/AvatarPaciente.vue'
+import AvatarPaciente3D from '../components/AvatarPaciente3D.vue'
 import FichaSupervisor from '../components/FichaSupervisor.vue'
 
 const route = useRoute()
@@ -392,6 +400,13 @@ const ultimaFicha = ref(null)
 // no preset "neutro" nesse meio-tempo (ver AvatarPaciente.vue).
 const sinaisAvatar = computed(() =>
   ultimaAbertura.value ? sinaisReaisParaAvatar(ultimaAbertura.value.sinais) : null
+)
+// Corpo inteiro em 3D por padrão (ver AvatarPaciente3D.vue); cai para o
+// busto 2D (AvatarPaciente.vue) só se o navegador não der WebGL — ver o
+// @indisponivel emitido pelo componente 3D logo abaixo no template.
+const avatar3dDisponivel = ref(true)
+const parametrosAvatar3D = computed(() =>
+  sinaisAvatar.value ? calcularParametrosAvatar3D(sinaisAvatar.value) : null
 )
 
 // Os sliders de prescrição são 0–1 puros (ver Prescricao em prescricao.py) —
