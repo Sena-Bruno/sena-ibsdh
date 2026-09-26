@@ -119,6 +119,14 @@
           <button class="btn-secundario btn-pequeno" @click="trocarPaciente">Trocar paciente</button>
         </div>
 
+        <div class="como-funciona">
+          <span><strong>1.</strong> Você prescreve</span>
+          <span class="cf-seta">→</span>
+          <span><strong>2.</strong> O motor simula os 7 dias</span>
+          <span class="cf-seta">→</span>
+          <span><strong>3.</strong> O paciente volta mudado</span>
+        </div>
+
         <div class="sessao-grid">
           <div class="painel-paciente">
             <AvatarPaciente :sinais="sinaisAvatar" :falando="falandoAvatar" :reduzir-movimento="prefs.movimento" />
@@ -143,26 +151,60 @@
 
           <div class="painel-prescricao">
             <div class="mini-title">Prescrição para a próxima semana</div>
+            <p class="painel-intro">
+              O que você combina aqui vira os próximos 7 dias do paciente. Ele volta na sessão
+              seguinte já tendo vivido a semana com esta tarefa — ou sem ela.
+            </p>
+
             <label class="campo-label" for="pvTipo">Tipo</label>
             <select id="pvTipo" v-model="prescricao.tipo" class="campo-input">
               <option v-for="t in TIPOS_PRESCRICAO" :key="t.valor" :value="t.valor">{{ t.rotulo }}</option>
             </select>
+            <p v-if="tipoSelecionado" class="campo-ajuda">{{ tipoSelecionado.descricao }}</p>
 
             <template v-if="prescricao.tipo !== 'NENHUMA'">
-              <label class="campo-label">Especificidade ({{ prescricao.especificidade.toFixed(2) }})</label>
+              <label class="campo-label">
+                Especificidade — {{ rotuloEspecificidade }} ({{ prescricao.especificidade.toFixed(2) }})
+              </label>
               <input type="range" min="0" max="1" step="0.05" v-model.number="prescricao.especificidade" />
-              <label class="campo-label">Carga pedida ({{ prescricao.carga.toFixed(2) }})</label>
+              <p class="campo-ajuda">
+                Quão executável é o pedido, sem precisar interpretar: de "tente ficar melhor" (vaga)
+                a "às 7h, sentado, seis ciclos" (muito específica). Vago também é cumprido bem menos.
+              </p>
+
+              <label class="campo-label">
+                Carga pedida — {{ rotuloCarga }} ({{ prescricao.carga.toFixed(2) }})
+              </label>
               <input type="range" min="0" max="1" step="0.05" v-model.number="prescricao.carga" />
+              <p class="campo-ajuda" :class="{ 'campo-ajuda-alerta': cargaExcedida }">
+                <template v-if="perfilAtual">
+                  Este perfil tolera bem cargas até ~{{ perfilAtual.carga_tolerada.toFixed(2) }} numa
+                  semana.
+                  <template v-if="cargaExcedida">
+                    Esta carga passa esse teto — o risco de falha sobe bastante, e falhar pode deixar
+                    o paciente pior do que se nada tivesse sido prescrito.
+                  </template>
+                </template>
+              </p>
+
               <label class="checkbox-label">
                 <input type="checkbox" v-model="prescricao.plano_de_seguranca" />
                 Combinou plano de segurança
               </label>
+              <p class="campo-ajuda campo-ajuda-recuada">
+                O que fazer se piorar e a quem recorrer. Só muda muito o resultado quando o risco do
+                paciente já está alto — mas aí muda mais que qualquer outra escolha aqui.
+              </p>
             </template>
+            <p v-else class="campo-ajuda">
+              Sem tarefa nenhuma: a semana roda só com a vida do paciente, sem sua intervenção direta.
+            </p>
 
             <div v-if="erroSemana" class="alert" role="alert">{{ erroSemana }}</div>
             <button class="btn-primario" :disabled="avancando" @click="avancarSemana">
               {{ avancando ? 'Simulando semana...' : 'Avançar semana →' }}
             </button>
+            <p class="painel-rodape">Isto simula os 7 dias inteiros e abre a próxima sessão.</p>
           </div>
         </div>
 
@@ -230,15 +272,50 @@ const { carregarPreferencias, limparClasses } = useAccessibility({
 })
 const prefs = reactive({ movimento: false })
 
+// `descricao` é texto de apoio para o instrutor decidir o tipo — não é
+// lido pelo motor (nucleo/sena_nucleo/prescricao.py só usa `valor`) e não
+// tem número nenhum, só o que a tarefa pede e o que ela tende a mover.
 const TIPOS_PRESCRICAO = [
-  { valor: 'NENHUMA', rotulo: 'Nenhuma — só observar' },
-  { valor: 'RESPIRATORIA', rotulo: 'Regulação respiratória' },
-  { valor: 'REGISTRO', rotulo: 'Registro / diário' },
-  { valor: 'ATIVACAO_COMPORTAMENTAL', rotulo: 'Ativação comportamental' },
-  { valor: 'ANCORAGEM', rotulo: 'Ancoragem' },
-  { valor: 'EXPOSICAO_GRADUAL', rotulo: 'Exposição gradual' },
-  { valor: 'PSICOEDUCACAO', rotulo: 'Psicoeducação' },
-  { valor: 'CONTENCAO', rotulo: 'Contenção' },
+  {
+    valor: 'NENHUMA',
+    rotulo: 'Nenhuma — só observar',
+    descricao: 'Sem tarefa. Útil para ver como a semana passa sem nenhuma intervenção sua.',
+  },
+  {
+    valor: 'RESPIRATORIA',
+    rotulo: 'Regulação respiratória',
+    descricao: 'Prática de respiração no dia a dia. Efeito suave e constante; não exige mudar a rotina.',
+  },
+  {
+    valor: 'REGISTRO',
+    rotulo: 'Registro / diário',
+    descricao: 'Anotar pensamentos ou situações durante a semana. Abre espaço para a próxima sessão sem exigir mudança de comportamento.',
+  },
+  {
+    valor: 'ATIVACAO_COMPORTAMENTAL',
+    rotulo: 'Ativação comportamental',
+    descricao: 'Uma atividade concreta a fazer apesar do desânimo. Bom potencial de ganho — e a mais sensível a pedir carga acima do que o paciente aguenta.',
+  },
+  {
+    valor: 'ANCORAGEM',
+    rotulo: 'Ancoragem',
+    descricao: 'Técnica de estabilização para praticar sozinho. Funciona melhor quando já existe alguma confiança no processo.',
+  },
+  {
+    valor: 'EXPOSICAO_GRADUAL',
+    rotulo: 'Exposição gradual',
+    descricao: 'Aproximar-se, pouco a pouco, do que o paciente evita. Ganho grande quando bem dosada, mas é a que mais pune o excesso de carga.',
+  },
+  {
+    valor: 'PSICOEDUCACAO',
+    rotulo: 'Psicoeducação',
+    descricao: 'Explicar o que está acontecendo e por quê. Fortalece a aliança terapêutica; efeito mais lento, risco baixo.',
+  },
+  {
+    valor: 'CONTENCAO',
+    rotulo: 'Contenção',
+    descricao: 'Foco em segurança e redução imediata de risco. Prioridade quando o paciente está em sofrimento agudo.',
+  },
 ]
 
 const logado = ref(false)
@@ -269,6 +346,31 @@ const ultimaFicha = ref(null)
 // no preset "neutro" nesse meio-tempo (ver AvatarPaciente.vue).
 const sinaisAvatar = computed(() =>
   ultimaAbertura.value ? sinaisReaisParaAvatar(ultimaAbertura.value.sinais) : null
+)
+
+// Os sliders de prescrição são 0–1 puros (ver Prescricao em prescricao.py) —
+// sem tradução, "0.65" não diz nada para quem não abriu o motor. Estas
+// faixas são só rótulo de apoio na tela; o número exato continua visível
+// e é o que de fato viaja para a API.
+function rotuloFaixa(valor, [baixo, medio, alto]) {
+  if (valor < 0.34) return baixo
+  if (valor < 0.67) return medio
+  return alto
+}
+const rotuloEspecificidade = computed(() =>
+  rotuloFaixa(prescricao.especificidade, ['vaga', 'razoável', 'muito específica'])
+)
+const rotuloCarga = computed(() => rotuloFaixa(prescricao.carga, ['leve', 'moderada', 'pesada']))
+const tipoSelecionado = computed(() => TIPOS_PRESCRICAO.find((t) => t.valor === prescricao.tipo))
+
+// `carga_tolerada` já vem de GET /perfis (ver api.py, listar_perfis) — é
+// o teto real que o motor usa (excesso_de_carga em prescricao.py), não uma
+// estimativa da tela. Mostrar isso aqui é o que falta pra virar a mesma
+// lição do nucleo/README.md ("dose errada é clinicamente errada") em algo
+// visível ANTES de avançar a semana, não só depois na Ficha do Supervisor.
+const perfilAtual = computed(() => (paciente.value ? perfis.value[paciente.value.perfil] : null))
+const cargaExcedida = computed(
+  () => !!perfilAtual.value && prescricao.carga > perfilAtual.value.carga_tolerada
 )
 
 const historico = ref([])
@@ -505,6 +607,12 @@ h1 { position: relative; font-size: clamp(24px, 5vw, 36px); font-weight: 800; le
 .campo-input:focus { border-color: rgba(10,117,102,0.35); }
 .checkbox-label { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-soft); margin-top: 12px; }
 
+.painel-intro { font-size: 12px; color: var(--text-faint); line-height: 1.6; margin-bottom: 14px; }
+.campo-ajuda { font-size: 11px; color: var(--text-faint); line-height: 1.55; margin-top: 5px; }
+.campo-ajuda-recuada { margin-top: 4px; margin-left: 24px; }
+.campo-ajuda-alerta { color: var(--gold); font-weight: 600; }
+.painel-rodape { font-size: 11px; color: var(--text-faint); text-align: center; margin-top: 10px; }
+
 .perfil-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin-top: 4px; }
 .perfil-card {
   text-align: left; background: rgba(35,32,26,0.02); border: 1px solid rgba(35,32,26,0.07);
@@ -547,6 +655,14 @@ h1 { position: relative; font-size: clamp(24px, 5vw, 36px); font-weight: 800; le
 .paciente-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
 .paciente-perfil { font-size: 15px; font-weight: 700; }
 .paciente-sessao { font-size: 12px; color: var(--text-faint); }
+
+.como-funciona {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+  font-size: 12px; color: var(--text-soft); background: rgba(10,117,102,0.06);
+  border: 1px solid rgba(10,117,102,0.16); border-radius: 12px; padding: 10px 14px; margin-bottom: 16px;
+}
+.como-funciona strong { color: var(--cyan); }
+.cf-seta { color: var(--text-faint); }
 
 .sessao-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
 @media (max-width: 720px) { .sessao-grid { grid-template-columns: 1fr; } }
