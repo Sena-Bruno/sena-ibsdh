@@ -129,14 +129,6 @@
 
         <div class="sessao-grid">
           <div class="painel-paciente">
-            <AvatarPaciente3D
-              v-if="avatar3dDisponivel"
-              :parametros="parametrosAvatar3D"
-              :falando="falandoAvatar"
-              :reduzir-movimento="prefs.movimento"
-              @indisponivel="avatar3dDisponivel = false"
-            />
-            <AvatarPaciente v-else :sinais="sinaisAvatar" :falando="falandoAvatar" :reduzir-movimento="prefs.movimento" />
             <label class="voz-toggle">
               <input type="checkbox" v-model="vozAtiva" @change="aoMudarVoz" />
               Ouvir o paciente (voz do navegador)
@@ -257,10 +249,7 @@ import { useRoute } from 'vue-router'
 import { estaAutenticado, getToken, limparSessao } from '../composables/useAuth'
 import { useAccessibility } from '../composables/useAccessibility'
 import { usePacienteVivo, ErroPacienteVivo } from '../composables/usePacienteVivo'
-import { sinaisReaisParaAvatar, calcularParametrosAvatar3D } from '../composables/sinaisCorporais.js'
 import LoginModal from '../components/LoginModal.vue'
-import AvatarPaciente from '../components/AvatarPaciente.vue'
-import AvatarPaciente3D from '../components/AvatarPaciente3D.vue'
 import FichaSupervisor from '../components/FichaSupervisor.vue'
 
 const route = useRoute()
@@ -280,8 +269,6 @@ const { carregarPreferencias, limparClasses } = useAccessibility({
   altoContraste: 'sena_alto_contraste',
   reduzirMovimento: 'sena_reduzir_movimento',
 })
-const prefs = reactive({ movimento: false })
-
 // `descricao` é texto de apoio para o instrutor decidir o tipo — não é
 // lido pelo motor (nucleo/sena_nucleo/prescricao.py só usa `valor`) e não
 // tem número nenhum, só o que a tarefa pede e o que ela tende a mover.
@@ -395,19 +382,6 @@ const avancando = ref(false)
 const erroSemana = ref('')
 const ultimaAbertura = ref(null)
 const ultimaFicha = ref(null)
-// Sinais REAIS do motor (ideia #2 — o avatar anima o sinal, não só
-// descreve em texto). `null` até a primeira semana rodar — o avatar cai
-// no preset "neutro" nesse meio-tempo (ver AvatarPaciente.vue).
-const sinaisAvatar = computed(() =>
-  ultimaAbertura.value ? sinaisReaisParaAvatar(ultimaAbertura.value.sinais) : null
-)
-// Corpo inteiro em 3D por padrão (ver AvatarPaciente3D.vue); cai para o
-// busto 2D (AvatarPaciente.vue) só se o navegador não der WebGL — ver o
-// @indisponivel emitido pelo componente 3D logo abaixo no template.
-const avatar3dDisponivel = ref(true)
-const parametrosAvatar3D = computed(() =>
-  sinaisAvatar.value ? calcularParametrosAvatar3D(sinaisAvatar.value) : null
-)
 
 // Os sliders de prescrição são 0–1 puros (ver Prescricao em prescricao.py) —
 // sem tradução, "0.65" não diz nada para quem não abriu o motor. Estas
@@ -449,7 +423,6 @@ const numeroHistoricoAberto = ref(null)
 const fichaHistorico = ref(null)
 const erroHistorico = ref('')
 
-const falandoAvatar = ref(false)
 const vozAtiva = ref(false)
 
 function aoLogar() {
@@ -577,15 +550,11 @@ async function verFichaHistorico(numeroSessao) {
   }
 }
 
-// ── voz do paciente (mesmo padrão de SimuladorView.vue: opt-in, off por
-// padrão, e nunca decide o QUE o avatar mostra — só quando a boca se move).
+// ── voz do paciente (mesmo padrão de SimuladorView.vue: opt-in, off por padrão).
 const synth = typeof window !== 'undefined' ? window.speechSynthesis : null
 
 function aoMudarVoz() {
-  if (!vozAtiva.value && synth) {
-    synth.cancel()
-    falandoAvatar.value = false
-  }
+  if (!vozAtiva.value && synth) synth.cancel()
 }
 
 function falarFala(fala) {
@@ -597,16 +566,12 @@ function falarFala(fala) {
   utter.pitch = 0.88
   const vozPT = synth.getVoices().find((v) => v.lang.startsWith('pt'))
   if (vozPT) utter.voice = vozPT
-  utter.onstart = () => { falandoAvatar.value = true }
-  utter.onend = () => { falandoAvatar.value = false }
-  utter.onerror = () => { falandoAvatar.value = false }
   synth.speak(utter)
 }
 
 onMounted(() => {
   document.title = 'SENA | Paciente Vivo'
   carregarPreferencias()
-  prefs.movimento = document.body.classList.contains('reduzir-movimento')
   if (estaAutenticado() && getToken()) {
     logado.value = true
     iniciar()
