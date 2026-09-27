@@ -1,5 +1,5 @@
 // Sinais corporais do paciente — a ponte entre o estado emocional e o
-// avatar visual.
+// avatar visual do Simulador (SimuladorView.vue / AvatarPaciente.vue).
 //
 // ┌───────────────────────────────────────────────────────────────────────┐
 // │  A MESMA REGRA DE `nucleo/sena_nucleo/corpo.py`                       │
@@ -29,15 +29,12 @@
 // nenhum — mesmo status de "hipótese pedagógica" que várias constantes do
 // motor Python, ver nucleo/FUNDAMENTACAO.md).
 //
-// O Paciente Vivo (PacienteVivoView.vue, etapa 4) NÃO usa este adaptador —
-// ele já tem os números de verdade, saídos do motor via
-// `AberturaSaida.sinais` (ver `sena_servico/api.py`). Para esse caso, use
-// `sinaisReaisParaAvatar` logo abaixo, que só traduz nome de campo
-// (snake_case do Python → camelCase daqui) — o mesmo formato de saída
-// (respiracaoPorMinuto, contatoVisual, microTensao, presenca,
-// velocidadeDaFala) que `inferirSinaisCorporais` já produzia, então
-// `AvatarPaciente.vue` e `calcularEstilosAvatar` não mudam nada com a
-// troca de origem.
+// O Paciente Vivo (PacienteVivoView.vue, etapa 4) tem os números de
+// verdade, saídos do motor via `AberturaSaida.sinais`, mas não tem avatar
+// visual nenhum — a leitura do corpo lá é só a descrição em texto que
+// `corpo.descrever()` já produz (campo `corpo` da abertura), exibida
+// direto pela tela. Não existe um segundo consumidor destes sinais
+// numéricos além do avatar do Simulador.
 
 /** As cinco leituras que `inferirEstadoPaciente` (SimuladorView.vue) produz. */
 export const ESTADOS_CONHECIDOS = ['aberto', 'engajado', 'neutro', 'resistente', 'fechado']
@@ -65,33 +62,6 @@ const PRESETS = Object.freeze({
 export function inferirSinaisCorporais(estado) {
   const preset = PRESETS[estado] || PRESETS.neutro
   return { ...preset }
-}
-
-/**
- * Traduz `AberturaSaida.sinais` (o dicionário snake_case que
- * `SinaisCorporais.como_dicionario()` — nucleo/sena_nucleo/corpo.py —
- * devolve pela API do Paciente Vivo) para o formato camelCase que
- * `calcularEstilosAvatar` espera.
- *
- * `latencia_de_resposta` e `variabilidade_respiratoria` não têm
- * equivalente visual no avatar ainda — ficam de fora do retorno de
- * propósito, não por esquecimento (ver o cabeçalho deste arquivo).
- *
- * Nunca lança erro: entrada ausente ou malformada cai no preset "neutro",
- * pela mesma razão de `inferirSinaisCorporais` — um dado ruim não pode
- * travar o avatar, só deixá-lo neutro até a causa ser corrigida.
- */
-export function sinaisReaisParaAvatar(sinaisDoBackend) {
-  if (!sinaisDoBackend || typeof sinaisDoBackend !== 'object') {
-    return { ...PRESETS.neutro }
-  }
-  return {
-    respiracaoPorMinuto: sinaisDoBackend.respiracao_por_minuto,
-    contatoVisual: sinaisDoBackend.contato_visual,
-    microTensao: sinaisDoBackend.micro_tensao,
-    presenca: sinaisDoBackend.presenca,
-    velocidadeDaFala: sinaisDoBackend.velocidade_da_fala,
-  }
 }
 
 const clamp01 = (v) => Math.max(0, Math.min(1, v))
@@ -126,20 +96,7 @@ const amplificarEmTornoDoNeutro = (valor, centroNeutro) =>
  * quebraria a animação em silêncio (sem erro no console, sem sintoma óbvio
  * — só o avatar parado, e ninguém saberia por quê).
  */
-// Máximo que o olhar 3D gira a cabeça em torno do eixo Y, em radianos, no
-// desvio total (contato visual 0). Equivalente ao "10px" de
-// `desvioOlharPx` abaixo — mesma leitura ("o olhar fica na janela"), só
-// que como ângulo em vez de deslocamento em tela.
-const ANGULO_MAX_OLHAR_RAD = 0.5
-
-// O núcleo dos três sinais "estáticos" (contato, tensão, presença) e das
-// duas durações (respiração, fala) — compartilhado entre
-// `calcularEstilosAvatar` (2D, formata em string de CSS) e
-// `calcularParametrosAvatar3D` (3D, devolve número puro para o Three.js).
-// As DUAS leituras do avatar (bidimensional e tridimensional) vêm do MESMO
-// número amplificado — nenhuma das duas "decide" um valor que a outra não
-// veria, só desenha diferente.
-function computarBase(sinais) {
+export function calcularEstilosAvatar(sinais) {
   const s = sinais && typeof sinais === 'object' ? sinais : PRESETS.neutro
 
   const rpm = Number.isFinite(s.respiracaoPorMinuto) ? s.respiracaoPorMinuto : 16
@@ -171,12 +128,6 @@ function computarBase(sinais) {
   // repetitiva — 0.5s é o piso).
   const duracaoFalaS = clamp(0.34 * (150 / (velocidadeFalaBase || 150)), 0.2, 0.5)
 
-  return { contato, tensao, presenca, duracaoRespiracaoS, duracaoFalaS }
-}
-
-export function calcularEstilosAvatar(sinais) {
-  const { contato, tensao, presenca, duracaoRespiracaoS, duracaoFalaS } = computarBase(sinais)
-
   // Quanto o olhar se desvia do centro, em px. 0 = olho no aluno; no
   // máximo, "o olhar fica na janela" (o mesmo texto de corpo.descrever()).
   // 10px (não 6): o valor menor deixava até desvios reais e notáveis
@@ -195,24 +146,5 @@ export function calcularEstilosAvatar(sinais) {
     desfoquePresenca: `${(clamp01(1 - presenca) * 3.2).toFixed(2)}px`,
     opacidadePresenca: (0.6 + presenca * 0.4).toFixed(2),
     duracaoFala: `${duracaoFalaS.toFixed(2)}s`,
-  }
-}
-
-/**
- * A mesma tradução de `calcularEstilosAvatar`, para o avatar 3D
- * (AvatarPaciente3D.vue / avatar3d.js): números puros em vez de string de
- * CSS, porque quem consome isto é uma cena Three.js, não um `style`.
- * `opacidade` já inclui o piso de 0,6 pela mesma razão do 2D — "parece
- * longe" nunca pode ficar invisível.
- */
-export function calcularParametrosAvatar3D(sinais) {
-  const { contato, tensao, presenca, duracaoRespiracaoS, duracaoFalaS } = computarBase(sinais)
-  return {
-    periodoRespiracaoS: duracaoRespiracaoS,
-    anguloOlharRad: (1 - contato) * ANGULO_MAX_OLHAR_RAD,
-    tensao,
-    presenca,
-    opacidade: 0.6 + presenca * 0.4,
-    periodoFalaS: duracaoFalaS,
   }
 }
