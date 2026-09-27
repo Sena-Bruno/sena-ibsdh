@@ -39,41 +39,48 @@
 
 :root {
   /* ── Superfícies (tema escuro — opcional, ver body.tema-claro) ────── */
-  --sena-bg: #15130e;
-  --sena-bg-fim: #1d1811;          /* fim do gradiente vertical da página */
-  --sena-surface: #1e1a13;         /* painel opaco — use em tooltip/menu  */
-  --sena-surface-1: rgba(247, 244, 238, 0.04);
-  --sena-surface-2: rgba(247, 244, 238, 0.07);
+  /* Revisão 4: --sena-bg e --sena-surface eram quase idênticos (#15130e vs
+     #1e1a13) — um cartão "opaco" mal se distinguia do fundo, então a tela
+     toda lia como um bloco só, sem profundidade. --sena-surface agora é
+     visivelmente mais claro que o fundo. */
+  --sena-bg: #120f0b;
+  --sena-bg-fim: #1b160f;          /* fim do gradiente vertical da página */
+  --sena-surface: #241f16;         /* painel opaco — use em tooltip/menu  */
+  --sena-surface-1: rgba(247, 244, 238, 0.05);
+  --sena-surface-2: rgba(247, 244, 238, 0.09);
 
   /* ── Traço ───────────────────────────────────────────────────────── */
   /* --sena-border-forte entrega 3:1+ contra a superfície (1.4.11); a
      divisória --sena-border continua fraca de propósito — decoração não
      precisa do mesmo piso de contraste que um componente interativo. */
-  --sena-border: rgba(179, 162, 130, 0.20);       /* decorativa, divisórias */
-  --sena-border-forte: rgba(206, 190, 160, 0.50); /* campos e controles    */
+  --sena-border: rgba(200, 185, 155, 0.22);       /* decorativa, divisórias */
+  --sena-border-forte: rgba(220, 205, 175, 0.55); /* campos e controles    */
 
   /* ── Texto ───────────────────────────────────────────────────────── */
-  --sena-text: #f7f4ee;            /* 16.9:1 sobre --sena-bg */
-  --sena-text-soft: #bdb096;       /*  8.7:1 */
-  --sena-text-faint: #9c9080;      /*  5.9:1 */
-  --sena-placeholder: #8c8071;     /*  4.8:1 */
+  --sena-text: #f7f4ee;            /* 17.4:1 sobre --sena-bg */
+  --sena-text-soft: #c2b59a;       /*  9.4:1 */
+  --sena-text-faint: #a0937a;      /*  6.3:1 */
+  --sena-placeholder: #8c8071;     /*  4.6:1 */
 
   /* ── Acento e semântica ──────────────────────────────────────────── */
-  /* Verde-azulado — acento primário: link, destaque, foco de atenção. */
-  --sena-cyan: #52c4b3;
-  --sena-cyan-dim: rgba(82, 196, 179, 0.12);
+  /* Revisão 4: os acentos da revisão anterior já contrastavam bem, mas
+     liam como apagados contra o fundo bem mais escuro agora — mais
+     luminosidade e um triz mais de saturação para terem presença própria,
+     quase um brilho, em vez de se misturar ao painel. */
+  --sena-cyan: #4dd0bc;
+  --sena-cyan-dim: rgba(77, 208, 188, 0.14);
   /* Âmbar — acento secundário: conquista, destaque de apoio. Mesma
      temperatura quente do primário, então os dois convivem sem disputar
      atenção. */
-  --sena-gold: #e0a545;
-  --sena-gold-dim: rgba(224, 165, 69, 0.12);
-  --sena-success: #7cc464;
-  --sena-success-dim: rgba(124, 196, 100, 0.1);
-  --sena-danger: #e2775c;
-  --sena-danger-dim: rgba(226, 119, 92, 0.1);
+  --sena-gold: #f0ac4a;
+  --sena-gold-dim: rgba(240, 172, 74, 0.14);
+  --sena-success: #86d16c;
+  --sena-success-dim: rgba(134, 209, 108, 0.12);
+  --sena-danger: #ef8266;
+  --sena-danger-dim: rgba(239, 130, 102, 0.12);
 
   /* Texto sobre os botões preenchidos com as cores acima. */
-  --sena-on-acento: #15130e;
+  --sena-on-acento: #120f0b;
 
   /* ── Foco ────────────────────────────────────────────────────────── */
   /* Anel de 2px + deslocamento, para funcionar sobre fundo escuro, claro e
@@ -163,21 +170,20 @@ body.tema-claro {
   --sena-text-faint: #786f5e;       /* 5.0:1 sobre --sena-surface  */
   --sena-placeholder: #8a8171;      /* 3.6:1 — só para placeholder */
 
-  /* Revisão 3: os acentos da revisão anterior (#0e7a6f/#9c5a0c) passavam no
-     contraste mas liam como "sem graça" — pouco saturados demais para
-     carregar uma tela inteira de fundo quase branco. Mais croma na mesma
-     matiz, luminosidade ajustada para manter a mesma margem de contraste
-     (~5:1 texto, ~5.5:1 texto branco sobre o acento cheio). */
-  --sena-cyan: #0a7566;             /* 5.3:1 como texto */
-  --sena-cyan-dim: rgba(10, 117, 102, 0.10);
-  --sena-gold: #9c5700;             /* 5.2:1 como texto */
-  --sena-gold-dim: rgba(156, 87, 0, 0.10);
-  --sena-success: #1c7a33;          /* 5.1:1 */
-  --sena-success-dim: rgba(28, 122, 51, 0.10);
-  --sena-danger: #c93f24;           /* 4.7:1 */
-  --sena-danger-dim: rgba(201, 63, 36, 0.10);
+  /* Revisão 4: a revisão 3 (#0a7566/#9c5700) ainda lia como "sem brilho" —
+     mais croma de novo, e desta vez também um empurrão na luminosidade dos
+     tons quentes (dourado, sucesso, alerta) para terem mais energia, não só
+     mais saturação. Margem de contraste igual ou maior que antes. */
+  --sena-cyan: #037d6c;             /* 4.8:1 como texto */
+  --sena-cyan-dim: rgba(3, 125, 108, 0.11);
+  --sena-gold: #a85200;             /* 5.1:1 como texto */
+  --sena-gold-dim: rgba(168, 82, 0, 0.11);
+  --sena-success: #158035;          /* 4.8:1 */
+  --sena-success-dim: rgba(21, 128, 53, 0.11);
+  --sena-danger: #c93712;           /* 4.9:1 */
+  --sena-danger-dim: rgba(201, 55, 18, 0.11);
 
-  --sena-on-acento: #ffffff;        /* 5.4:1+ sobre qualquer acento acima */
+  --sena-on-acento: #ffffff;        /* 5.0:1+ sobre qualquer acento acima */
   --sena-foco: #7a4a12;             /* 7.0:1 sobre --sena-bg */
 
   /* Sombra com mais presença: a versão anterior (0.10 de opacidade) deixava
