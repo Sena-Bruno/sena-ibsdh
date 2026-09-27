@@ -22,6 +22,7 @@ function paraBufferSemSinal(bytes) {
 function montar(opcoes = {}) {
   const emails = []   // { para, assunto, corpo }
   const logs = []     // { tipo, email }
+  const chamadasAcesso = []  // { email, curso }
   const cacheStore = new Map()
   const props = Object.assign({ SESSION_SECRET: 'segredo-de-teste-bem-longo' }, opcoes.props || {})
 
@@ -35,6 +36,16 @@ function montar(opcoes = {}) {
     normalizarTexto: (v) => String(v === undefined || v === null ? '' : v).trim(),
     registrarLog: (tipo, email) => logs.push({ tipo, email }),
     enviarEmailZoho: (para, assunto, corpo) => emails.push({ para, assunto, corpo }),
+    // Dublê de verificarAcessoAluno (autorizacao-compra.gs) — só para provar
+    // que solicitarAcesso consulta a base de compradores QUANDO recebe curso,
+    // sem retestar a leitura real da planilha (já não há Sheets aqui).
+    verificarAcessoAluno: (email, curso) => {
+      chamadasAcesso.push({ email, curso })
+      const base = (opcoes.alunos || {})[email]
+      if (!base) return { liberado: false, mensagem: 'E-mail não encontrado na base de compradores.' }
+      if (base.status !== 'APPROVED') return { liberado: false, mensagem: 'Acesso bloqueado. Status da compra: ' + base.status }
+      return { liberado: true, mensagem: 'Acesso autorizado.' }
+    },
     CacheService: { getScriptCache: () => cache },
     PropertiesService: {
       getScriptProperties: () => ({
@@ -60,7 +71,7 @@ function montar(opcoes = {}) {
   }
   vm.createContext(sandbox)
   vm.runInContext(fs.readFileSync(ARQ, 'utf8'), sandbox)
-  return { sandbox, emails, logs, cache, props }
+  return { sandbox, emails, logs, cache, props, chamadasAcesso }
 }
 
 let falhas = 0
@@ -106,6 +117,49 @@ function codigoEnviadoPara(t, email) {
   try { t.sandbox.solicitarAcesso('aluno@exemplo.com') } catch (e) { msg = e.message }
   checar('a 4ª solicitação na janela é bloqueada', /muitas solicitações/i.test(msg))
   checar('só 3 e-mails foram realmente enviados', t.emails.length === 3)
+}
+
+// ── 3b) solicitar código: com curso, comprador aprovado → envia normalmente ─
+{
+  const t = montar({ alunos: { 'aluno@exemplo.com': { status: 'APPROVED' } } })
+  const r = t.sandbox.solicitarAcesso('aluno@exemplo.com', 'Practitioner')
+  checar('devolve sucesso quando o curso está liberado', r.sucesso === true)
+  checar('consulta verificarAcessoAluno com o curso informado',
+    t.chamadasAcesso.length === 1 && t.chamadasAcesso[0].curso === 'Practitioner')
+  checar('envia o e-mail normalmente', t.emails.length === 1)
+}
+
+// ── 3c) solicitar código: com curso, e-mail fora da base de compradores ─────
+// O caso central do pedido: quem não comprou é avisado JÁ NESTA ETAPA, sem
+// receber código nenhum — antes, essa checagem só rodava depois de o código
+// ser confirmado (verificar_acesso, com a sessão já autenticada).
+{
+  const t = montar({ alunos: {} })
+  let msg = ''
+  try { t.sandbox.solicitarAcesso('estranho@exemplo.com', 'Practitioner') } catch (e) { msg = e.message }
+  checar('recusa com a mensagem de "não é comprador"', /base de compradores/i.test(msg), msg)
+  checar('não envia e-mail nenhum', t.emails.length === 0)
+  checar('não deixa código nenhum pendente no cache', t.cache.get('otp_estranho@exemplo.com') === null)
+  checar('registra o motivo da recusa no log', t.logs.some(l => l.tipo === 'AUTH_OTP_NEGADO_COMPRA'))
+}
+
+// ── 3d) solicitar código: com curso, compra reembolsada/cancelada ───────────
+{
+  const t = montar({ alunos: { 'exaluno@exemplo.com': { status: 'REFUNDED' } } })
+  let msg = ''
+  try { t.sandbox.solicitarAcesso('exaluno@exemplo.com', 'Practitioner') } catch (e) { msg = e.message }
+  checar('recusa citando o status da compra', /bloqueado.*REFUNDED/i.test(msg), msg)
+  checar('não envia e-mail nenhum', t.emails.length === 0)
+}
+
+// ── 3e) solicitar código: SEM curso, comportamento de sempre (sem checar compra) ─
+// Chamador que ainda não sabe o curso neste ponto (ou tela que nunca fez essa
+// checagem) continua recebendo o código incondicionalmente — só identidade.
+{
+  const t = montar({ alunos: {} })
+  const r = t.sandbox.solicitarAcesso('quemquer@exemplo.com')
+  checar('sem curso, envia o código mesmo sem base de compradores', r.sucesso === true && t.emails.length === 1)
+  checar('sem curso, verificarAcessoAluno nem é chamado', t.chamadasAcesso.length === 0)
 }
 
 // ── 4) confirmar código: caminho feliz ──────────────────────────────────────

@@ -7,7 +7,7 @@
   </div>
 
   <!-- LOGIN (código por e-mail — ver appscript/autenticacao.gs) -->
-  <LoginModal v-if="mostrarLoginModal" :erro-inicial="erroAcesso" @success="aoLogar" />
+  <LoginModal v-if="mostrarLoginModal" :erro-inicial="erroAcesso" :curso="CURSO" @success="aoLogar" />
 
   <!-- MODAL ONBOARDING -->
   <div class="modal-overlay" id="onboardingModal">

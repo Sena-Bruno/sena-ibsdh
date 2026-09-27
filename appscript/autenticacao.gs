@@ -45,12 +45,27 @@ function getSessionSecret_() {
 /**
  * Passo 1 do login: gera e envia por e-mail um código de uso único.
  *
- * Não revela se o e-mail existe ou não na base de alunos — isso é decidido
- * depois, por `verificarAcesso`, já com a sessão autenticada. Aqui a única
- * responsabilidade é provar que quem está pedindo o código tem acesso àquela
- * caixa de entrada.
+ * Se `curso` for informado, confirma a compra (`verificarAcessoAluno`) ANTES
+ * de gerar e enviar o código — quem não comprou recebe o aviso na hora,
+ * sem receber e-mail nenhum. Sem `curso` (chamador que ainda não sabe o
+ * curso neste ponto), o comportamento é o de sempre: só identidade aqui,
+ * compra fica para depois.
+ *
+ * Isto é uma troca deliberada em relação ao design original (ver
+ * `autorizacao-compra.gs` e o README): antes, esta função nunca revelava se
+ * o e-mail estava na base de compradores, e mandava o código para qualquer
+ * endereço — quem não tinha comprado só descobria isso DEPOIS de confirmar
+ * o código, quando `verificar_acesso` já rodava com a sessão autenticada.
+ * Passou a ser pedido do produto que o aviso apareça já na tela de e-mail,
+ * antes de gastar o código/e-mail com quem não vai poder entrar mesmo.
+ *
+ * Efeito colateral aceito: como a checagem agora roda ANTES de provar posse
+ * do e-mail, ela também serve de oráculo — dá para descobrir se um endereço
+ * está na base de compradores só pedindo o código para ele, sem precisar da
+ * caixa de entrada. O limite de solicitações abaixo (`SOLICITACOES_MAX`)
+ * limita isso por endereço, não entre endereços diferentes.
  */
-function solicitarAcesso(email) {
+function solicitarAcesso(email, curso) {
   const emailNorm = normalizarTexto(email).toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailNorm)) {
     throw new Error('E-mail inválido.');
@@ -66,6 +81,15 @@ function solicitarAcesso(email) {
     throw new Error('Muitas solicitações para este e-mail. Tente novamente em alguns minutos.');
   }
   cache.put(chaveJanela, String(pedidos + 1), AUTH.SOLICITACOES_JANELA_SEG);
+
+  const cursoNorm = normalizarTexto(curso);
+  if (cursoNorm) {
+    const acesso = verificarAcessoAluno(emailNorm, cursoNorm);
+    if (!acesso.liberado) {
+      registrarLog('AUTH_OTP_NEGADO_COMPRA', emailNorm, cursoNorm, '', acesso.mensagem || '', '');
+      throw new Error(acesso.mensagem || 'Este e-mail não está na base de compradores.');
+    }
+  }
 
   const codigo = String(Math.floor(100000 + Math.random() * 900000));
   const hash = Utilities.base64Encode(
@@ -171,7 +195,7 @@ function emailAutenticado(payload) {
 /*
         case 'solicitar_codigo':
           try {
-            return jsonResponse(solicitarAcesso(payload.email));
+            return jsonResponse(solicitarAcesso(payload.email, payload.curso));
           } catch(err) {
             return jsonResponse({ erro: true, mensagem: err.message });
           }
