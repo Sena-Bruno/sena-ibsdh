@@ -223,24 +223,27 @@ onMounted(() => {
 
 <style scoped>
 * { box-sizing: border-box; margin: 0; padding: 0; }
+/* Tema escuro é a base (sem classe) e o claro entra como override sob
+   body.tema-claro — mesmo padrão adotado em RankingView.vue, para que
+   o toggle do Dashboard alcance esta tela também (achado pós-lançamento:
+   "modo escuro é o pior" porque telas menores ficavam sempre no claro). */
 .wrap {
-  --bg: #faf8f4;
-  --panel: rgba(255,255,255,0.96);
-  --panel-soft: rgba(35,32,26,0.03);
-  --border: rgba(35,32,26,0.12);
-  --text: #23201a;
-  --text-soft: #5c5647;
-  --text-faint: #786f5e;
-  --gold: #9c5700;
-  --cyan: #0a7566;
-  --success: #1c7a33;
-  --danger: #c93f24;
+  --text: #f7f4ee;
+  --text-soft: #c2b59a;
+  --text-faint: #a0937a;
+  --gold: #f0ac4a;
+  --cyan: #4dd0bc;
+  --success: #86d16c;
+  --danger: #ef8266;
+  --panel: #241f16;
+  --border: rgba(200,185,155,0.18);
+  --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 24px 48px rgba(0,0,0,0.35);
   font-family: 'Inter', sans-serif;
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(10,117,102,0.14), transparent 30%),
-    radial-gradient(circle at top right, rgba(156,87,0,0.1), transparent 26%),
-    linear-gradient(180deg, #faf8f4 0%, #f1ece2 100%);
+    radial-gradient(circle at top left, rgba(77,208,188,0.1), transparent 30%),
+    radial-gradient(circle at top right, rgba(240,172,74,0.07), transparent 26%),
+    linear-gradient(180deg, #120f0b 0%, #1b160f 100%);
   color: var(--text);
   display: flex;
   align-items: center;
@@ -248,20 +251,36 @@ onMounted(() => {
   padding: 24px;
   width: 100%; max-width: none;
 }
+body.tema-claro .wrap {
+  --text: #23201a;
+  --text-soft: #5c5647;
+  --text-faint: #786f5e;
+  --gold: #a85200;
+  --cyan: #037d6c;
+  --success: #158035;
+  --danger: #c93712;
+  --panel: #ffffff;
+  --border: rgba(35,32,26,0.12);
+  --shadow: 0 1px 2px rgba(35,32,26,0.06), 0 24px 48px rgba(35,32,26,0.14);
+  background:
+    radial-gradient(circle at top left, rgba(3,125,108,0.14), transparent 30%),
+    radial-gradient(circle at top right, rgba(168,82,0,0.1), transparent 26%),
+    linear-gradient(180deg, #faf8f4 0%, #f1ece2 100%);
+}
 .wrap > .card { width: 100%; max-width: 820px; }
 .card {
   position: relative;
-  background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(250,248,244,0.99) 100%);
-  border: 1px solid rgba(35,32,26,0.14);
+  background: linear-gradient(180deg, var(--panel) 0%, color-mix(in srgb, var(--panel) 97%, var(--text) 3%) 100%);
+  border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
   border-radius: 24px;
-  box-shadow: 0 1px 2px rgba(35,32,26,0.06), 0 28px 56px rgba(35,32,26,0.16);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--text) 6%, transparent), 0 28px 56px color-mix(in srgb, var(--text) 16%, transparent);
   overflow: hidden;
 }
 .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--cyan), var(--gold)); }
-.header { padding: 32px 28px 20px; border-bottom: 1px solid rgba(35,32,26,0.08); }
+.header { padding: 32px 28px 20px; border-bottom: 1px solid color-mix(in srgb, var(--text) 8%, transparent); }
 .eyebrow {
   display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px;
-  border-radius: 999px; background: rgba(35,32,26,0.03); border: 1px solid rgba(35,32,26,0.07);
+  border-radius: 999px; background: color-mix(in srgb, var(--text) 3%, transparent); border: 1px solid color-mix(in srgb, var(--text) 7%, transparent);
   color: var(--gold); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 14px;
 }
 .eyebrow::before { content: ''; width: 7px; height: 7px; border-radius: 999px; background: var(--gold); }
@@ -272,19 +291,19 @@ h1 { font-size: 34px; line-height: 1.05; font-weight: 800; letter-spacing: -0.03
 label { color: var(--text-soft); font-size: 12px; font-weight: 700; letter-spacing: .10em; text-transform: uppercase; }
 .value-static {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 16px; border-radius: 14px; border: 1px solid rgba(35,32,26,0.08);
-  background: rgba(35,32,26,0.03); color: var(--text); font-size: 15px;
+  padding: 16px; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
+  background: color-mix(in srgb, var(--text) 3%, transparent); color: var(--text); font-size: 15px;
 }
 .btn-trocar {
   background: none; border: none; color: var(--cyan); font-size: 12px;
   text-decoration: underline; cursor: pointer; padding: 0; white-space: nowrap;
 }
 input {
-  width: 100%; padding: 16px; border-radius: 14px; border: 1px solid rgba(35,32,26,0.08);
-  background: rgba(35,32,26,0.03); color: var(--text); font-size: 15px; outline: none;
+  width: 100%; padding: 16px; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
+  background: color-mix(in srgb, var(--text) 3%, transparent); color: var(--text); font-size: 15px; outline: none;
   font-family: 'Inter', sans-serif;
 }
-input:focus { border-color: rgba(10,117,102,0.35); box-shadow: 0 0 0 4px rgba(10,117,102,0.08); }
+input:focus { border-color: color-mix(in srgb, var(--cyan) 35%, transparent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--cyan) 8%, transparent); }
 .btn-row { display: flex; gap: 12px; flex-wrap: wrap; }
 .btn, .btn-secondary, .btn-success {
   border: none; border-radius: 14px; padding: 16px 18px; font-size: 13px; font-weight: 800;
@@ -293,15 +312,15 @@ input:focus { border-color: rgba(10,117,102,0.35); box-shadow: 0 0 0 4px rgba(10
 }
 .btn { color: #ffffff; background: var(--cyan); }
 .btn-success { color: #ffffff; background: var(--success); }
-.btn-secondary { color: var(--text); background: rgba(35,32,26,0.06); border: 1px solid rgba(35,32,26,0.08); }
+.btn-secondary { color: var(--text); background: color-mix(in srgb, var(--text) 6%, transparent); border: 1px solid color-mix(in srgb, var(--text) 8%, transparent); }
 .btn:disabled, .btn-secondary:disabled, .btn-success:disabled { opacity: .5; cursor: not-allowed; }
 .alert { display: none; padding: 14px 16px; border-radius: 14px; font-size: 14px; }
 .alert.visible { display: block; }
-.alert.error { border: 1px solid rgba(201,63,36,0.18); background: rgba(201,63,36,0.08); color: var(--danger); }
-.alert.success { border: 1px solid rgba(28,122,51,0.18); background: rgba(28,122,51,0.08); color: var(--success); }
+.alert.error { border: 1px solid color-mix(in srgb, var(--danger) 18%, transparent); background: color-mix(in srgb, var(--danger) 8%, transparent); color: var(--danger); }
+.alert.success { border: 1px solid color-mix(in srgb, var(--success) 18%, transparent); background: color-mix(in srgb, var(--success) 8%, transparent); color: var(--success); }
 .status-box { display: none; gap: 12px; }
 .status-box.visible { display: grid; }
-.item { padding: 16px; border-radius: 16px; border: 1px solid rgba(35,32,26,0.06); background: rgba(35,32,26,0.03); }
+.item { padding: 16px; border-radius: 16px; border: 1px solid color-mix(in srgb, var(--text) 6%, transparent); background: color-mix(in srgb, var(--text) 3%, transparent); }
 .label2 { color: var(--text-soft); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 8px; }
 .value { color: var(--text); font-size: 15px; line-height: 1.7; word-break: break-word; }
 </style>
