@@ -54,7 +54,12 @@ import { solicitarCodigo, confirmarCodigo } from '../composables/useAuth'
 const props = defineProps({
   // Erro de negócio a mostrar assim que o modal abre (ex.: "curso sem acesso
   // liberado para este e-mail") — distinto de um erro do próprio login.
-  erroInicial: { type: String, default: '' }
+  erroInicial: { type: String, default: '' },
+  // Quando informado, o backend checa a compra deste curso ANTES de enviar o
+  // código (ver useAuth.solicitarCodigo) — quem não comprou vê o aviso já na
+  // etapa de e-mail, sem receber código nenhum. Telas que ainda não sabem o
+  // curso neste ponto deixam em branco e mantêm o comportamento de sempre.
+  curso: { type: String, default: '' }
 })
 const emit = defineEmits(['success'])
 
@@ -75,7 +80,7 @@ async function enviarCodigo() {
   erro.value = ''
   carregando.value = true
   try {
-    await solicitarCodigo(val)
+    await solicitarCodigo(val, props.curso)
     email.value = val
     etapa.value = 'codigo'
     await nextTick()

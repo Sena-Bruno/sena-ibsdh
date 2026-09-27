@@ -168,11 +168,14 @@ também está no fim do próprio `autorizacao-compra.gs`):
 | `avaliarPlantao` (dentro da função) e o `case 'plantao_historico'` do `doPost` | plantao.gs |
 
 **Não mexa em:** `verificar_acesso` (já checa compra separadamente — é onde
-essa lógica nasceu), `solicitar_codigo`/`confirmar_codigo` (não podem exigir
-compra, senão ninguém consegue logar pela primeira vez), e as ações que não
-identificam um aluno específico (`plantao_gerar`, `base_aula`,
-`ranking_perfis`, `desafio_semanal`, `gerar_desafio`, `estrutura_curso`,
-`replay`, `conversar`, `titulos`).
+essa lógica nasceu), `confirmar_codigo` (só troca o código já emitido por um
+token — a checagem de compra, quando cabe, já rodou em `solicitar_codigo`,
+antes de o código existir), e as ações que não identificam um aluno
+específico (`plantao_gerar`, `base_aula`, `ranking_perfis`,
+`desafio_semanal`, `gerar_desafio`, `estrutura_curso`, `replay`,
+`conversar`, `titulos`). Sobre `solicitar_codigo`: ver a seção seguinte —
+ele passou a checar compra também, mas de um jeito que não bloqueia quem
+ainda não pode ser checado (ver abaixo).
 
 **Limitação conhecida, fora do escopo desta mudança:** `verificarAcessoAluno`
 hoje confere só se o e-mail existe com status aprovado em `Alunos_Hotmart` —
@@ -196,6 +199,36 @@ administra o SENA.
 > O projeto no Apps Script tem mais de um arquivo: `Codigo.gs` (o grande, com
 > `doGet`/`doPost` e a lógica), `Setup.gs` (utilitários que criam e formatam as
 > abas) e os templates HTML `Index`, `Dashboard`, `Certificado` e `Validar`.
+
+## Checar compra ANTES de enviar o código (`autenticacao.gs`, `solicitarAcesso`)
+
+**O problema que isso resolve:** o fluxo original mandava o código de acesso
+para qualquer e-mail, sem checar compra — quem não tinha comprado só
+descobria isso DEPOIS de digitar o código recebido, quando `verificar_acesso`
+rodava (só no Dashboard, já com a sessão autenticada). Na prática, um
+não-comprador recebia um e-mail com código, digitava esse código, e só então
+via o aviso "acesso não autorizado" — um passo a mais e uma confusão
+evitável ("recebi o código, por que não consigo entrar?").
+
+**O que mudou:** `solicitarAcesso(email, curso)` agora recebe `curso` como
+segundo argumento opcional. Quando informado, ela chama a MESMA
+`verificarAcessoAluno` que `autorizacao-compra.gs` já usa, ANTES de gerar e
+enviar o código — quem não está liberado para aquele curso recebe o aviso na
+hora, sem e-mail nenhum sendo enviado. Sem `curso` (chamador que ainda não
+sabe o curso nesse ponto), o comportamento continua o de sempre: só
+identidade aqui, compra fica para depois. Hoje só o `DashboardView.vue`
+manda `curso` (ele já sabe o curso pela URL antes mesmo do login) — ver
+`LoginModal.vue` (prop `curso`) e `useAuth.solicitarCodigo`.
+
+**Efeito colateral aceito:** como a checagem passou a rodar ANTES de provar
+posse do e-mail (o código só existe depois dela), `solicitar_codigo` com
+`curso` vira um oráculo de "este e-mail está na base de compradores?" — dá
+para descobrir isso de qualquer endereço, sem acesso à caixa de entrada dele.
+Antes desta mudança isso só era descoberto DEPOIS de provar posse do e-mail
+(via OTP). O limite de solicitações (`AUTH.SOLICITACOES_MAX`, 3 por e-mail a
+cada 10 min) seguem limitando repetição no MESMO endereço, não uma varredura
+por muitos endereços diferentes — quem administra o SENA deve estar ciente
+dessa troca ao decidir estender `curso` a outras telas além do Dashboard.
 
 ## Como aplicar
 

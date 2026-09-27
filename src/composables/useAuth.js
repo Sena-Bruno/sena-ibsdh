@@ -54,8 +54,12 @@ async function post(payload) {
   return await res.json()
 }
 
-export async function solicitarCodigo(email) {
-  const data = await post({ action: 'solicitar_codigo', email })
+// `curso`, quando informado, faz o backend checar a compra ANTES de gerar e
+// enviar o código (ver appscript/autenticacao.gs) — quem não comprou recebe
+// o aviso na hora, sem código nenhum sendo enviado. Sem `curso`, o
+// comportamento continua o de sempre: só identidade aqui.
+export async function solicitarCodigo(email, curso) {
+  const data = await post({ action: 'solicitar_codigo', email, curso })
   if (!data || data.erro) throw new Error((data && data.mensagem) || 'Não foi possível enviar o código.')
   return data
 }
